@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Configurações - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item active"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">⚙️ Configurações do Painel</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Gerencie suas credenciais, chaves do Firebase, conexão com o Google Agenda e modelos de mensagens.</p>
+                </div>
+            </div>
+            
+            <div class="config-grid">
+                
+                <!-- 1. Segurança e Senha Local -->
+                <div class="config-section">
+                    <h3 class="config-section-title">🔒 Segurança (Senha do Painel)</h3>
+                    <form id="form-password" style="display: flex; flex-direction: column; gap: 16px; max-width: 500px;">
+                        <div class="form-group">
+                            <label for="pass-current">Senha Atual</label>
+                            <input type="password" id="pass-current" class="form-control" placeholder="Senha atual" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pass-new">Nova Senha</label>
+                            <input type="password" id="pass-new" class="form-control" placeholder="Nova senha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="align-self: flex-start;">Alterar Senha</button>
+                    </form>
+                </div>
+                
+                <!-- 2. Modelo de Lembrete do WhatsApp -->
+                <div class="config-section">
+                    <h3 class="config-section-title">💬 Modelo de Lembrete (WhatsApp)</h3>
+                    <form id="form-lembrete" style="display: flex; flex-direction: column; gap: 16px;">
+                        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                            Personalize a mensagem automática de confirmação de transfer. Você pode usar os seguintes placeholders:<br>
+                            <strong>[Nome]</strong> (Cliente), <strong>[Data]</strong>, <strong>[Horario]</strong>, <strong>[Embarque]</strong>, <strong>[Destino]</strong>, <strong>[Passageiros]</strong>.
+                        </p>
+                        <div class="form-group">
+                            <textarea id="lembrete-template" class="form-control" style="min-height: 180px; font-family: 'Courier New', monospace; font-size: 13px;" required></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="btn btn-primary">Salvar Modelo</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetLembreteTemplate()">Restaurar Padrão</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 3. Integração Google Agenda -->
+                <div class="config-section">
+                    <h3 class="config-section-title">📅 Integração Google Agenda (OAuth 2.0)</h3>
+                    <form id="form-google-config" style="display: flex; flex-direction: column; gap: 16px; max-width: 600px; margin-bottom: 24px;">
+                        <div class="form-group">
+                            <label for="google-client-id">Google Client ID</label>
+                            <input type="text" id="google-client-id" class="form-control" placeholder="SEU_CLIENT_ID.apps.googleusercontent.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="google-api-key">Google API Key</label>
+                            <input type="password" id="google-api-key" class="form-control" placeholder="AIzaSy...">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="align-self: flex-start;">Salvar Credenciais Google</button>
+                    </form>
+                    
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
+                        <p id="google-status-text" style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted);">
+                            Status: Desconectado.
+                        </p>
+                        <div style="display: flex; gap: 12px;">
+                            <button id="connect-google-btn" class="btn btn-secondary" onclick="handleGoogleAuthClick()">Conectar Google Agenda</button>
+                            <button class="btn btn-secondary" style="color: var(--color-cancelled);" onclick="handleGoogleSignout()">Desconectar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Chaves do Firebase (Banco e Nuvem) -->
+                <div class="config-section">
+                    <h3 class="config-section-title">🔥 Configuração Firebase Cloud (Firestore / Auth / Messaging)</h3>
+                    <form id="form-firebase" style="display: flex; flex-direction: column; gap: 16px; max-width: 650px;">
+                        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                            Para ativar a sincronização em nuvem automática e poder gerenciar seus dados em múltiplos dispositivos (celular e desktop) simultaneamente, cole abaixo as credenciais Web App obtidas no Firebase Console.
+                        </p>
+                        
+                        <div class="form-grid" style="margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="fb-api-key">API Key (apiKey)</label>
+                                <input type="password" id="fb-api-key" class="form-control" placeholder="AIzaSy...">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-project-id">Project ID (projectId)</label>
+                                <input type="text" id="fb-project-id" class="form-control" placeholder="rota-cde-app">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-auth-domain">Auth Domain (authDomain)</label>
+                                <input type="text" id="fb-auth-domain" class="form-control" placeholder="rota-cde-app.firebaseapp.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-app-id">App ID (appId)</label>
+                                <input type="text" id="fb-app-id" class="form-control" placeholder="1:123456:web:abcd">
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="btn btn-primary">Salvar e Inicializar Firebase</button>
+                            <button type="button" class="btn btn-secondary" style="color: var(--color-cancelled);" onclick="limparFirebaseConfig()">Desativar Firebase</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 5. Notificações Locais Push -->
+                <div class="config-section">
+                    <h3 class="config-section-title">🔔 Notificações Push do Navegador</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+                        Ative as notificações para receber alertas pop-up de transfers 2 horas e 30 minutos antes diretamente em sua tela.
+                    </p>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-primary" onclick="requestNotificationPermission()">Ativar Notificações no Navegador</button>
+                        <button class="btn btn-secondary" onclick="triggerLocalNotification('Teste do Painel!', 'As notificações estão funcionando perfeitamente 🚗')">Testar Notificação</button>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Google API & GIS -->
+    <script src="assets/google.js"></script>
+    
+    <!-- Config e Lógica -->
+    <script src="assets/firebase-config.js"></script>
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger Menu Mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Carregar valores iniciais nos formulários
+            loadConfigValues();
+            
+            // Listeners de Forms
+            document.getElementById('form-password').addEventListener('submit', alterSenha);
+            document.getElementById('form-lembrete').addEventListener('submit', salvarLembreteTemplate);
+            document.getElementById('form-google-config').addEventListener('submit', salvarGoogleCreds);
+            document.getElementById('form-firebase').addEventListener('submit', salvarFirebaseCreds);
+        });
+        
+        function loadConfigValues() {
+            // Template do Lembrete
+            const defaultMsg = 
+`Olá, [Nome]! 👋 Tudo bem?
+
+Aqui é da Rota CDE Transfer. Passando para confirmar seu transfer agendado:
+
+📍 Embarque: [Embarque]
+📍 Destino: [Destino]
+🕐 Horário: [Horario]
+📅 Data: [Data]
+👥 Passageiros: [Passageiros]
+
+Confirme sua presença respondendo esta mensagem. Em caso de dúvidas, estou à disposição! Obrigado! 🙏`;
+            document.getElementById('lembrete-template').value = localStorage.getItem('rota_lembrete_template') || defaultMsg;
+            
+            // Credenciais do Google
+            const googleConfig = getGoogleConfig();
+            document.getElementById('google-client-id').value = googleConfig.clientId || '';
+            document.getElementById('google-api-key').value = googleConfig.apiKey || '';
+            
+            // Credenciais do Firebase
+            const fbConfig = getFirebaseConfig();
+            document.getElementById('fb-api-key').value = fbConfig.apiKey || '';
+            document.getElementById('fb-project-id').value = fbConfig.projectId || '';
+            document.getElementById('fb-auth-domain').value = fbConfig.authDomain || '';
+            document.getElementById('fb-app-id').value = fbConfig.appId || '';
+        }
+        
+        // --- 1. Ação Alterar Senha ---
+        async function alterSenha(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('pass-current').value.trim();
+            const newPass = document.getElementById('pass-new').value.trim();
+            
+            // Verifica senha atual (compara com senha salva no localStorage ou padrão)
+            const storedPassword = localStorage.getItem('rota_admin_password') || DEFAULT_PASSWORD;
+            
+            if (currentPass !== storedPassword) {
+                alert("A senha atual digitada está incorreta!");
+                return;
+            }
+            
+            if (!newPass || newPass.length < 4) {
+                alert("A nova senha deve ter pelo menos 4 caracteres!");
+                return;
+            }
+            
+            localStorage.setItem('rota_admin_password', newPass);
+            alert("Senha alterada com sucesso!");
+            document.getElementById('pass-current').value = '';
+            document.getElementById('pass-new').value = '';
+        }
+        
+        // --- 2. Ação Lembrete WhatsApp ---
+        function salvarLembreteTemplate(e) {
+            e.preventDefault();
+            const val = document.getElementById('lembrete-template').value;
+            localStorage.setItem('rota_lembrete_template', val);
+            alert("Modelo de lembrete salvo com sucesso!");
+        }
+        
+        function resetLembreteTemplate() {
+            if (confirm("Deseja realmente restaurar o modelo padrão de fábrica?")) {
+                localStorage.removeItem('rota_lembrete_template');
+                loadConfigValues();
+            }
+        }
+        
+        // --- 3. Ação Credenciais Google ---
+        function salvarGoogleCreds(e) {
+            e.preventDefault();
+            const config = {
+                clientId: document.getElementById('google-client-id').value.trim(),
+                apiKey: document.getElementById('google-api-key').value.trim()
+            };
+            localStorage.setItem('rota_google_config', JSON.stringify(config));
+            alert("Configurações do Google salvas! Recarregue a página para re-inicializar o serviço.");
+            location.reload();
+        }
+        
+        // --- 4. Ação Credenciais Firebase ---
+        function salvarFirebaseCreds(e) {
+            e.preventDefault();
+            const config = {
+                apiKey: document.getElementById('fb-api-key').value.trim(),
+                projectId: document.getElementById('fb-project-id').value.trim(),
+                authDomain: document.getElementById('fb-auth-domain').value.trim(),
+                appId: document.getElementById('fb-app-id').value.trim(),
+                storageBucket: `${document.getElementById('fb-project-id').value.trim()}.appspot.com`
+            };
+            localStorage.setItem('rota_firebase_config', JSON.stringify(config));
+            alert("Configurações do Firebase salvas! O Painel será reiniciado para ativar a sincronização em nuvem.");
+            location.reload();
+        }
+        
+        function limparFirebaseConfig() {
+            if (confirm("Deseja realmente remover as configurações do Firebase? Os dados voltarão a ser salvos localmente neste navegador.")) {
+                localStorage.removeItem('rota_firebase_config');
+                alert("Firebase desativado. Reiniciando...");
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

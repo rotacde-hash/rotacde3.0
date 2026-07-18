@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Relatório Financeiro - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item active"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">💰 Relatório Financeiro</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Acompanhamento do faturamento por períodos, métodos de pagamento e rotas.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-secondary" onclick="exportarCSV()">📥 Exportar CSV</button>
+                    <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir PDF</button>
+                </div>
+            </div>
+            
+            <!-- Filtro de Período -->
+            <div class="filter-card">
+                <div class="filter-group">
+                    <label for="fin-period">Período de Análise</label>
+                    <select id="fin-period" class="form-control">
+                        <option value="todos">Histórico Completo</option>
+                        <option value="semana">Esta Semana</option>
+                        <option value="semana_passada">Semana Passada</option>
+                        <option value="mes" selected>Este Mês</option>
+                        <option value="mes_passado">Mês Passado</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="fin-date-start-group" style="display: none;">
+                    <label for="fin-start-date">De</label>
+                    <input type="date" id="fin-start-date" class="form-control">
+                </div>
+                
+                <div class="filter-group" id="fin-date-end-group" style="display: none;">
+                    <label for="fin-end-date">Até</label>
+                    <input type="date" id="fin-end-date" class="form-control">
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Faturamento Recebido / Confirmado</span>
+                    <span class="stat-value" id="fin-recebido">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Faturamento Pendente</span>
+                    <span class="stat-value" id="fin-pendente" style="color: var(--color-waiting);">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Faturamento Perdido (Cancelados)</span>
+                    <span class="stat-value" id="fin-cancelado" style="color: var(--color-cancelled);">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Total de Viagens Realizadas</span>
+                    <span class="stat-value" id="fin-viagens">-</span>
+                </div>
+            </div>
+            
+            <!-- Breakdown Grid -->
+            <div class="finance-breakdown">
+                <div class="breakdown-card">
+                    <h3 class="breakdown-title">💳 Métodos de Pagamento</h3>
+                    <div id="breakdown-pagamento">
+                        <!-- Injetado dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="breakdown-card">
+                    <h3 class="breakdown-title">🗺️ Breakdown de Rotas</h3>
+                    <div id="breakdown-rotas">
+                        <!-- Injetado dinamicamente -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela Detalhada -->
+            <div class="page-header" style="margin-top: 40px; margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 700;">📋 Transações Detalhadas</h2>
+            </div>
+            
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Data</th>
+                            <th>Rota/Serviço</th>
+                            <th>Forma de Pagamento</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="finance-table-body">
+                        <!-- Injetado dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Config e Lógica -->
+    <script src="assets/firebase-config.js"></script>
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        let viagensGlobal = [];
+        let viagensFiltradas = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger Menu Mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Listeners de Filtro
+            document.getElementById('fin-period').addEventListener('change', handlePeriodChange);
+            document.getElementById('fin-start-date').addEventListener('change', loadFinanceData);
+            document.getElementById('fin-end-date').addEventListener('change', loadFinanceData);
+            
+            // Carregar Dados
+            loadFinanceData();
+        });
+        
+        function handlePeriodChange() {
+            const period = document.getElementById('fin-period').value;
+            const startGroup = document.getElementById('fin-date-start-group');
+            const endGroup = document.getElementById('fin-date-end-group');
+            
+            if (period === 'personalizado') {
+                startGroup.style.display = 'flex';
+                endGroup.style.display = 'flex';
+            } else {
+                startGroup.style.display = 'none';
+                endGroup.style.display = 'none';
+            }
+            loadFinanceData();
+        }
+        
+        async function loadFinanceData() {
+            try {
+                viagensGlobal = await dbGetViagens();
+                processFinanceFilters();
+            } catch (e) {
+                console.error("Erro ao processar dados financeiros:", e);
+            }
+        }
+        
+        function processFinanceFilters() {
+            const period = document.getElementById('fin-period').value;
+            const startDate = document.getElementById('fin-start-date').value;
+            const endDate = document.getElementById('fin-end-date').value;
+            
+            const hoje = new Date();
+            const hojeStr = hoje.toISOString().split('T')[0];
+            
+            // Obter limites da semana atual
+            const diaSemana = hoje.getDay();
+            const dif = hoje.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+            const inicioSemana = new Date(new Date().setDate(dif)).toISOString().split('T')[0];
+            
+            // Obter limites da semana passada
+            const inicioSemanaPassada = new Date(new Date().setDate(dif - 7)).toISOString().split('T')[0];
+            const fimSemanaPassada = new Date(new Date().setDate(dif - 1)).toISOString().split('T')[0];
+            
+            // Obter limites do mês atual
+            const mesAtual = hoje.toISOString().substring(0, 7);
+            
+            // Obter limites do mês passado
+            const dataMesPassado = new Date();
+            dataMesPassado.setMonth(dataMesPassado.getMonth() - 1);
+            const mesPassado = dataMesPassado.toISOString().substring(0, 7);
+            
+            viagensFiltradas = viagensGlobal.filter(v => {
+                if (period === 'semana' && (v.data < inicioSemana || v.data > hojeStr)) return false;
+                if (period === 'semana_passada' && (v.data < inicioSemanaPassada || v.data > fimSemanaPassada)) return false;
+                if (period === 'mes' && !v.data.startsWith(mesAtual)) return false;
+                if (period === 'mes_passado' && !v.data.startsWith(mesPassado)) return false;
+                if (period === 'personalizado') {
+                    if (startDate && v.data < startDate) return false;
+                    if (endDate && v.data > endDate) return false;
+                }
+                return true;
+            });
+            
+            calculateStatsAndBreakdowns();
+            renderTable();
+        }
+        
+        function calculateStatsAndBreakdowns() {
+            let recebido = 0;
+            let pendente = 0;
+            let cancelado = 0;
+            let totalViagens = 0;
+            
+            const pagMap = { Pix: 0, 'Dinheiro BRL': 0, Dólar: 0, Guarani: 0 };
+            const rotaMap = {};
+            
+            viagensFiltradas.forEach(v => {
+                const val = parseFloat(v.valor) || 0;
+                
+                if (v.status === 'Confirmado' || v.status === 'Concluído') {
+                    recebido += val;
+                    totalViagens++;
+                    
+                    // Incrementa Forma de Pagamento
+                    if (pagMap[v.formaPagamento] !== undefined) {
+                        pagMap[v.formaPagamento] += val;
+                    }
+                    
+                    // Incrementa Rota
+                    if (!rotaMap[v.tipoServico]) {
+                        rotaMap[v.tipoServico] = 0;
+                    }
+                    rotaMap[v.tipoServico] += val;
+                    
+                } else if (v.status === 'Aguardando confirmação') {
+                    pendente += val;
+                } else if (v.status === 'Cancelado') {
+                    cancelado += val;
+                }
+            });
+            
+            // Render Stats
+            document.getElementById('fin-recebido').innerText = `R$ ${recebido.toFixed(2)}`;
+            document.getElementById('fin-pendente').innerText = `R$ ${pendente.toFixed(2)}`;
+            document.getElementById('fin-cancelado').innerText = `R$ ${cancelado.toFixed(2)}`;
+            document.getElementById('fin-viagens').innerText = totalViagens;
+            
+            // Render Breakdown Pagamentos
+            const payContainer = document.getElementById('breakdown-pagamento');
+            payContainer.innerHTML = '';
+            
+            Object.keys(pagMap).forEach(key => {
+                const total = pagMap[key];
+                const pct = recebido > 0 ? ((total / recebido) * 100).toFixed(0) : 0;
+                
+                const item = document.createElement('div');
+                item.className = 'breakdown-item';
+                item.innerHTML = `
+                    <span style="font-weight: 500;">${key}</span>
+                    <span style="font-weight: 700;">R$ ${total.toFixed(2)} <span style="font-size: 11px; font-weight: normal; color: var(--text-muted); margin-left: 6px;">(${pct}%)</span></span>
+                `;
+                payContainer.appendChild(item);
+            });
+            
+            // Render Breakdown Rotas
+            const rotaContainer = document.getElementById('breakdown-rotas');
+            rotaContainer.innerHTML = '';
+            
+            const rotasSorted = Object.keys(rotaMap).sort((a, b) => rotaMap[b] - rotaMap[a]);
+            
+            if (rotasSorted.length === 0) {
+                rotaContainer.innerHTML = `<div style="color: var(--text-muted); text-align: center; font-size: 13px; padding-top: 10px;">Sem dados de rotas neste período.</div>`;
+            } else {
+                rotasSorted.forEach(key => {
+                    const total = rotaMap[key];
+                    const pct = recebido > 0 ? ((total / recebido) * 100).toFixed(0) : 0;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'breakdown-item';
+                    item.innerHTML = `
+                        <span style="font-weight: 500;">${key}</span>
+                        <span style="font-weight: 700;">R$ ${total.toFixed(2)} <span style="font-size: 11px; font-weight: normal; color: var(--text-muted); margin-left: 6px;">(${pct}%)</span></span>
+                    `;
+                    rotaContainer.appendChild(item);
+                });
+            }
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('finance-table-body');
+            tbody.innerHTML = '';
+            
+            if (viagensFiltradas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Nenhuma transação encontrada no período.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            viagensFiltradas.forEach(v => {
+                const tr = document.createElement('tr');
+                let badgeClass = 'badge-waiting';
+                if (v.status === 'Confirmado') badgeClass = 'badge-confirmed';
+                else if (v.status === 'Concluído') badgeClass = 'badge-completed';
+                else if (v.status === 'Cancelado') badgeClass = 'badge-cancelled';
+                
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${v.nomeCliente}</td>
+                    <td>${formatDate(v.data)}</td>
+                    <td>${v.tipoServico}</td>
+                    <td>${v.formaPagamento}</td>
+                    <td><span class="badge ${badgeClass}">${v.status}</span></td>
+                    <td style="text-align: right; font-weight: 700;">R$ ${parseFloat(v.valor).toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // --- Exportar para CSV ---
+        function exportarCSV() {
+            if (viagensFiltradas.length === 0) {
+                alert("Sem transações para exportar!");
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Adiciona BOM para português (acentos)
+            csvContent += "Cliente,Data,Rota,Metodo Pagamento,Status,Valor\n";
+            
+            viagensFiltradas.forEach(v => {
+                const line = `"${v.nomeCliente}","${v.data}","${v.tipoServico}","${v.formaPagamento}","${v.status}",${v.valor}`;
+                csvContent += line + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `relatorio_financeiro_${new Date().toISOString().substring(0,10)}.csv`);
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

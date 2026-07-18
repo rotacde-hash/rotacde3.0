@@ -1,0 +1,751 @@
+/* ==========================================================================
+   ROTA CDE TRANSFER - PAINEL ADMINISTRATIVO
+   Premium, Modern, Dark Mode Design System
+   ========================================================================== */
+
+/* --- Design Tokens --- */
+:root {
+    --primary-dark: #050B14;
+    /* Deep Navy (Fundo Principal) */
+    --primary-navy: #0e1a2f;
+    /* Medium Navy (Sidebar e Cards) */
+    --primary-gold: #c59b27;
+    /* Gold Accent */
+    --accent-gold: #e5c158;
+    /* Bright Gold for Hover */
+    --border-color: rgba(197, 155, 39, 0.15);
+    --bg-dark: #050B14;
+    --bg-card: #0e1a2f;
+    --bg-input: #13223c;
+
+    --text-light: #ffffff;
+    --text-muted: #9ba8bc;
+    --text-dark: #11151d;
+
+    /* Status Colors */
+    --color-waiting: #e5c158;
+    /* Aguardando Confirmação */
+    --color-confirmed: #4caf50;
+    /* Confirmado */
+    --color-completed: #2196f3;
+    /* Concluído */
+    --color-cancelled: #f44336;
+    /* Cancelado */
+
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius-md: 10px;
+    --border-radius-sm: 6px;
+    --shadow-premium: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Base Styles --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    background-color: var(--primary-dark);
+    color: var(--text-light);
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+/* --- Layout Estrutural --- */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar --- */
+.admin-sidebar {
+    width: 260px;
+    background-color: var(--primary-navy);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    z-index: 1000;
+    transition: var(--transition-normal);
+}
+
+.sidebar-brand {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.brand-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.brand-subtitle {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--primary-gold);
+    letter-spacing: 2.5px;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.menu-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--border-radius-sm);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition-normal);
+}
+
+.menu-item a:hover,
+.menu-item.active a {
+    color: var(--text-light);
+    background-color: rgba(197, 155, 39, 0.1);
+    border-left: 3px solid var(--primary-gold);
+    padding-left: 13px;
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logout-btn {
+    cursor: pointer;
+    color: var(--color-cancelled);
+    font-weight: bold;
+    border: none;
+    background: transparent;
+}
+
+/* --- Main Content Area --- */
+.admin-main {
+    flex-grow: 1;
+    margin-left: 260px;
+    padding: 30px;
+    min-height: 100vh;
+    transition: var(--transition-normal);
+}
+
+/* --- Top Header / Mobile Bar --- */
+.admin-topbar {
+    display: none;
+    background-color: var(--primary-navy);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 24px;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.menu-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* --- Dashboard / Seções --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.page-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-gold);
+    color: var(--primary-dark);
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-gold);
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+    background-color: var(--color-cancelled);
+    color: var(--text-light);
+}
+
+.btn-danger:hover {
+    filter: brightness(0.9);
+}
+
+/* --- Stats Cards Grid --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    box-shadow: var(--shadow-premium);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-gold);
+}
+
+/* --- Filters Section --- */
+.filter-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.form-control {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-light);
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition-normal);
+}
+
+.form-control:focus {
+    border-color: var(--primary-gold);
+}
+
+/* --- Cards de Viagem --- */
+.viagens-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.viagem-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-premium);
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.viagem-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.viagem-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.client-name {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: var(--border-radius-full);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-waiting {
+    background-color: rgba(229, 193, 88, 0.1);
+    color: var(--color-waiting);
+    border: 1px solid var(--color-waiting);
+}
+
+.badge-confirmed {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--color-confirmed);
+    border: 1px solid var(--color-confirmed);
+}
+
+.badge-completed {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: var(--color-completed);
+    border: 1px solid var(--color-completed);
+}
+
+.badge-cancelled {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--color-cancelled);
+    border: 1px solid var(--color-cancelled);
+}
+
+.viagem-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.viagem-route {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-gold);
+}
+
+.viagem-finance {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.finance-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.finance-pay {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.viagem-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.action-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--border-radius-sm);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--text-light);
+    transition: var(--transition-normal);
+}
+
+.action-icon-btn:hover {
+    background-color: rgba(197, 155, 39, 0.1);
+    border-color: var(--primary-gold);
+}
+
+.action-whatsapp-btn {
+    border-color: #25d366;
+    color: #25d366;
+}
+
+.action-whatsapp-btn:hover {
+    background-color: rgba(37, 211, 102, 0.1);
+    border-color: #25d366;
+}
+
+/* --- Forms & Modals --- */
+.form-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 30px;
+    box-shadow: var(--shadow-premium);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.form-group-full {
+    grid-column: span 2;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* --- Login Screen --- */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-dark);
+    padding: 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 40px;
+    box-shadow: var(--shadow-premium);
+    text-align: center;
+}
+
+.login-logo {
+    margin-bottom: 30px;
+}
+
+.login-logo img {
+    height: 60px;
+    width: auto;
+    object-fit: contain;
+}
+
+.login-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-error {
+    color: var(--color-cancelled);
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: none;
+}
+
+/* --- CRM / Clientes Table --- */
+.admin-table-container {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-premium);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-table th {
+    background-color: rgba(255, 255, 255, 0.02);
+    font-weight: 700;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* --- Relatório Financeiro Breakdown --- */
+.finance-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.breakdown-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+}
+
+.breakdown-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 14px;
+}
+
+.breakdown-item:last-child {
+    border-bottom: none;
+}
+
+/* --- Configurações Grid --- */
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+.config-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+}
+
+.config-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--primary-gold);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* --- Responsividade --- */
+@media (max-width: 992px) {
+    .viagem-card {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .viagem-finance {
+        text-align: left;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 15px;
+    }
+
+    .viagem-actions {
+        justify-content: flex-start;
+    }
+
+    .finance-breakdown {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-sidebar {
+        left: -260px;
+    }
+
+    .admin-sidebar.active {
+        left: 0;
+    }
+
+    .admin-main {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 30px;
+    }
+
+    .admin-topbar {
+        display: flex;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group-full {
+        grid-column: span 1;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+/* --- CSS de Impressão para Relatórios Financeiros --- */
+@media print {
+    body {
+        background-color: #fff;
+        color: #000;
+    }
+
+    .admin-sidebar,
+    .admin-topbar,
+    .page-actions,
+    .filter-card {
+        display: none !important;
+    }
+
+    .admin-main {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stat-card,
+    .breakdown-card,
+    .admin-table-container {
+        border: 1px solid #ddd !important;
+        background-color: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+    }
+
+    .stat-value,
+    .breakdown-item,
+    .admin-table td {
+        color: #000 !important;
+    }
+
+    .admin-table th {
+        background-color: #eee !important;
+        color: #000 !important;
+        border-bottom: 1px solid #ddd !important;
+    }
+}
