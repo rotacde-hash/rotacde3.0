@@ -141,6 +141,31 @@ async function login(password, email = "") {
 
 // Obter Viagens
 async function dbGetViagens() {
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.from('viagens').select('*');
+            if (error) {
+                console.error("Erro ao buscar viagens do Supabase:", error);
+            } else if (data) {
+                // Auto-migração: Se o Supabase estiver vazio, mas o localStorage tiver dados, migra para o Supabase
+                const localViagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
+                if (data.length === 0 && localViagens.length > 0) {
+                    console.log("Migrando viagens locais para o Supabase...");
+                    for (const v of localViagens) {
+                        await supabaseClient.from('viagens').upsert(v, { onConflict: 'id' });
+                    }
+                    return localViagens.sort((a, b) => new Date(`${a.data}T${a.horario}`) - new Date(`${b.data}T${b.horario}`));
+                }
+
+                // Atualiza cache local
+                localStorage.setItem('rota_viagens', JSON.stringify(data));
+                return data.sort((a, b) => new Date(`${a.data}T${a.horario}`) - new Date(`${b.data}T${b.horario}`));
+            }
+        } catch (e) {
+            console.warn("Falha de conexão com Supabase, usando LocalStorage:", e);
+        }
+    }
+
     if (db) {
         const snapshot = await db.collection('viagens').get();
         const viagens = [];
@@ -164,19 +189,33 @@ async function dbSaveViagem(viagem) {
     }
     viagem.updatedAt = new Date().toISOString();
 
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { error } = await supabaseClient.from('viagens').upsert(viagem, { onConflict: 'id' });
+            if (error) {
+                console.error("Erro ao salvar viagem no Supabase:", error);
+            } else {
+                console.log("Viagem salva no Supabase com sucesso:", viagem.id);
+            }
+        } catch (e) {
+            console.warn("Erro ao salvar no Supabase:", e);
+        }
+    }
+
     if (db) {
         const id = viagem.id;
         await db.collection('viagens').doc(id).set(viagem);
-    } else {
-        let viagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
-        const idx = viagens.findIndex(v => v.id === viagem.id);
-        if (idx !== -1) {
-            viagens[idx] = viagem;
-        } else {
-            viagens.push(viagem);
-        }
-        localStorage.setItem('rota_viagens', JSON.stringify(viagens));
     }
+
+    // Sempre salva em LocalStorage para disponibilidade offline
+    let viagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
+    const idx = viagens.findIndex(v => v.id === viagem.id);
+    if (idx !== -1) {
+        viagens[idx] = viagem;
+    } else {
+        viagens.push(viagem);
+    }
+    localStorage.setItem('rota_viagens', JSON.stringify(viagens));
     
     // Atualizar Google Agenda se conectado
     if (typeof syncEventToGoogleCalendar === 'function') {
@@ -192,13 +231,26 @@ async function dbSaveViagem(viagem) {
 
 // Excluir Viagem
 async function dbDeleteViagem(id) {
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { error } = await supabaseClient.from('viagens').delete().eq('id', id);
+            if (error) {
+                console.error("Erro ao excluir viagem no Supabase:", error);
+            } else {
+                console.log("Viagem excluída no Supabase:", id);
+            }
+        } catch (e) {
+            console.warn("Erro ao deletar no Supabase:", e);
+        }
+    }
+
     if (db) {
         await db.collection('viagens').doc(id).delete();
-    } else {
-        let viagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
-        viagens = viagens.filter(v => v.id !== id);
-        localStorage.setItem('rota_viagens', JSON.stringify(viagens));
     }
+
+    let viagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
+    viagens = viagens.filter(v => v.id !== id);
+    localStorage.setItem('rota_viagens', JSON.stringify(viagens));
     
     // Remover do Google Agenda se necessário
     if (typeof deleteEventFromGoogleCalendar === 'function') {
@@ -414,10 +466,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificar sessões ativas
     verifySession();
     
-    // 2. Inicializar Firebase se chaves estiverem presentes
+    // 2. Inicializar Supabase (Banco de dados principal)
+    if (typeof initSupabase === 'function') {
+        initSupabase();
+    }
+
+    // 3. Inicializar Firebase se chaves estiverem presentes (fallback)
     initFirebase();
     
-    // 3. Monitoramento de alarmes no cliente
+    // 4. Monitoramento de alarmes no cliente
     if (!window.location.pathname.endsWith('index.html')) {
         startLocalTripMonitoring();
     }

@@ -131,7 +131,32 @@
                     </div>
                 </div>
                 
-                <!-- 4. Chaves do Firebase (Banco e Nuvem) -->
+                <!-- 4. Chaves do Supabase Cloud (Banco de Dados PostgreSQL) -->
+                <div class="config-section">
+                    <h3 class="config-section-title">⚡ Configuração Supabase Cloud (PostgreSQL)</h3>
+                    <form id="form-supabase" style="display: flex; flex-direction: column; gap: 16px; max-width: 650px;">
+                        <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                            O Supabase está conectado como banco de dados em nuvem principal. Suas viagens, clientes e relatórios são salvos e sincronizados automaticamente em tempo real.
+                        </p>
+                        
+                        <div class="form-grid" style="margin-bottom: 0;">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="sb-url">Project URL</label>
+                                <input type="text" id="sb-url" class="form-control" value="https://dafveurgzqysybznmzqg.supabase.co" readonly>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="sb-key">Publishable / Anon Key</label>
+                                <input type="password" id="sb-key" class="form-control" value="sb_publishable_btB8gU9_GLIOKMTzOrMoJw_kBUeIQjH" readonly>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span class="badge badge-confirmado" style="padding: 6px 12px; font-size: 12px;">✅ Supabase Conectado</span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 5. Chaves do Firebase (Opcional / Fallback) -->
                 <div class="config-section">
                     <h3 class="config-section-title">🔥 Configuração Firebase Cloud (Firestore / Auth / Messaging)</h3>
                     <form id="form-firebase" style="display: flex; flex-direction: column; gap: 16px; max-width: 650px;">
@@ -165,7 +190,7 @@
                     </form>
                 </div>
                 
-                <!-- 5. Notificações Locais Push -->
+                <!-- 6. Notificações Locais Push -->
                 <div class="config-section">
                     <h3 class="config-section-title">🔔 Notificações Push do Navegador</h3>
                     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
@@ -181,6 +206,10 @@
             
         </div>
     </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
 
     <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
