@@ -1112,6 +1112,20 @@ section {
     max-width: 240px;
 }
 
+.footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--text-light-muted);
+    font-size: 14px;
+    transition: color 0.3s ease;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-social-link:hover {
+    color: var(--primary-gold);
+}
+
 .footer-title {
     color: var(--text-light);
     font-size: 16px;
