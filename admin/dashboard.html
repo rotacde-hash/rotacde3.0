@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Agenda de Viagens - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1R380CBM22"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1R380CBM22');
+    </script>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item active"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">📅 Agenda / Viagens</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Controle e gestão das corridas de transfers agendadas.</p>
+                </div>
+                <div class="page-actions">
+                    <a href="nova-viagem.html" class="btn btn-primary">➕ Nova Viagem</a>
+                </div>
+            </div>
+            
+            <!-- Dashboard Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Viagens Hoje</span>
+                    <span class="stat-value" id="stat-hoje">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Viagens Esta Semana</span>
+                    <span class="stat-value" id="stat-semana">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Receita do Mês</span>
+                    <span class="stat-value" id="stat-receita">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Clientes Atendidos (Mês)</span>
+                    <span class="stat-value" id="stat-clientes">-</span>
+                </div>
+            </div>
+            
+            <!-- Filtros -->
+            <div class="filter-card">
+                <div class="filter-group">
+                    <label for="filter-search">Cliente / WhatsApp</label>
+                    <input type="text" id="filter-search" class="form-control" placeholder="Buscar por nome ou tel...">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filter-period">Período</label>
+                    <select id="filter-period" class="form-control">
+                        <option value="todos">Todas</option>
+                        <option value="hoje">Hoje</option>
+                        <option value="amanha">Amanhã</option>
+                        <option value="semana">Esta Semana</option>
+                        <option value="mes" selected>Este Mês</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" id="custom-date-group" style="display: none;">
+                    <label for="filter-start-date">De</label>
+                    <input type="date" id="filter-start-date" class="form-control">
+                </div>
+                
+                <div class="filter-group" id="custom-date-group-end" style="display: none;">
+                    <label for="filter-end-date">Até</label>
+                    <input type="date" id="filter-end-date" class="form-control">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filter-status">Status</label>
+                    <select id="filter-status" class="form-control">
+                        <option value="todos">Todos</option>
+                        <option value="Aguardando confirmação">Aguardando confirmação</option>
+                        <option value="Confirmado">Confirmado</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Listagem de Viagens -->
+            <div class="viagens-list" id="viagens-list-container">
+                <!-- Injetado dinamicamente -->
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Carregando viagens...
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Google API & GIS -->
+    <script src="assets/google.js"></script>
+    
+    <!-- Config e Lógica -->
+    <script src="assets/firebase-config.js"></script>
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        let viagensGlobal = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger Menu Mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Listeners de Filtros
+            document.getElementById('filter-search').addEventListener('input', renderViagensList);
+            document.getElementById('filter-status').addEventListener('change', renderViagensList);
+            document.getElementById('filter-period').addEventListener('change', handlePeriodChange);
+            document.getElementById('filter-start-date').addEventListener('change', renderViagensList);
+            document.getElementById('filter-end-date').addEventListener('change', renderViagensList);
+            
+            // Carregar dados iniciais
+            loadDashboardData();
+        });
+        
+        function handlePeriodChange() {
+            const period = document.getElementById('filter-period').value;
+            const startGroup = document.getElementById('custom-date-group');
+            const endGroup = document.getElementById('custom-date-group-end');
+            
+            if (period === 'personalizado') {
+                startGroup.style.display = 'flex';
+                endGroup.style.display = 'flex';
+            } else {
+                startGroup.style.display = 'none';
+                endGroup.style.display = 'none';
+            }
+            renderViagensList();
+        }
+        
+        async function loadDashboardData() {
+            try {
+                // 1. Estatísticas do Topo
+                const stats = await dbGetStats();
+                document.getElementById('stat-hoje').innerText = stats.viagensHoje;
+                document.getElementById('stat-semana').innerText = stats.viagensSemana;
+                document.getElementById('stat-receita').innerText = `R$ ${stats.receitaMes.toFixed(2)}`;
+                document.getElementById('stat-clientes').innerText = stats.clientesAtendidosMes;
+                
+                // 2. Carregar Lista de Viagens
+                viagensGlobal = await dbGetViagens();
+                renderViagensList();
+            } catch (e) {
+                console.error("Erro ao carregar dados do dashboard:", e);
+            }
+        }
+        
+        function renderViagensList() {
+            const search = document.getElementById('filter-search').value.toLowerCase();
+            const status = document.getElementById('filter-status').value;
+            const period = document.getElementById('filter-period').value;
+            const startDate = document.getElementById('filter-start-date').value;
+            const endDate = document.getElementById('filter-end-date').value;
+            
+            const container = document.getElementById('viagens-list-container');
+            container.innerHTML = '';
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            const amanhaDate = new Date();
+            amanhaDate.setDate(amanhaDate.getDate() + 1);
+            const amanha = amanhaDate.toISOString().split('T')[0];
+            
+            // Obter limites da semana
+            const dataAtual = new Date();
+            const diaSemana = dataAtual.getDay();
+            const dif = dataAtual.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+            const inicioSemana = new Date(dataAtual.setDate(dif)).toISOString().split('T')[0];
+            
+            // Filtrar viagens
+            const filtradas = viagensGlobal.filter(v => {
+                // Busca texto
+                const matchesSearch = v.nomeCliente.toLowerCase().includes(search) || v.telefone.includes(search);
+                if (!matchesSearch) return false;
+                
+                // Status
+                if (status !== 'todos' && v.status !== status) return false;
+                
+                // Período
+                if (period === 'hoje' && v.data !== hoje) return false;
+                if (period === 'amanha' && v.data !== amanha) return false;
+                if (period === 'semana' && (v.data < inicioSemana || v.data > hoje)) return false;
+                if (period === 'mes') {
+                    const mesAtual = new Date().toISOString().substring(0, 7);
+                    if (!v.data.startsWith(mesAtual)) return false;
+                }
+                if (period === 'personalizado') {
+                    if (startDate && v.data < startDate) return false;
+                    if (endDate && v.data > endDate) return false;
+                }
+                
+                return true;
+            });
+            
+            if (filtradas.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhuma viagem agendada com estes filtros.</div>`;
+                return;
+            }
+            
+            filtradas.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'viagem-card';
+                
+                let badgeClass = 'badge-waiting';
+                if (v.status === 'Confirmado') badgeClass = 'badge-confirmed';
+                else if (v.status === 'Concluído') badgeClass = 'badge-completed';
+                else if (v.status === 'Cancelado') badgeClass = 'badge-cancelled';
+                
+                card.innerHTML = `
+                    <div class="viagem-details">
+                        <div class="viagem-header">
+                            <span class="client-name">${v.nomeCliente}</span>
+                            <span class="badge ${badgeClass}">${v.status}</span>
+                        </div>
+                        <div class="viagem-route">${v.tipoServico}</div>
+                        <div class="viagem-meta">
+                            <div class="meta-item">📅 ${formatDate(v.data)}</div>
+                            <div class="meta-item">🕐 ${v.horario}</div>
+                            <div class="meta-item">👥 ${v.passageiros} pass.</div>
+                            <div class="meta-item">🧳 ${v.malas} malas</div>
+                        </div>
+                        <div class="viagem-meta" style="margin-top: 4px;">
+                            <div class="meta-item">📍 Embarque: ${v.enderecoEmbarque}</div>
+                            <div class="meta-item">📍 Destino: ${v.enderecoDestino}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="viagem-finance">
+                        <span class="finance-val">R$ ${parseFloat(v.valor).toFixed(2)}</span>
+                        <span class="finance-pay">Forma: ${v.formaPagamento}</span>
+                    </div>
+                    
+                    <div class="viagem-actions">
+                        <button class="action-icon-btn action-whatsapp-btn" onclick="whatsappLembrete('${v.id}')" title="Enviar Lembrete WhatsApp">💬</button>
+                        <button class="action-icon-btn" onclick="concluirViagem('${v.id}')" title="Marcar como Concluído">✅</button>
+                        <button class="action-icon-btn" onclick="editarViagem('${v.id}')" title="Editar Viagem">✏️</button>
+                        <button class="action-icon-btn" style="color: var(--color-cancelled);" onclick="cancelarViagem('${v.id}')" title="Cancelar Viagem">❌</button>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // --- Ações Rápidas ---
+        
+        function whatsappLembrete(id) {
+            const viagem = viagensGlobal.find(v => v.id === id);
+            if (viagem) {
+                enviarLembreteWhatsApp(viagem);
+            }
+        }
+        
+        async function concluirViagem(id) {
+            if (confirm("Confirmar conclusão deste transfer?")) {
+                const viagem = viagensGlobal.find(v => v.id === id);
+                if (viagem) {
+                    viagem.status = 'Concluído';
+                    await dbSaveViagem(viagem);
+                    loadDashboardData();
+                }
+            }
+        }
+        
+        async function cancelarViagem(id) {
+            if (confirm("Deseja realmente CANCELAR este transfer?")) {
+                const viagem = viagensGlobal.find(v => v.id === id);
+                if (viagem) {
+                    viagem.status = 'Cancelado';
+                    await dbSaveViagem(viagem);
+                    loadDashboardData();
+                }
+            }
+        }
+        
+        function editarViagem(id) {
+            window.location.href = `nova-viagem.html?id=${id}`;
+        }
+    </script>
+</body>
+</html>
+

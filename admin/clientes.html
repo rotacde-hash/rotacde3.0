@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>CRM de Clientes - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+    
+    <style>
+        /* Estilos Locais do Modal de Historico */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            max-width: 650px;
+            width: 100%;
+            box-shadow: var(--shadow-premium);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+        
+        .close-modal-btn:hover {
+            color: var(--text-light);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .history-item {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        
+        .history-route {
+            font-weight: 600;
+            color: var(--primary-gold);
+        }
+        
+        .history-meta {
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1R380CBM22"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1R380CBM22');
+    </script>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item active"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">👥 CRM de Clientes</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Lista consolidada e faturamento acumulado por cliente.</p>
+                </div>
+            </div>
+            
+            <!-- Barra de Busca -->
+            <div class="filter-card">
+                <div class="filter-group" style="flex-grow: 1;">
+                    <label for="crm-search">Pesquisar Clientes</label>
+                    <input type="text" id="crm-search" class="form-control" placeholder="Buscar por nome ou WhatsApp...">
+                </div>
+            </div>
+            
+            <!-- Tabela de CRM -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nome do Cliente</th>
+                            <th>WhatsApp</th>
+                            <th>E-mail</th>
+                            <th>Total Viagens</th>
+                            <th>Faturamento (R$)</th>
+                            <th>Última Viagem</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crm-table-body">
+                        <!-- Injetado dinamicamente -->
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                Carregando clientes...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Modal do Historico de Viagens -->
+    <div class="modal" id="historico-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-client-title">Histórico do Cliente</h3>
+                <button class="close-modal-btn" onclick="fecharModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="modal-history-list">
+                    <!-- Injetado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Config e Lógica -->
+    <script src="assets/firebase-config.js"></script>
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        let clientesGlobal = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hamburger Menu Mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Listener de Busca
+            document.getElementById('crm-search').addEventListener('input', renderCRMList);
+            
+            // Carregar CRM
+            loadCRMData();
+        });
+        
+        async function loadCRMData() {
+            try {
+                clientesGlobal = await dbGetClientes();
+                renderCRMList();
+            } catch (e) {
+                console.error("Erro ao carregar CRM de clientes:", e);
+            }
+        }
+        
+        function renderCRMList() {
+            const search = document.getElementById('crm-search').value.toLowerCase();
+            const tbody = document.getElementById('crm-table-body');
+            tbody.innerHTML = '';
+            
+            const filtrados = clientesGlobal.filter(c => {
+                return c.nome.toLowerCase().includes(search) || c.telefone.includes(search);
+            });
+            
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Nenhum cliente cadastrado ou encontrado.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filtrados.forEach((c, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: 600;">${c.nome}</td>
+                    <td>${c.telefone}</td>
+                    <td style="color: var(--text-muted);">${c.email || '-'}</td>
+                    <td>${c.totalViagens}</td>
+                    <td style="font-weight: 700; color: var(--primary-gold);">R$ ${c.totalGasto.toFixed(2)}</td>
+                    <td>${formatDate(c.ultimaViagem)}</td>
+                    <td style="text-align: right;">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="verHistorico('${c.telefone.replace(/\D/g, '')}')">Ver Histórico</button>
+                            <button class="action-icon-btn action-whatsapp-btn" style="width: 30px; height: 30px;" onclick="contatoWhatsApp('${c.telefone.replace(/\D/g, '')}')" title="Chamar no WhatsApp">💬</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // --- Modal e Historico ---
+        
+        function verHistorico(telClean) {
+            const cliente = clientesGlobal.find(c => c.telefone.replace(/\D/g, '') === telClean);
+            if (!cliente) return;
+            
+            document.getElementById('modal-client-title').innerText = `Histórico de ${cliente.nome}`;
+            const list = document.getElementById('modal-history-list');
+            list.innerHTML = '';
+            
+            cliente.historico.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                
+                let badgeClass = 'badge-waiting';
+                if (v.status === 'Confirmado') badgeClass = 'badge-confirmed';
+                else if (v.status === 'Concluído') badgeClass = 'badge-completed';
+                else if (v.status === 'Cancelado') badgeClass = 'badge-cancelled';
+                
+                item.innerHTML = `
+                    <div>
+                        <div class="history-route">${v.tipoServico}</div>
+                        <div class="history-meta">📅 ${formatDate(v.data)} às ${v.horario} | R$ ${parseFloat(v.valor).toFixed(2)} (${v.formaPagamento})</div>
+                    </div>
+                    <span class="badge ${badgeClass}">${v.status}</span>
+                `;
+                list.appendChild(item);
+            });
+            
+            document.getElementById('historico-modal').style.display = 'flex';
+        }
+        
+        function fecharModal() {
+            document.getElementById('historico-modal').style.display = 'none';
+        }
+        
+        function contatoWhatsApp(telClean) {
+            window.open(`https://wa.me/${telClean}`, '_blank');
+        }
+    </script>
+</body>
+</html>
+

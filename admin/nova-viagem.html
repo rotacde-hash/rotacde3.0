@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Gerenciar Transfer - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1R380CBM22"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1R380CBM22');
+    </script>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item active"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" id="form-page-title">➕ Novo Transfer</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Registre ou edite os dados detalhados da viagem.</p>
+                </div>
+                <div class="page-actions">
+                    <a href="dashboard.html" class="btn btn-secondary">Voltar à Agenda</a>
+                </div>
+            </div>
+            
+            <!-- Formulário -->
+            <div class="form-card">
+                <form id="viagem-form">
+                    <input type="hidden" id="viagem-id">
+                    <input type="hidden" id="viagem-google-id">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cliente-nome">Nome do Cliente *</label>
+                            <input type="text" id="cliente-nome" class="form-control" placeholder="Nome completo" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cliente-tel">WhatsApp / Telefone *</label>
+                            <input type="text" id="cliente-tel" class="form-control" placeholder="Ex: 5545999887766" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cliente-email">E-mail (Opcional)</label>
+                            <input type="email" id="cliente-email" class="form-control" placeholder="email@exemplo.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-servico">Tipo de Serviço *</label>
+                            <select id="viagem-servico" class="form-control" required>
+                                <option value="" disabled selected>Selecione a Rota/Serviço</option>
+                                <option value="Foz → Ciudad del Este">Foz → Ciudad del Este</option>
+                                <option value="Ciudad del Este → Foz">Ciudad del Este → Foz</option>
+                                <option value="Aeroporto IGU → CDE">Aeroporto IGU → CDE</option>
+                                <option value="CDE → Aeroporto IGU">CDE → Aeroporto IGU</option>
+                                <option value="Rodoviária → CDE">Rodoviária → CDE</option>
+                                <option value="Compras Paraguai (4h)">Compras Paraguai (4h)</option>
+                                <option value="Compras Paraguai (6h)">Compras Paraguai (6h)</option>
+                                <option value="Personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-embarque">Endereço de Embarque *</label>
+                            <input type="text" id="viagem-embarque" class="form-control" placeholder="Hotel, Residência, Aeroporto..." required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-destino">Endereço de Destino *</label>
+                            <input type="text" id="viagem-destino" class="form-control" placeholder="Local de desembarque no destino" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-data">Data da Viagem *</label>
+                            <input type="date" id="viagem-data" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-horario">Horário de Embarque *</label>
+                            <input type="time" id="viagem-horario" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-pass">Passageiros (1 a 6) *</label>
+                            <input type="number" id="viagem-pass" class="form-control" min="1" max="6" value="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-malas">Malas (0 a 10) *</label>
+                            <input type="number" id="viagem-malas" class="form-control" min="0" max="10" value="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-valor">Valor Cobrado (R$) *</label>
+                            <input type="number" id="viagem-valor" class="form-control" step="0.01" placeholder="Ex: 150.00" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-pagamento">Forma de Pagamento *</label>
+                            <select id="viagem-pagamento" class="form-control" required>
+                                <option value="Pix">Pix</option>
+                                <option value="Dinheiro BRL">Dinheiro BRL</option>
+                                <option value="Dólar">Dólar</option>
+                                <option value="Guarani">Guarani</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viagem-status">Status *</label>
+                            <select id="viagem-status" class="form-control" required>
+                                <option value="Aguardando confirmação">Aguardando confirmação</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="Concluído">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group form-group-full">
+                            <label for="viagem-obs">Observações</label>
+                            <textarea id="viagem-obs" class="form-control" placeholder="Notas sobre o transfer, preferências do cliente, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Google API & GIS -->
+    <script src="assets/google.js"></script>
+    
+    <!-- Config e Lógica -->
+    <script src="assets/firebase-config.js"></script>
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Hamburger Menu Mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            
+            // Checar se é edição
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (id) {
+                document.getElementById('form-page-title').innerText = "✏️ Editar Transfer";
+                await populateForm(id);
+            }
+            
+            // Listener de Submissão
+            document.getElementById('viagem-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await salvarViagem();
+            });
+        });
+        
+        async function populateForm(id) {
+            try {
+                // Como as viagens já estão no Firebase/localStorage, buscamos tudo e filtramos o correspondente
+                const viagens = await dbGetViagens();
+                const v = viagens.find(item => item.id === id);
+                
+                if (v) {
+                    document.getElementById('viagem-id').value = v.id;
+                    document.getElementById('viagem-google-id').value = v.googleEventId || '';
+                    document.getElementById('cliente-nome').value = v.nomeCliente;
+                    document.getElementById('cliente-tel').value = v.telefone;
+                    document.getElementById('cliente-email').value = v.emailCliente || '';
+                    document.getElementById('viagem-servico').value = v.tipoServico;
+                    document.getElementById('viagem-embarque').value = v.enderecoEmbarque;
+                    document.getElementById('viagem-destino').value = v.enderecoDestino;
+                    document.getElementById('viagem-data').value = v.data;
+                    document.getElementById('viagem-horario').value = v.horario;
+                    document.getElementById('viagem-pass').value = v.passageiros;
+                    document.getElementById('viagem-malas').value = v.malas;
+                    document.getElementById('viagem-valor').value = v.valor;
+                    document.getElementById('viagem-pagamento').value = v.formaPagamento;
+                    document.getElementById('viagem-status').value = v.status;
+                    document.getElementById('viagem-obs').value = v.observacoes || '';
+                }
+            } catch (e) {
+                console.error("Erro ao carregar dados para edição:", e);
+            }
+        }
+        
+        async function salvarViagem() {
+            const viagem = {
+                id: document.getElementById('viagem-id').value || null,
+                googleEventId: document.getElementById('viagem-google-id').value || null,
+                nomeCliente: document.getElementById('cliente-nome').value,
+                telefone: document.getElementById('cliente-tel').value,
+                emailCliente: document.getElementById('cliente-email').value,
+                tipoServico: document.getElementById('viagem-servico').value,
+                enderecoEmbarque: document.getElementById('viagem-embarque').value,
+                enderecoDestino: document.getElementById('viagem-destino').value,
+                data: document.getElementById('viagem-data').value,
+                horario: document.getElementById('viagem-horario').value,
+                passageiros: parseInt(document.getElementById('viagem-pass').value),
+                malas: parseInt(document.getElementById('viagem-malas').value),
+                valor: parseFloat(document.getElementById('viagem-valor').value),
+                formaPagamento: document.getElementById('viagem-pagamento').value,
+                status: document.getElementById('viagem-status').value,
+                observacoes: document.getElementById('viagem-obs').value
+            };
+            
+            try {
+                await dbSaveViagem(viagem);
+                alert("Viagem salva com sucesso!");
+                window.location.href = 'dashboard.html';
+            } catch (e) {
+                alert("Falha ao salvar viagem: " + e.message);
+            }
+        }
+    </script>
+</body>
+</html>
+

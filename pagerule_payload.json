@@ -1,0 +1,22 @@
+{
+  "targets": [
+    {
+      "target": "url",
+      "constraint": {
+        "operator": "matches",
+        "value": "www.rotacde.site/*"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "forwarding_url",
+      "value": {
+        "url": "https://rotacde.site/$1",
+        "status_code": 301
+      }
+    }
+  ],
+  "priority": 1,
+  "status": "active"
+}
