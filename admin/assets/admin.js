@@ -194,11 +194,13 @@ async function dbSaveViagem(viagem) {
             const { error } = await supabaseClient.from('viagens').upsert(viagem, { onConflict: 'id' });
             if (error) {
                 console.error("Erro ao salvar viagem no Supabase:", error);
+                throw new Error(error.message || "Falha ao salvar no banco de dados.");
             } else {
                 console.log("Viagem salva no Supabase com sucesso:", viagem.id);
             }
         } catch (e) {
-            console.warn("Erro ao salvar no Supabase:", e);
+            console.error("Erro ao salvar no Supabase:", e);
+            throw e;
         }
     }
 
