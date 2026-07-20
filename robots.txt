@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Googlebot-Image
+Allow: /assets/
+Allow: /
+
+Sitemap: https://www.rotacde.site/sitemap.xml
+Sitemap: https://rotacde.site/sitemap.xml
