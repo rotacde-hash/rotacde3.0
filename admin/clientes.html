@@ -102,15 +102,46 @@
             margin-top: 4px;
         }
     </style>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1R380CBM22"></script>
+    <!-- Google Consent Mode Default -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-1R380CBM22');
+      
+      // Default Consent Mode v2 setup (denied by default)
+      if (localStorage.getItem('cookie_consent') === null) {
+        gtag('consent', 'default', {
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied',
+          'analytics_storage': 'denied'
+        });
+      } else {
+        try {
+          const consent = JSON.parse(localStorage.getItem('cookie_consent'));
+          gtag('consent', 'default', {
+            'ad_storage': consent.ad_storage || 'denied',
+            'ad_user_data': consent.ad_user_data || 'denied',
+            'ad_personalization': consent.ad_personalization || 'denied',
+            'analytics_storage': consent.analytics_storage || 'denied'
+          });
+        } catch (e) {
+          gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied'
+          });
+        }
+      }
     </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJPZYG2G9Z"></script>
+    <script>
+      gtag('js', new Date());
+      gtag('config', 'G-MJPZYG2G9Z');
+    </script>
+    <!-- Cookie Consent Banner -->
+    <script src="../assets/cookie-consent.js" defer></script>
 </head>
 <body>
 
