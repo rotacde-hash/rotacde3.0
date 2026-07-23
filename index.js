@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_contact_loc: "📍 Atendimento em Foz do Iguaçu / PR e Ciudad del Este / PY",
             footer_contact_email: "✉️ Email: contato@rotacdetransfer.com.br",
             footer_rights: "© 2026 Rota CDE Transfer. Todos os direitos reservados.",
-            footer_dev: "Site feito por GDS Design",
+            footer_dev: "Site feito por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
             val_sob_consulta: "Sob Consulta"
         },
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_contact_loc: "📍 Atención en Foz de Iguazú / PR y Ciudad del Este / PY",
             footer_contact_email: "✉️ Correo: contato@rotacdetransfer.com.br",
             footer_rights: "© 2026 Rota CDE Transfer. Todos los derechos reservados.",
-            footer_dev: "Sitio hecho por GDS Design",
+            footer_dev: "Sitio hecho por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
             val_sob_consulta: "Bajo Consulta"
         },
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_contact_loc: "📍 Services in Foz do Iguaçu / BR and Ciudad del Este / PY",
             footer_contact_email: "✉️ Email: contato@rotacdetransfer.com.br",
             footer_rights: "© 2026 Rota CDE Transfer. All rights reserved.",
-            footer_dev: "Site made by GDS Design",
+            footer_dev: "Site made by <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Book",
             val_sob_consulta: "On Request"
         }
@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (el.tagName === 'INPUT' && (el.type === 'submit' || el.type === 'button')) {
                     el.value = translation;
                 } else {
-                    el.textContent = translation;
+                    el.innerHTML = translation;
                 }
             }
         });

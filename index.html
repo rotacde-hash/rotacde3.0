@@ -44,41 +44,41 @@
     <link rel="icon" type="image/png" href="assets/logo.png">
     <!-- Google Consent Mode Default -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      
-      // Default Consent Mode v2 setup (denied by default)
-      if (localStorage.getItem('cookie_consent') === null) {
-        gtag('consent', 'default', {
-          'ad_storage': 'denied',
-          'ad_user_data': 'denied',
-          'ad_personalization': 'denied',
-          'analytics_storage': 'denied'
-        });
-      } else {
-        try {
-          const consent = JSON.parse(localStorage.getItem('cookie_consent'));
-          gtag('consent', 'default', {
-            'ad_storage': consent.ad_storage || 'denied',
-            'ad_user_data': consent.ad_user_data || 'denied',
-            'ad_personalization': consent.ad_personalization || 'denied',
-            'analytics_storage': consent.analytics_storage || 'denied'
-          });
-        } catch (e) {
-          gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied',
-            'analytics_storage': 'denied'
-          });
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+
+        // Default Consent Mode v2 setup (denied by default)
+        if (localStorage.getItem('cookie_consent') === null) {
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied'
+            });
+        } else {
+            try {
+                const consent = JSON.parse(localStorage.getItem('cookie_consent'));
+                gtag('consent', 'default', {
+                    'ad_storage': consent.ad_storage || 'denied',
+                    'ad_user_data': consent.ad_user_data || 'denied',
+                    'ad_personalization': consent.ad_personalization || 'denied',
+                    'analytics_storage': consent.analytics_storage || 'denied'
+                });
+            } catch (e) {
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+            }
         }
-      }
     </script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJPZYG2G9Z"></script>
     <script>
-      gtag('js', new Date());
-      gtag('config', 'G-MJPZYG2G9Z');
+        gtag('js', new Date());
+        gtag('config', 'G-MJPZYG2G9Z');
     </script>
     <!-- Cookie Consent Banner -->
     <script src="assets/cookie-consent.js" defer></script>
@@ -134,8 +134,10 @@
         <div class="container hero-container">
             <div class="hero-content">
                 <span class="badge" data-i18n="hero_badge">Sua conexão premium Brasil ⇄ Paraguai</span>
-                <h1 class="hero-title" data-i18n="hero_title">Transfer Privativo entre Foz do Iguaçu e Ciudad del Este</h1>
-                <p class="hero-subtitle" data-i18n="hero_subtitle">Compras, Aeroporto, Rodoviária e Airbnbs com conforto, segurança e atendimento
+                <h1 class="hero-title" data-i18n="hero_title">Transfer Privativo entre Foz do Iguaçu e Ciudad del Este
+                </h1>
+                <p class="hero-subtitle" data-i18n="hero_subtitle">Compras, Aeroporto, Rodoviária e Airbnbs com
+                    conforto, segurança e atendimento
                     personalizado.</p>
                 <div class="hero-buttons">
                     <a href="#cotacao" class="btn btn-primary" data-i18n="hero_btn_quote">Solicitar Orçamento</a>
@@ -159,13 +161,18 @@
                         <label for="origem" data-i18n="label_origem">Origem</label>
                         <div class="select-wrapper">
                             <select id="origem" name="origem" required>
-                                <option value="" disabled selected data-i18n="opt_select_origem">Selecione a origem</option>
+                                <option value="" disabled selected data-i18n="opt_select_origem">Selecione a origem
+                                </option>
                                 <option value="Foz Centro" data-i18n="opt_foz_centro">Foz do Iguaçu (Centro)</option>
-                                <option value="Hotel/Airbnb Foz" data-i18n="opt_hotel_foz">Hotel / Airbnb em Foz</option>
-                                <option value="Aeroporto IGU" data-i18n="opt_aeroporto_foz">Aeroporto de Foz (IGU)</option>
-                                <option value="Rodoviária de Foz" data-i18n="opt_rodoviaria_foz">Rodoviária de Foz do Iguaçu</option>
+                                <option value="Hotel/Airbnb Foz" data-i18n="opt_hotel_foz">Hotel / Airbnb em Foz
+                                </option>
+                                <option value="Aeroporto IGU" data-i18n="opt_aeroporto_foz">Aeroporto de Foz (IGU)
+                                </option>
+                                <option value="Rodoviária de Foz" data-i18n="opt_rodoviaria_foz">Rodoviária de Foz do
+                                    Iguaçu</option>
                                 <option value="Ciudad del Este" data-i18n="opt_cde">Ciudad del Este</option>
-                                <option value="Hotel/Airbnb CDE" data-i18n="opt_hotel_cde">Hotel / Airbnb em Ciudad del Este</option>
+                                <option value="Hotel/Airbnb CDE" data-i18n="opt_hotel_cde">Hotel / Airbnb em Ciudad del
+                                    Este</option>
                                 <option value="Assunção" data-i18n="opt_assuncao">Assunção (Asunción)</option>
                                 <option value="Santa Rita" data-i18n="opt_santa_rita">Santa Rita</option>
                                 <option value="Encarnação" data-i18n="opt_encarnacao">Encarnação (Encarnación)</option>
@@ -177,18 +184,25 @@
                         <label for="destino" data-i18n="label_destino">Destino</label>
                         <div class="select-wrapper">
                             <select id="destino" name="destino" required>
-                                <option value="" disabled selected data-i18n="opt_select_destino">Selecione o destino</option>
+                                <option value="" disabled selected data-i18n="opt_select_destino">Selecione o destino
+                                </option>
                                 <option value="Ciudad del Este" data-i18n="opt_cde">Ciudad del Este</option>
-                                <option value="Hotel/Airbnb CDE" data-i18n="opt_hotel_cde">Hotel / Airbnb em Ciudad del Este</option>
+                                <option value="Hotel/Airbnb CDE" data-i18n="opt_hotel_cde">Hotel / Airbnb em Ciudad del
+                                    Este</option>
                                 <option value="Foz Centro" data-i18n="opt_foz_centro">Foz do Iguaçu (Centro)</option>
-                                <option value="Hotel/Airbnb Foz" data-i18n="opt_hotel_foz">Hotel / Airbnb em Foz</option>
-                                <option value="Aeroporto IGU" data-i18n="opt_aeroporto_foz">Aeroporto de Foz (IGU)</option>
-                                <option value="Rodoviária de Foz" data-i18n="opt_rodoviaria_foz">Rodoviária de Foz do Iguaçu</option>
+                                <option value="Hotel/Airbnb Foz" data-i18n="opt_hotel_foz">Hotel / Airbnb em Foz
+                                </option>
+                                <option value="Aeroporto IGU" data-i18n="opt_aeroporto_foz">Aeroporto de Foz (IGU)
+                                </option>
+                                <option value="Rodoviária de Foz" data-i18n="opt_rodoviaria_foz">Rodoviária de Foz do
+                                    Iguaçu</option>
                                 <option value="Assunção" data-i18n="opt_assuncao">Assunção (Asunción)</option>
                                 <option value="Santa Rita" data-i18n="opt_santa_rita">Santa Rita</option>
                                 <option value="Encarnação" data-i18n="opt_encarnacao">Encarnação (Encarnación)</option>
-                                <option value="Compras 6h" data-i18n="opt_compras_6h">Compras Paraguai — até 6 horas</option>
-                                <option value="Compras 4h" data-i18n="opt_compras_4h">Compras Paraguai — até 4 horas</option>
+                                <option value="Compras 6h" data-i18n="opt_compras_6h">Compras Paraguai — até 6 horas
+                                </option>
+                                <option value="Compras 4h" data-i18n="opt_compras_4h">Compras Paraguai — até 4 horas
+                                </option>
                                 <option value="outro" data-i18n="opt_outro">Outro local (Personalizado)</option>
                             </select>
                         </div>
@@ -200,8 +214,7 @@
                         </div>
                         <div class="form-group">
                             <label for="passageiros" data-i18n="label_passageiros">Passageiros</label>
-                            <input type="number" id="passageiros" name="passageiros" min="1" max="7" value="2"
-                                required>
+                            <input type="number" id="passageiros" name="passageiros" min="1" max="7" value="2" required>
                         </div>
                         <div class="form-group">
                             <label for="malas" data-i18n="label_malas">Malas</label>
@@ -209,7 +222,8 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block btn-calc" id="btnCalculate" data-i18n="btn_calculate">
+                    <button type="submit" class="btn btn-primary btn-block btn-calc" id="btnCalculate"
+                        data-i18n="btn_calculate">
                         Calcular Valor
                     </button>
                 </form>
@@ -221,7 +235,8 @@
                         <span class="result-label" data-i18n="result_label">Valor Estimado:</span>
                         <span class="result-price" id="resultPrice">R$ 0,00</span>
                     </div>
-                    <p class="result-note" data-i18n="result_note">Valor aproximado. Consulte nossa equipe pelo WhatsApp para receber uma cotação personalizada.</p>
+                    <p class="result-note" data-i18n="result_note">Valor aproximado. Consulte nossa equipe pelo WhatsApp
+                        para receber uma cotação personalizada.</p>
                     <a href="#" id="btnContinueWhatsApp" target="_blank" rel="noopener noreferrer"
                         class="btn btn-whatsapp-submit btn-block">
                         <svg class="icon-whatsapp" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
@@ -241,7 +256,8 @@
             <div class="section-header">
                 <span class="section-tagline" data-i18n="services_tagline">Nossas Rotas & Serviços</span>
                 <h2 class="section-title" data-i18n="services_title">Soluções de Transporte Sob Medida</h2>
-                <p class="section-desc" data-i18n="services_desc">Conectando o Brasil e o Paraguai com a comodidade e agilidade que você merece.
+                <p class="section-desc" data-i18n="services_desc">Conectando o Brasil e o Paraguai com a comodidade e
+                    agilidade que você merece.
                 </p>
             </div>
 
@@ -258,7 +274,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv1_title">Compras em Ciudad del Este</h3>
-                    <p class="service-card-desc" data-i18n="srv1_desc">Vá fazer suas compras com tranquilidade. Levamos você aos principais
+                    <p class="service-card-desc" data-i18n="srv1_desc">Vá fazer suas compras com tranquilidade. Levamos
+                        você aos principais
                         shoppings e buscamos com segurança, sem preocupações com estacionamento ou trânsito da
                         fronteira.</p>
                 </div>
@@ -272,7 +289,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv2_title">Aeroporto IGU → Ciudad del Este</h3>
-                    <p class="service-card-desc" data-i18n="srv2_desc">Chegando pelo Aeroporto Internacional de Foz do Iguaçu? Nosso motorista
+                    <p class="service-card-desc" data-i18n="srv2_desc">Chegando pelo Aeroporto Internacional de Foz do
+                        Iguaçu? Nosso motorista
                         estará aguardando no desembarque para te levar direto ao seu destino no Paraguai.</p>
                 </div>
                 <!-- Card 3 -->
@@ -288,7 +306,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv3_title">Rodoviária de Foz → Ciudad del Este</h3>
-                    <p class="service-card-desc" data-i18n="srv3_desc">Transfer prático a partir do terminal rodoviário de Foz do Iguaçu.
+                    <p class="service-card-desc" data-i18n="srv3_desc">Transfer prático a partir do terminal rodoviário
+                        de Foz do Iguaçu.
                         Pontualidade garantida para que você não perca tempo na sua viagem.</p>
                 </div>
                 <!-- Card 4 -->
@@ -303,7 +322,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv4_title">Hotéis → Ciudad del Este</h3>
-                    <p class="service-card-desc" data-i18n="srv4_desc">Buscamos você na porta do seu hotel em Foz do Iguaçu e realizamos o
+                    <p class="service-card-desc" data-i18n="srv4_desc">Buscamos você na porta do seu hotel em Foz do
+                        Iguaçu e realizamos o
                         transfer de ida e volta para hotéis ou pontos comerciais de Ciudad del Este.</p>
                 </div>
                 <!-- Card 5 -->
@@ -318,7 +338,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv5_title">Transfer para Airbnbs</h3>
-                    <p class="service-card-desc" data-i18n="srv5_desc">Alugou uma casa ou apartamento por temporada? Oferecemos um serviço
+                    <p class="service-card-desc" data-i18n="srv5_desc">Alugou uma casa ou apartamento por temporada?
+                        Oferecemos um serviço
                         especializado de transfer para buscar você e seus acompanhantes com todas as bagagens, deixando
                         vocês na porta do seu Airbnb com tranquilidade.</p>
                 </div>
@@ -333,7 +354,8 @@
                         </svg>
                     </div>
                     <h3 class="service-card-title" data-i18n="srv6_title">Transporte Executivo</h3>
-                    <p class="service-card-desc" data-i18n="srv6_desc">Veículo confortável com ar condicionado e motorista discreto para
+                    <p class="service-card-desc" data-i18n="srv6_desc">Veículo confortável com ar condicionado e
+                        motorista discreto para
                         viagens de negócios, eventos corporativos ou turismo executivo.</p>
                 </div>
             </div>
@@ -346,32 +368,37 @@
             <div class="section-header">
                 <span class="section-tagline" data-i18n="how_tagline">Passo a Passo</span>
                 <h2 class="section-title" data-i18n="how_title">Como Funciona Nosso Serviço?</h2>
-                <p class="section-desc" data-i18n="how_desc">Um processo simples, rápido e transparente do início ao fim.</p>
+                <p class="section-desc" data-i18n="how_desc">Um processo simples, rápido e transparente do início ao
+                    fim.</p>
             </div>
 
             <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">01</div>
                     <h3 class="step-title" data-i18n="step1_title">Solicite seu orçamento</h3>
-                    <p class="step-desc" data-i18n="step1_desc">Utilize nosso simulador rápido ou nos chame diretamente para preencher os dados
+                    <p class="step-desc" data-i18n="step1_desc">Utilize nosso simulador rápido ou nos chame diretamente
+                        para preencher os dados
                         do seu trajeto.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">02</div>
                     <h3 class="step-title" data-i18n="step2_title">Receba o valor</h3>
-                    <p class="step-desc" data-i18n="step2_desc">Veja instantaneamente a estimativa de tarifa calculada de forma justa e
+                    <p class="step-desc" data-i18n="step2_desc">Veja instantaneamente a estimativa de tarifa calculada
+                        de forma justa e
                         transparente.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">03</div>
                     <h3 class="step-title" data-i18n="step3_title">Confirme via WhatsApp</h3>
-                    <p class="step-desc" data-i18n="step3_desc">Seus dados são enviados prontos. Um consultor confirma seu agendamento e tira
+                    <p class="step-desc" data-i18n="step3_desc">Seus dados são enviados prontos. Um consultor confirma
+                        seu agendamento e tira
                         dúvidas em segundos.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">04</div>
                     <h3 class="step-title" data-i18n="step4_title">Embarque com Segurança</h3>
-                    <p class="step-desc" data-i18n="step4_desc">O motorista local credenciado aguarda você no local e horário combinados, com
+                    <p class="step-desc" data-i18n="step4_desc">O motorista local credenciado aguarda você no local e
+                        horário combinados, com
                         total pontualidade.</p>
                 </div>
             </div>
@@ -384,7 +411,8 @@
             <div class="section-header">
                 <span class="section-tagline" data-i18n="diff_tagline">Por Que Nos Escolher?</span>
                 <h2 class="section-title" data-i18n="diff_title">Diferenciais que Garantem sua Paz de Espírito</h2>
-                <p class="section-desc" data-i18n="diff_desc">Focamos na máxima qualidade de atendimento e segurança na travessia da ponte
+                <p class="section-desc" data-i18n="diff_desc">Focamos na máxima qualidade de atendimento e segurança na
+                    travessia da ponte
                     internacional.</p>
             </div>
 
@@ -398,7 +426,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff1_title">Preço Fixo</h4>
-                        <p class="diff-desc" data-i18n="diff1_desc">Sem surpresas desagradáveis na hora de pagar. A tarifa combinada inclui
+                        <p class="diff-desc" data-i18n="diff1_desc">Sem surpresas desagradáveis na hora de pagar. A
+                            tarifa combinada inclui
                             todas as taxas de aduana e fronteira.</p>
                     </div>
                 </div>
@@ -410,7 +439,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff2_title">Atendimento Rápido</h4>
-                        <p class="diff-desc" data-i18n="diff2_desc">Suporte ágil 100% humanizado via WhatsApp para agendar, reagendar ou tirar
+                        <p class="diff-desc" data-i18n="diff2_desc">Suporte ágil 100% humanizado via WhatsApp para
+                            agendar, reagendar ou tirar
                             dúvidas a qualquer hora.</p>
                     </div>
                 </div>
@@ -423,7 +453,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff3_title">Porta-Malas Flexível</h4>
-                        <p class="diff-desc" data-i18n="diff3_desc">Contamos com bancos rebatíveis que liberam o espaço máximo para malas e
+                        <p class="diff-desc" data-i18n="diff3_desc">Contamos com bancos rebatíveis que liberam o espaço
+                            máximo para malas e
                             compras em viagens de até 5 passageiros. Para grupos de 6 pessoas, priorizamos o conforto
                             dos assentos a bordo.</p>
                     </div>
@@ -438,7 +469,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff4_title">Veículos Confortáveis</h4>
-                        <p class="diff-desc" data-i18n="diff4_desc">Frota moderna com ar-condicionado potente, assentos limpos e higienizados
+                        <p class="diff-desc" data-i18n="diff4_desc">Frota moderna com ar-condicionado potente, assentos
+                            limpos e higienizados
                             para uma viagem agradável.</p>
                     </div>
                 </div>
@@ -454,7 +486,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff5_title">Suporte Bilíngue</h4>
-                        <p class="diff-desc" data-i18n="diff5_desc">Atendimento completo em Português e Espanhol para facilitar a comunicação e
+                        <p class="diff-desc" data-i18n="diff5_desc">Atendimento completo em Português e Espanhol para
+                            facilitar a comunicação e
                             trâmites na aduana.</p>
                     </div>
                 </div>
@@ -467,7 +500,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff6_title">Motorista Local Experiente</h4>
-                        <p class="diff-desc" data-i18n="diff6_desc">Profissional que conhece perfeitamente as melhores rotas, horários de
+                        <p class="diff-desc" data-i18n="diff6_desc">Profissional que conhece perfeitamente as melhores
+                            rotas, horários de
                             trânsito e atalhos na região da Ponte da Amizade.</p>
                     </div>
                 </div>
@@ -482,7 +516,8 @@
                     </div>
                     <div>
                         <h4 class="diff-title" data-i18n="diff7_title">Segurança e Pontualidade</h4>
-                        <p class="diff-desc" data-i18n="diff7_desc">Compromisso rígido com seus horários de voo ou compromissos. Condução
+                        <p class="diff-desc" data-i18n="diff7_desc">Compromisso rígido com seus horários de voo ou
+                            compromissos. Condução
                             segura, defensiva e responsável.</p>
                     </div>
                 </div>
@@ -512,7 +547,8 @@
                     </button>
                 </div>
 
-                <p class="pricing-intro" data-i18n="pricing_intro">Tarifas estimadas para transfer privativo (veículo exclusivo). Os valores podem
+                <p class="pricing-intro" data-i18n="pricing_intro">Tarifas estimadas para transfer privativo (veículo
+                    exclusivo). Os valores podem
                     ser atualizados a qualquer momento.</p>
 
                 <div class="table-responsive">
@@ -532,7 +568,8 @@
                 </div>
 
                 <div class="pricing-footer-info">
-                    <p data-i18n="pricing_footer_text">💡 <strong>Precisa de outra rota?</strong> Solicite um orçamento personalizado no simulador do
+                    <p data-i18n="pricing_footer_text">💡 <strong>Precisa de outra rota?</strong> Solicite um orçamento
+                        personalizado no simulador do
                         topo ou converse conosco diretamente.</p>
                 </div>
             </div>
@@ -582,28 +619,30 @@
             <div class="section-header">
                 <span class="section-tagline" data-i18n="testimonials_tagline">Depoimentos</span>
                 <h2 class="section-title" data-i18n="testimonials_title">O Que Nossos Clientes Dizem</h2>
-                <p class="section-desc" data-i18n="testimonials_desc">A satisfação e segurança de quem já viajou conosco na fronteira.</p>
+                <p class="section-desc" data-i18n="testimonials_desc">A satisfação e segurança de quem já viajou conosco
+                    na fronteira.</p>
             </div>
 
             <div class="testimonials-grid">
                 <!-- Card 1 -->
                 <div class="testimonial-card">
                     <div class="testimonial-rating">★★★★★</div>
-                    <p class="testimonial-text" data-i18n="test1_text">"Excelente serviço! O motorista estava nos aguardando no aeroporto IGU
-                        com uma plaquinha. Carro super limpo, com ar-condicionado maravilhoso. Nos levou direto para o
-                        hotel em Ciudad del Este e deu ótimas dicas de compras. Recomendo muito!"</p>
+                    <p class="testimonial-text" data-i18n="test1_text">"Eu e meus amigos utilizamos o serviço e tivemos
+                        uma ótima experiência. Atendimento atencioso, pontualidade e muito conforto em todo o trajeto.
+                        Fez toda a diferença para aproveitarmos a viagem com mais tranquilidade. Recomendo!"</p>
                     <div class="testimonial-user">
                         <div class="avatar">MA</div>
                         <div>
-                            <h4 class="user-name">Marcos Andrade</h4>
-                            <span class="user-role" data-i18n="test1_user_role">Turista de São Paulo / SP</span>
+                            <h4 class="user-name">Nathalia Paim</h4>
+                            <span class="user-role" data-i18n="test1_user_role">Turista de Santa Catarina</span>
                         </div>
                     </div>
                 </div>
                 <!-- Card 2 -->
                 <div class="testimonial-card">
                     <div class="testimonial-rating">★★★★★</div>
-                    <p class="testimonial-text" data-i18n="test2_text">"Contratei para fazer minha mudança de Foz para o Paraguai, pois passei
+                    <p class="testimonial-text" data-i18n="test2_text">"Contratei para fazer minha mudança de Foz para o
+                        Paraguai, pois passei
                         em medicina. Fiquei preocupada com a quantidade de malas, mas o veículo era super amplo e o
                         motorista ajudou com tudo, inclusive nos trâmites da aduana. Muito atencioso!"</p>
                     <div class="testimonial-user">
@@ -617,7 +656,8 @@
                 <!-- Card 3 -->
                 <div class="testimonial-card">
                     <div class="testimonial-rating">★★★★★</div>
-                    <p class="testimonial-text" data-i18n="test3_text">"Utilizo sempre que vou fazer compras de eletrônicos no Paraguai. Deixo
+                    <p class="testimonial-text" data-i18n="test3_text">"Utilizo sempre que vou fazer compras de
+                        eletrônicos no Paraguai. Deixo
                         meu carro no hotel em Foz e vou com a Rota CDE. Preço justo, motorista educado e nos busca
                         exatamente no local combinado na hora do retorno. Agilidade nota 10."</p>
                     <div class="testimonial-user">
@@ -638,7 +678,8 @@
             <div class="section-header">
                 <span class="section-tagline" data-i18n="faq_tagline">Dúvidas Frequentes</span>
                 <h2 class="section-title" data-i18n="faq_title">Perguntas Frequentes</h2>
-                <p class="section-desc" data-i18n="faq_desc">Tire suas dúvidas rápidas sobre a travessia e nossos serviços de transfer.</p>
+                <p class="section-desc" data-i18n="faq_desc">Tire suas dúvidas rápidas sobre a travessia e nossos
+                    serviços de transfer.</p>
             </div>
 
             <div class="faq-container">
@@ -649,7 +690,8 @@
                         <span class="faq-icon">+</span>
                     </button>
                     <div class="faq-answer">
-                        <p data-i18n="faq1_a">Sim, com certeza! Nossos veículos possuem porta-malas amplos e adequados para acomodar malas
+                        <p data-i18n="faq1_a">Sim, com certeza! Nossos veículos possuem porta-malas amplos e adequados
+                            para acomodar malas
                             e caixas de compras de forma segura. Certifique-se apenas de preencher a quantidade de malas
                             no formulário de cotação para que enviemos o veículo ideal para você.</p>
                     </div>
@@ -661,7 +703,8 @@
                         <span class="faq-icon">+</span>
                     </button>
                     <div class="faq-answer">
-                        <p data-i18n="faq2_a">Sim! Temos o serviço de "Compras no Paraguai" com franquia de até 6 horas. O motorista leva
+                        <p data-i18n="faq2_a">Sim! Temos o serviço de "Compras no Paraguai" com franquia de até 6 horas.
+                            O motorista leva
                             você, aguarda ou combina um ponto de encontro e traz de volta com segurança para o seu hotel
                             em Foz do Iguaçu no mesmo dia.</p>
                     </div>
@@ -673,7 +716,8 @@
                         <span class="faq-icon">+</span>
                     </button>
                     <div class="faq-answer">
-                        <p data-i18n="faq3_a">Sim, aceitamos pagamento em Reais (BRL), Pix, Dólares (USD) e Guaranis (PYG). A cotação da
+                        <p data-i18n="faq3_a">Sim, aceitamos pagamento em Reais (BRL), Pix, Dólares (USD) e Guaranis
+                            (PYG). A cotação da
                             moeda estrangeira é feita no dia da viagem com base no câmbio local de turismo.</p>
                     </div>
                 </div>
@@ -684,7 +728,8 @@
                         <span class="faq-icon">+</span>
                     </button>
                     <div class="faq-answer">
-                        <p data-i18n="faq4_a">Sim, atendemos todos os dias da semana, incluindo sábados, domingos e feriados. Recomendamos
+                        <p data-i18n="faq4_a">Sim, atendemos todos os dias da semana, incluindo sábados, domingos e
+                            feriados. Recomendamos
                             apenas reservar com antecedência para garantir a disponibilidade de veículos nos dias de
                             maior movimento na fronteira.</p>
                     </div>
@@ -696,7 +741,8 @@
                         <span class="faq-icon">+</span>
                     </button>
                     <div class="faq-answer">
-                        <p data-i18n="faq5_a">Sim. Temos ampla experiência no transporte de estudantes e profissionais que estão se mudando
+                        <p data-i18n="faq5_a">Sim. Temos ampla experiência no transporte de estudantes e profissionais
+                            que estão se mudando
                             para o Paraguai (Ciudad del Este, Presidente Franco, Hernandarias). Ajudamos no deslocamento
                             de malas grandes e caixas e orientamos quanto aos documentos exigidos na aduana.</p>
                     </div>
@@ -709,7 +755,8 @@
     <section class="final-cta">
         <div class="container final-cta-container">
             <h2 class="cta-title" data-i18n="cta_title">Reserve seu transfer agora</h2>
-            <p class="cta-subtitle" data-i18n="cta_subtitle">Atendimento rápido, cotação sem compromisso e confirmação imediata pelo WhatsApp.
+            <p class="cta-subtitle" data-i18n="cta_subtitle">Atendimento rápido, cotação sem compromisso e confirmação
+                imediata pelo WhatsApp.
             </p>
             <a href="https://wa.me/595973953874?text=Olá! Gostaria de fazer uma reserva de transfer agora."
                 target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-large btn-cta-whatsapp">
@@ -735,9 +782,11 @@
                 </div>
                 <p class="footer-slogan" data-i18n="footer_slogan">"Sua conexão entre Foz e Ciudad del Este."</p>
                 <div style="margin-top: 16px;">
-                    <a href="https://www.instagram.com/rotacde" target="_blank" rel="noopener noreferrer" class="footer-social-link">
+                    <a href="https://www.instagram.com/rotacde" target="_blank" rel="noopener noreferrer"
+                        class="footer-social-link">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 8px;">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                         </svg>
                         <span>@rotacde</span>
                     </a>
@@ -755,14 +804,16 @@
                 <h4 class="footer-title" data-i18n="footer_contact_title">Contato e Reservas</h4>
                 <p data-i18n="footer_contact_loc">📍 Atendimento em Foz do Iguaçu / PR e Ciudad del Este / PY</p>
                 <p>💬 WhatsApp: +595 973 953874</p>
-                <p>📸 Instagram: <a href="https://www.instagram.com/rotacde" target="_blank" rel="noopener noreferrer" style="color: var(--primary-gold); font-weight: 500;">@rotacde</a></p>
+                <p>📸 Instagram: <a href="https://www.instagram.com/rotacde" target="_blank" rel="noopener noreferrer"
+                        style="color: var(--primary-gold); font-weight: 500;">@rotacde</a></p>
                 <p data-i18n="footer_contact_email">✉️ Email: contato@rotacdetransfer.com.br</p>
             </div>
         </div>
         <div class="footer-bottom">
             <div class="container footer-bottom-container">
                 <p data-i18n="footer_rights">&copy; 2026 Rota CDE Transfer. Todos os direitos reservados.</p>
-                <p data-i18n="footer_dev">Site feito por GDS Design</p>
+                <p data-i18n="footer_dev">Site feito por <a href="https://gdsdesign.site/" target="_blank">GDS
+                        Design</a></p>
             </div>
         </div>
     </footer>
