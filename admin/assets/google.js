@@ -29,12 +29,16 @@ async function initializeGapiClient() {
     const config = getGoogleConfig();
     if (!config.apiKey) return;
     
-    await gapi.client.init({
-        apiKey: config.apiKey,
-        discoveryDocs: [GOOGLE_DISCOVERY_DOC],
-    });
-    gapiInited = true;
-    checkGoogleAuthStatus();
+    try {
+        await gapi.client.init({
+            apiKey: config.apiKey,
+            discoveryDocs: [GOOGLE_DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        checkGoogleAuthStatus();
+    } catch (err) {
+        console.error("Erro ao inicializar GAPI Client:", err);
+    }
 }
 
 // Inicializa o GIS (Google Identity Services) para OAuth 2.0
@@ -42,24 +46,33 @@ function gisLoad() {
     const config = getGoogleConfig();
     if (!config.clientId) return;
 
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: config.clientId,
-        scope: GOOGLE_SCOPES,
-        callback: (resp) => {
-            if (resp.error !== undefined) {
-                console.error("Erro na autenticação do Google:", resp.error);
-                return;
-            }
-            // Salva o token de acesso no localStorage
-            localStorage.setItem('gcal_access_token', JSON.stringify({
-                token: resp.access_token,
-                expiresAt: Date.now() + (resp.expires_in * 1000)
-            }));
-            checkGoogleAuthStatus();
-        },
-    });
-    gisInited = true;
-    checkGoogleAuthStatus();
+    try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: config.clientId,
+            scope: GOOGLE_SCOPES,
+            callback: (resp) => {
+                if (resp.error !== undefined) {
+                    console.error("Erro na autenticação do Google:", resp);
+                    alert("Erro ao conectar Google Agenda:\n" + (resp.error_description || resp.error || JSON.stringify(resp)));
+                    return;
+                }
+                // Salva o token de acesso no localStorage
+                localStorage.setItem('gcal_access_token', JSON.stringify({
+                    token: resp.access_token,
+                    expiresAt: Date.now() + (resp.expires_in * 1000)
+                }));
+                if (typeof gapi !== 'undefined' && gapi.client) {
+                    gapi.client.setToken({ access_token: resp.access_token });
+                }
+                checkGoogleAuthStatus();
+                alert("✅ Google Agenda conectado com sucesso!");
+            },
+        });
+        gisInited = true;
+        checkGoogleAuthStatus();
+    } catch (err) {
+        console.error("Erro ao inicializar GIS Token Client:", err);
+    }
 }
 
 // Verifica se existe um token ativo e atualiza a interface
@@ -73,9 +86,13 @@ function checkGoogleAuthStatus() {
             const tokenData = JSON.parse(tokenDataStr);
             if (Date.now() < tokenData.expiresAt) {
                 // Token válido!
-                gapi.client.setToken({ access_token: tokenData.token });
-                if (btn) btn.innerText = "Google Agenda Conectado ✓";
-                if (btn) btn.classList.add('btn-success');
+                if (typeof gapi !== 'undefined' && gapi.client) {
+                    gapi.client.setToken({ access_token: tokenData.token });
+                }
+                if (btn) {
+                    btn.innerText = "Google Agenda Conectado ✓";
+                    btn.classList.add('btn-success');
+                }
                 if (statusText) statusText.innerText = "Status: Conectado e Sincronizando.";
                 return true;
             }
@@ -83,8 +100,10 @@ function checkGoogleAuthStatus() {
     }
 
     // Desconectado
-    if (btn) btn.innerText = "Conectar Google Agenda";
-    if (btn) btn.classList.remove('btn-success');
+    if (btn) {
+        btn.innerText = "Conectar Google Agenda";
+        btn.classList.remove('btn-success');
+    }
     if (statusText) statusText.innerText = "Status: Desconectado.";
     return false;
 }
@@ -93,16 +112,35 @@ function checkGoogleAuthStatus() {
 function handleGoogleAuthClick() {
     const config = getGoogleConfig();
     if (!config.clientId || !config.apiKey) {
-        alert("Por favor, configure o Client ID e a API Key do Google primeiro nas Configurações!");
+        alert("Por favor, preencha e salve o Client ID e a API Key do Google primeiro nas Configurações!");
         return;
     }
 
-    if (gapi.client.getToken() === null) {
-        // Solicita autorização
-        tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
-        // Solicita novamente para refresh ou re-consentimento
-        tokenClient.requestAccessToken({ prompt: '' });
+    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+        alert("Os serviços do Google ainda estão carregando. Por favor, aguarde alguns segundos e clique novamente.");
+        setupGoogleCalendarClient();
+        return;
+    }
+
+    if (!tokenClient) {
+        gisLoad();
+    }
+
+    if (!tokenClient) {
+        alert("Não foi possível inicializar o cliente Google OAuth. Verifique se o Client ID é válido.");
+        return;
+    }
+
+    try {
+        const hasToken = (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken && gapi.client.getToken() !== null);
+        if (!hasToken) {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+            tokenClient.requestAccessToken({ prompt: '' });
+        }
+    } catch (err) {
+        console.error("Erro ao abrir janela de login do Google:", err);
+        alert("Erro ao iniciar login do Google: " + err.message);
     }
 }
 
