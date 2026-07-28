@@ -276,6 +276,7 @@
                 <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
                 <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
                 <li class="menu-item active"><a href="parceiros.html">🤝 &nbsp; Parceiros</a></li>
+                <li class="menu-item"><a href="cupons.html">🏷️ &nbsp; Cupons</a></li>
                 <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
                 <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
             </ul>
@@ -387,6 +388,12 @@
                         <div>
                             <label for="partner-whatsapp" style="display:block; margin-bottom:6px; font-weight:600;">WhatsApp do Parceiro (Opcional)</label>
                             <input type="text" id="partner-whatsapp" class="form-control" placeholder="Ex: 5545999999999">
+                        </div>
+
+                        <div>
+                            <label for="partner-desconto" style="display:block; margin-bottom:6px; font-weight:600;">Desconto do Link (% OFF)</label>
+                            <input type="number" id="partner-desconto" class="form-control" value="10" min="0" max="100" placeholder="Ex: 10" required>
+                            <span style="font-size:11px; color: var(--text-muted);">Desconto concedido aos clientes deste link</span>
                         </div>
                         
                         <div class="form-group-full">
@@ -635,6 +642,7 @@
             document.getElementById('partner-nome').value = '';
             document.getElementById('partner-slug').value = '';
             document.getElementById('partner-whatsapp').value = '';
+            document.getElementById('partner-desconto').value = '10';
             document.getElementById('partner-obs').value = '';
             document.getElementById('modalPartnerTitle').innerText = '➕ Novo Parceiro';
             document.getElementById('partnerModal').style.display = 'flex';
@@ -652,6 +660,7 @@
             document.getElementById('partner-nome').value = partner.nome;
             document.getElementById('partner-slug').value = partner.slug;
             document.getElementById('partner-whatsapp').value = partner.whatsapp || '';
+            document.getElementById('partner-desconto').value = partner.desconto !== undefined ? partner.desconto : 10;
             document.getElementById('partner-obs').value = partner.obs || '';
             document.getElementById('modalPartnerTitle').innerText = '✏️ Editar Parceiro';
             document.getElementById('partnerModal').style.display = 'flex';
@@ -693,6 +702,7 @@
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
             const whatsapp = document.getElementById('partner-whatsapp').value.trim();
+            const desconto = parseFloat(document.getElementById('partner-desconto').value) || 10;
             const obs = document.getElementById('partner-obs').value.trim();
 
             if (!slug) {
@@ -714,6 +724,7 @@
                     partner.nome = nome;
                     partner.slug = slug;
                     partner.whatsapp = whatsapp;
+                    partner.desconto = desconto;
                     partner.obs = obs;
                     targetPartner = partner;
                 }
@@ -723,6 +734,7 @@
                     nome: nome,
                     slug: slug,
                     whatsapp: whatsapp,
+                    desconto: desconto,
                     obs: obs,
                     cliques: 0,
                     criadoEm: new Date().toISOString()
@@ -738,6 +750,7 @@
                         nome: targetPartner.nome,
                         slug: targetPartner.slug,
                         whatsapp: targetPartner.whatsapp,
+                        desconto: targetPartner.desconto,
                         obs: targetPartner.obs,
                         cliques: targetPartner.cliques,
                         criadoEm: targetPartner.criadoEm
