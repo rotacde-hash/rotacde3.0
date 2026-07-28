@@ -1161,9 +1161,86 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnAdminCancel) {
-        btnAdminCancel.addEventListener('click', () => {
-            adminModal.classList.remove('open');
+    // --- Calculadora Interativa & Registro de Parceiros (parceiros.html) ---
+    const sliderCorridas = document.getElementById('sliderCorridas');
+    const calcCorridasVal = document.getElementById('calcCorridasVal');
+    const calcResultadoGanhos = document.getElementById('calcResultadoGanhos');
+    const ESTIMATED_TICKET_PRICE = 150; // Valor médio ilustrativo por corrida (R$)
+    const COMMISSION_PERCENTAGE = 0.10; // 10% de comissão
+
+    if (sliderCorridas && calcCorridasVal && calcResultadoGanhos) {
+        function updateCommissionCalc() {
+            const count = parseInt(sliderCorridas.value) || 1;
+            calcCorridasVal.textContent = `${count} ${count === 1 ? 'corrida' : 'corridas'}`;
+            const totalEarned = Math.round(count * ESTIMATED_TICKET_PRICE * COMMISSION_PERCENTAGE);
+            calcResultadoGanhos.textContent = `R$ ${totalEarned.toFixed(2).replace('.', ',')}`;
+        }
+        sliderCorridas.addEventListener('input', updateCommissionCalc);
+        updateCommissionCalc();
+    }
+
+    const partnerRegisterForm = document.getElementById('partnerRegisterForm');
+    if (partnerRegisterForm) {
+        partnerRegisterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('pNome').value.trim();
+            const empresa = document.getElementById('pEmpresa').value.trim();
+            const whatsapp = document.getElementById('pWhatsapp').value.trim();
+            const email = document.getElementById('pEmail').value.trim();
+            const tipo = document.getElementById('pTipo').value;
+
+            // Gera o código do link automático a partir do nome/empresa
+            const slug = (empresa || nome)
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            const newPartner = {
+                id: 'p_' + Date.now(),
+                nome: `${nome} (${empresa})`,
+                slug: slug,
+                whatsapp: whatsapp,
+                email: email,
+                tipo: tipo,
+                desconto: 10,
+                cliques: 0,
+                obs: `Cadastro via site. Categoria: ${tipo}`,
+                criadoEm: new Date().toISOString()
+            };
+
+            // 1. Salvar no Supabase se disponível (ou LocalStorage)
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('parceiros').upsert(newPartner, { onConflict: 'id' });
+                } catch (err) {
+                    console.error("Erro ao cadastrar parceiro no Supabase:", err);
+                }
+            }
+
+            let partnersList = [];
+            try {
+                partnersList = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+            } catch(e) {}
+            partnersList.push(newPartner);
+            localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+
+            // 2. Abrir WhatsApp pré-formatado para confirmação imediata
+            const waMessage = `Olá Rota CDE Transfer! Gostaria de me cadastrar no *Programa de Parceiros*:
+*Nome:* ${nome}
+*Empresa/Atuação:* ${empresa}
+*WhatsApp:* ${whatsapp}
+*E-mail:* ${email}
+*Categoria:* ${tipo}
+*Link Solicitado:* rotacde.site/?ref=${slug}`;
+
+            const waUrl = `https://wa.me/${currentPhone}?text=${encodeURIComponent(waMessage)}`;
+
+            alert(`Obrigado pelo cadastro, ${nome}! Seu link exclusivo sugerido é: rotacde.site/?ref=${slug}.\n\nVocê será redirecionado para o WhatsApp para confirmar sua ativação e receber seu acesso.`);
+            window.open(waUrl, '_blank');
+            partnerRegisterForm.reset();
         });
     }
 
@@ -1171,3 +1248,4 @@ document.addEventListener('DOMContentLoaded', () => {
     initReferralSystem();
     translatePage(currentLang);
 });
+
