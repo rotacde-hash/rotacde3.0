@@ -53,6 +53,102 @@
     </script>
     <!-- Cookie Consent Banner -->
     <script src="../assets/cookie-consent.js" defer></script>
+    <style>
+        /* Modern Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            max-width: 650px;
+            width: 100%;
+            box-shadow: var(--shadow-premium);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+        
+        .close-modal-btn:hover {
+            color: var(--text-light);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        .btn-action-sm {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-edit-despesa {
+            background: rgba(54, 162, 235, 0.15);
+            color: #36a2eb;
+            border-color: rgba(54, 162, 235, 0.3);
+        }
+        .btn-edit-despesa:hover { background: #36a2eb; color: #fff; }
+
+        .btn-delete-despesa {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+        .btn-delete-despesa:hover { background: #e74c3c; color: #fff; }
+    </style>
 </head>
 <body>
 
@@ -97,11 +193,12 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">💰 Relatório Financeiro</h1>
-                    <p style="color: var(--text-muted); font-size: 14px;">Acompanhamento do faturamento por períodos, métodos de pagamento e rotas.</p>
+                    <p style="color: var(--text-muted); font-size: 14px;">Acompanhamento do faturamento, despesas operacionais e lucro líquido.</p>
                 </div>
-                <div class="page-actions">
+                <div class="page-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="openNewDespesaModal()" style="background: var(--accent-gold); color: #000; font-weight:700;">➕ Registrar Despesa</button>
                     <button class="btn btn-secondary" onclick="exportarCSV()">📥 Exportar CSV</button>
-                    <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir PDF</button>
+                    <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir PDF</button>
                 </div>
             </div>
             
@@ -131,21 +228,33 @@
             </div>
             
             <!-- Stats Grid -->
-            <div class="stats-grid">
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="stat-card">
-                    <span class="stat-title">Faturamento Recebido / Confirmado</span>
+                    <span class="stat-title">Faturamento Recebido</span>
                     <span class="stat-value" id="fin-recebido">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">⛽ Combustível</span>
+                    <span class="stat-value" id="fin-combustivel" style="color: #ff9800;">R$ 0,00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">🛠️ Outras Despesas</span>
+                    <span class="stat-value" id="fin-outras-despesas" style="color: #e74c3c;">R$ 0,00</span>
+                </div>
+                <div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.05);">
+                    <span class="stat-title" style="color: var(--primary-gold); font-weight:700;">📊 Lucro Líquido Real</span>
+                    <span class="stat-value" id="fin-lucro-liquido" style="color: var(--primary-gold); font-size: 24px; font-weight: 800;">R$ 0,00</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-title">Faturamento Pendente</span>
                     <span class="stat-value" id="fin-pendente" style="color: var(--color-waiting);">-</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-title">Faturamento Perdido (Cancelados)</span>
+                    <span class="stat-title">Faturamento Cancelado</span>
                     <span class="stat-value" id="fin-cancelado" style="color: var(--color-cancelled);">-</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-title">Total de Viagens Realizadas</span>
+                    <span class="stat-title">Total de Viagens</span>
                     <span class="stat-value" id="fin-viagens">-</span>
                 </div>
             </div>
@@ -167,9 +276,9 @@
                 </div>
             </div>
             
-            <!-- Tabela Detalhada -->
+            <!-- Tabela Detalhada de Viagens -->
             <div class="page-header" style="margin-top: 40px; margin-bottom: 20px;">
-                <h2 style="font-size: 18px; font-weight: 700;">📋 Transações Detalhadas</h2>
+                <h2 style="font-size: 18px; font-weight: 700;">📋 Faturamento por Viagens</h2>
             </div>
             
             <div class="admin-table-container">
@@ -189,7 +298,117 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Seção de Despesas Operacionais -->
+            <div class="page-header" style="margin-top: 40px; margin-bottom: 20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h2 style="font-size: 18px; font-weight: 700; color: #fff;">⛽ Despesas Operacionais (Combustível, Manutenção & Custos)</h2>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-top:2px;">Registros de gastos com veículo, pedágios, seguros e operação no período.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openNewDespesaModal()" style="font-size: 13px; padding: 8px 16px; background: var(--accent-gold); color: #000; font-weight:700;">➕ Nova Despesa</button>
+                </div>
+            </div>
+
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Categoria</th>
+                            <th>Descrição / Local</th>
+                            <th>Forma Pagam.</th>
+                            <th>Km / Litros</th>
+                            <th style="text-align: right;">Valor</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="despesas-table-body">
+                        <!-- Injetado dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
             
+        </div>
+    </div>
+
+    <!-- Modal Cadastro/Edição de Despesa -->
+    <div class="modal" id="despesaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalDespesaTitle">➕ Registrar Despesa Operacional</h3>
+                <button class="close-modal-btn" onclick="closeDespesaModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="despesa-form" onsubmit="handleDespesaSubmit(event)">
+                    <input type="hidden" id="despesa-id">
+                    <div class="form-grid">
+                        <div class="form-group form-group-full">
+                            <label for="despesa-tipo">Categoria da Despesa *</label>
+                            <select id="despesa-tipo" class="form-control" required onchange="toggleLitrosField()">
+                                <option value="⛽ Combustível">⛽ Combustível (Gasolina / Etanol / Diesel)</option>
+                                <option value="🛣️ Pedágio / Fronteira">🛣️ Pedágio / Taxas de Fronteira</option>
+                                <option value="🅿️ Estacionamento">🅿️ Estacionamento (Shoppings / Aeroporto / Rodoviária)</option>
+                                <option value="🔧 Manutenção & Mecânica">🔧 Manutenção & Mecânica (Troca de óleo, freios, etc.)</option>
+                                <option value="🛞 Pneus & Borracharia">🛞 Pneus & Borracharia (Pneus novos, alinhamento)</option>
+                                <option value="🧽 Lavagem & Higienização">🧽 Lavagem & Higienização</option>
+                                <option value="📜 Documentação & Seguros">📜 Documentação & Seguros (Carta Verde, IPVA, Seguro)</option>
+                                <option value="🤝 Comissão de Parceiro">🤝 Comissão de Parceiro (Indicação)</option>
+                                <option value="💳 Taxa de Cartão / Banco">💳 Taxa de Cartão / Tarifa Bancária</option>
+                                <option value="💧 Cortesia p/ Passageiro">💧 Cortesia p/ Passageiro (Águas, mimos)</option>
+                                <option value="📱 Telefonia & Roaming">📱 Telefonia & Roaming Internacional</option>
+                                <option value="🔄 Outras Despesas">🔄 Outras Despesas Operacionais</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="despesa-data">Data da Despesa *</label>
+                            <input type="date" id="despesa-data" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="despesa-valor">Valor (R$) *</label>
+                            <input type="number" step="0.01" min="0.01" id="despesa-valor" class="form-control" placeholder="0.00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="despesa-descricao">Descrição / Local *</label>
+                            <input type="text" id="despesa-descricao" class="form-control" placeholder="Ex: Posto Shell BR-277" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="despesa-pagamento">Forma de Pagamento *</label>
+                            <select id="despesa-pagamento" class="form-control" required>
+                                <option value="Pix">Pix</option>
+                                <option value="Dinheiro BRL">Dinheiro BRL</option>
+                                <option value="Cartão de Crédito/Débito">Cartão de Crédito/Débito</option>
+                                <option value="Dólar">Dólar</option>
+                                <option value="Guarani">Guarani</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="despesa-km">Km Atual do Veículo (Opcional)</label>
+                            <input type="number" id="despesa-km" class="form-control" placeholder="Ex: 125400">
+                        </div>
+
+                        <div class="form-group" id="group-despesa-litros">
+                            <label for="despesa-litros">Litros Abastecidos (Opcional)</label>
+                            <input type="number" step="0.01" id="despesa-litros" class="form-control" placeholder="Ex: 45.5">
+                        </div>
+
+                        <div class="form-group form-group-full">
+                            <label for="despesa-obs">Observações (Opcional)</label>
+                            <textarea id="despesa-obs" class="form-control" rows="2" placeholder="Anotações adicionais..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeDespesaModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Despesa</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -209,6 +428,8 @@
     <script>
         let viagensGlobal = [];
         let viagensFiltradas = [];
+        let despesasGlobal = [];
+        let despesasFiltradas = [];
         
         document.addEventListener('DOMContentLoaded', () => {
             // Hamburger Menu Mobile
@@ -228,7 +449,64 @@
             // Carregar Dados
             loadFinanceData();
         });
-        
+
+        // --- Supabase / Storage CRUD para Despesas ---
+        async function dbGetDespesas() {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('despesas').select('*');
+                    if (error) {
+                        console.error("Erro ao buscar despesas do Supabase:", error);
+                    } else if (data) {
+                        localStorage.setItem('rota_despesas', JSON.stringify(data));
+                        return data;
+                    }
+                } catch (e) {
+                    console.warn("Falha ao buscar despesas no Supabase, usando LocalStorage:", e);
+                }
+            }
+            return JSON.parse(localStorage.getItem('rota_despesas') || '[]');
+        }
+
+        async function dbSaveDespesa(despesa) {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('despesas').upsert(despesa, { onConflict: 'id' });
+                    if (error) {
+                        console.error("Erro ao salvar despesa no Supabase:", error);
+                    }
+                } catch (e) {
+                    console.error("Erro de rede ao salvar despesa no Supabase:", e);
+                }
+            }
+
+            let despesas = JSON.parse(localStorage.getItem('rota_despesas') || '[]');
+            const idx = despesas.findIndex(d => d.id === despesa.id);
+            if (idx !== -1) {
+                despesas[idx] = despesa;
+            } else {
+                despesas.push(despesa);
+            }
+            localStorage.setItem('rota_despesas', JSON.stringify(despesas));
+        }
+
+        async function dbDeleteDespesa(id) {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('despesas').delete().eq('id', id);
+                    if (error) {
+                        console.error("Erro ao excluir despesa no Supabase:", error);
+                    }
+                } catch (e) {
+                    console.error("Erro de conexão ao excluir despesa no Supabase:", e);
+                }
+            }
+
+            let despesas = JSON.parse(localStorage.getItem('rota_despesas') || '[]');
+            despesas = despesas.filter(d => d.id !== id);
+            localStorage.setItem('rota_despesas', JSON.stringify(despesas));
+        }
+
         function handlePeriodChange() {
             const period = document.getElementById('fin-period').value;
             const startGroup = document.getElementById('fin-date-start-group');
@@ -247,6 +525,7 @@
         async function loadFinanceData() {
             try {
                 viagensGlobal = await dbGetViagens();
+                despesasGlobal = await dbGetDespesas();
                 processFinanceFilters();
             } catch (e) {
                 console.error("Erro ao processar dados financeiros:", e);
@@ -289,9 +568,25 @@
                 }
                 return true;
             });
+
+            despesasFiltradas = despesasGlobal.filter(d => {
+                if (period === 'semana' && (d.data < inicioSemana || d.data > hojeStr)) return false;
+                if (period === 'semana_passada' && (d.data < inicioSemanaPassada || d.data > fimSemanaPassada)) return false;
+                if (period === 'mes' && !d.data.startsWith(mesAtual)) return false;
+                if (period === 'mes_passado' && !d.data.startsWith(mesPassado)) return false;
+                if (period === 'personalizado') {
+                    if (startDate && d.data < startDate) return false;
+                    if (endDate && d.data > endDate) return false;
+                }
+                return true;
+            });
+
+            // Ordena despesas por data mais recente
+            despesasFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
             
             calculateStatsAndBreakdowns();
             renderTable();
+            renderDespesasTable();
         }
         
         function calculateStatsAndBreakdowns() {
@@ -327,9 +622,36 @@
                     cancelado += val;
                 }
             });
+
+            // Cálculos de Despesas
+            let gastoCombustivel = 0;
+            let outrasDespesas = 0;
+
+            despesasFiltradas.forEach(d => {
+                const val = parseFloat(d.valor) || 0;
+                if (d.tipo && d.tipo.includes('Combustível')) {
+                    gastoCombustivel += val;
+                } else {
+                    outrasDespesas += val;
+                }
+            });
+
+            const totalDespesas = gastoCombustivel + outrasDespesas;
+            const lucroLiquido = recebido - totalDespesas;
             
             // Render Stats
             document.getElementById('fin-recebido').innerText = `R$ ${recebido.toFixed(2)}`;
+            document.getElementById('fin-combustivel').innerText = `R$ ${gastoCombustivel.toFixed(2)}`;
+            document.getElementById('fin-outras-despesas').innerText = `R$ ${outrasDespesas.toFixed(2)}`;
+            
+            const elLucro = document.getElementById('fin-lucro-liquido');
+            elLucro.innerText = `R$ ${lucroLiquido.toFixed(2)}`;
+            if (lucroLiquido < 0) {
+                elLucro.style.color = '#f44336';
+            } else {
+                elLucro.style.color = 'var(--primary-gold)';
+            }
+
             document.getElementById('fin-pendente').innerText = `R$ ${pendente.toFixed(2)}`;
             document.getElementById('fin-cancelado').innerText = `R$ ${cancelado.toFixed(2)}`;
             document.getElementById('fin-viagens').innerText = totalViagens;
@@ -383,7 +705,7 @@
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
-                            Nenhuma transação encontrada no período.
+                            Nenhuma transação de viagem encontrada no período.
                         </td>
                     </tr>
                 `;
@@ -408,26 +730,168 @@
                 tbody.appendChild(tr);
             });
         }
+
+        function renderDespesasTable() {
+            const tbody = document.getElementById('despesas-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (despesasFiltradas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Nenhuma despesa operacional registrada no período. Clique em <b>"➕ Registrar Despesa"</b> para adicionar!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            despesasFiltradas.forEach(d => {
+                const tr = document.createElement('tr');
+                const kmInfo = d.quilometragem ? `${d.quilometragem} km` : '-';
+                const litrosInfo = d.litros ? `${d.litros} L` : '';
+                const kmLitros = [kmInfo, litrosInfo].filter(x => x && x !== '-').join(' / ') || '-';
+
+                tr.innerHTML = `
+                    <td>${formatDate(d.data)}</td>
+                    <td style="font-weight: 600;">${d.tipo}</td>
+                    <td>
+                        <div>${d.descricao}</div>
+                        ${d.observacao ? `<div style="font-size: 11px; color: var(--text-muted);">📝 ${d.observacao}</div>` : ''}
+                    </td>
+                    <td>${d.forma_pagamento || d.formaPagamento || 'Pix'}</td>
+                    <td><span style="font-size: 12px; color: var(--text-muted);">${kmLitros}</span></td>
+                    <td style="text-align: right; font-weight: 700; color: #f44336;">R$ ${parseFloat(d.valor).toFixed(2)}</td>
+                    <td style="text-align: center;">
+                        <div style="display:flex; gap:6px; justify-content:center;">
+                            <button class="btn-action-sm btn-edit-despesa" onclick="editDespesa('${d.id}')" title="Editar despesa">✏️</button>
+                            <button class="btn-action-sm btn-delete-despesa" onclick="deleteDespesa('${d.id}')" title="Excluir despesa">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Modais e Handlers de Despesas ---
+        function toggleLitrosField() {
+            const tipo = document.getElementById('despesa-tipo').value;
+            const groupLitros = document.getElementById('group-despesa-litros');
+            if (tipo.includes('Combustível')) {
+                groupLitros.style.display = 'block';
+            } else {
+                groupLitros.style.display = 'none';
+            }
+        }
+
+        function openNewDespesaModal() {
+            document.getElementById('despesa-id').value = '';
+            document.getElementById('despesa-tipo').value = '⛽ Combustível';
+            document.getElementById('despesa-data').value = new Date().toISOString().split('T')[0];
+            document.getElementById('despesa-valor').value = '';
+            document.getElementById('despesa-descricao').value = '';
+            document.getElementById('despesa-pagamento').value = 'Pix';
+            document.getElementById('despesa-km').value = '';
+            document.getElementById('despesa-litros').value = '';
+            document.getElementById('despesa-obs').value = '';
+            document.getElementById('modalDespesaTitle').innerText = '➕ Registrar Despesa Operacional';
+            toggleLitrosField();
+            document.getElementById('despesaModal').style.display = 'flex';
+        }
+
+        function closeDespesaModal() {
+            document.getElementById('despesaModal').style.display = 'none';
+        }
+
+        function editDespesa(id) {
+            const despesa = despesasGlobal.find(d => d.id === id);
+            if (!despesa) return;
+
+            document.getElementById('despesa-id').value = despesa.id;
+            document.getElementById('despesa-tipo').value = despesa.tipo;
+            document.getElementById('despesa-data').value = despesa.data;
+            document.getElementById('despesa-valor').value = despesa.valor;
+            document.getElementById('despesa-descricao').value = despesa.descricao;
+            document.getElementById('despesa-pagamento').value = despesa.forma_pagamento || despesa.formaPagamento || 'Pix';
+            document.getElementById('despesa-km').value = despesa.quilometragem || '';
+            document.getElementById('despesa-litros').value = despesa.litros || '';
+            document.getElementById('despesa-obs').value = despesa.observacao || '';
+            document.getElementById('modalDespesaTitle').innerText = '✏️ Editar Despesa';
+            toggleLitrosField();
+            document.getElementById('despesaModal').style.display = 'flex';
+        }
+
+        async function deleteDespesa(id) {
+            const despesa = despesasGlobal.find(d => d.id === id);
+            if (!despesa) return;
+
+            if (confirm(`Deseja realmente excluir a despesa "${despesa.descricao}" no valor de R$ ${parseFloat(despesa.valor).toFixed(2)}?`)) {
+                await dbDeleteDespesa(id);
+                await loadFinanceData();
+            }
+        }
+
+        async function handleDespesaSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('despesa-id').value || ('d_' + Date.now());
+            const tipo = document.getElementById('despesa-tipo').value;
+            const data = document.getElementById('despesa-data').value;
+            const valor = parseFloat(document.getElementById('despesa-valor').value) || 0;
+            const descricao = document.getElementById('despesa-descricao').value.trim();
+            const forma_pagamento = document.getElementById('despesa-pagamento').value;
+            const quilometragem = parseFloat(document.getElementById('despesa-km').value) || null;
+            const litros = parseFloat(document.getElementById('despesa-litros').value) || null;
+            const observacao = document.getElementById('despesa-obs').value.trim();
+
+            const despesaObj = {
+                id,
+                tipo,
+                data,
+                valor,
+                descricao,
+                forma_pagamento,
+                quilometragem,
+                litros,
+                observacao,
+                criadoEm: new Date().toISOString()
+            };
+
+            await dbSaveDespesa(despesaObj);
+            closeDespesaModal();
+            await loadFinanceData();
+        }
         
         // --- Exportar para CSV ---
         function exportarCSV() {
-            if (viagensFiltradas.length === 0) {
-                alert("Sem transações para exportar!");
+            if (viagensFiltradas.length === 0 && despesasFiltradas.length === 0) {
+                alert("Sem dados para exportar!");
                 return;
             }
             
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Adiciona BOM para português (acentos)
-            csvContent += "Cliente,Data,Rota,Metodo Pagamento,Status,Valor\n";
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
             
+            // Seção Viagens
+            csvContent += "=== FATURAMENTO POR VIAGENS ===\n";
+            csvContent += "Cliente,Data,Rota,Metodo Pagamento,Status,Valor\n";
             viagensFiltradas.forEach(v => {
                 const line = `"${v.nomeCliente}","${v.data}","${v.tipoServico}","${v.formaPagamento}","${v.status}",${v.valor}`;
+                csvContent += line + "\n";
+            });
+
+            // Seção Despesas
+            csvContent += "\n=== DESPESAS OPERACIONAIS ===\n";
+            csvContent += "Data,Categoria,Descricao,Metodo Pagamento,Km,Litros,Valor\n";
+            despesasFiltradas.forEach(d => {
+                const line = `"${d.data}","${d.tipo}","${d.descricao}","${d.forma_pagamento || d.formaPagamento || 'Pix'}","${d.quilometragem || ''}","${d.litros || ''}",${d.valor}`;
                 csvContent += line + "\n";
             });
             
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `relatorio_financeiro_${new Date().toISOString().substring(0,10)}.csv`);
+            link.setAttribute("download", `relatorio_financeiro_completo_${new Date().toISOString().substring(0,10)}.csv`);
             document.body.appendChild(link);
             
             link.click();
