@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Gestão de Cupons - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+    
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            max-width: 550px;
+            width: 100%;
+            box-shadow: var(--shadow-premium);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .close-modal-btn:hover {
+            color: var(--text-light);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        .code-badge {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary-gold);
+            border: 1px dashed rgba(212, 175, 55, 0.4);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .btn-action-sm {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .btn-edit-sm {
+            background: rgba(54, 162, 235, 0.15);
+            color: #36a2eb;
+            border-color: rgba(54, 162, 235, 0.3);
+        }
+
+        .btn-delete-sm {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="parceiros.html">🤝 &nbsp; Parceiros</a></li>
+                <li class="menu-item active"><a href="cupons.html">🏷️ &nbsp; Cupons</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🏷️ Cupons de Desconto</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Crie e gerencie cupons promocionais para o seu site.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="openNewCouponModal()" style="background: var(--accent-gold); color: #000; font-weight:700;">➕ Criar Novo Cupom</button>
+                </div>
+            </div>
+            
+            <!-- Table Cupons -->
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Código do Cupom</th>
+                            <th>Tipo de Desconto</th>
+                            <th>Valor do Desconto</th>
+                            <th>Status</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuponsTableBody">
+                        <!-- Injetado dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Cadastro/Edição de Cupom -->
+    <div class="modal" id="couponModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalCouponTitle">➕ Criar Novo Cupom</h3>
+                <button class="close-modal-btn" onclick="closeCouponModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="couponForm" onsubmit="handleCouponSubmit(event)">
+                    <input type="hidden" id="coupon-id">
+                    
+                    <div class="form-grid">
+                        <div class="form-group-full">
+                            <label for="coupon-codigo" style="display:block; margin-bottom:6px; font-weight:600;">Código do Cupom *</label>
+                            <input type="text" id="coupon-codigo" class="form-control" placeholder="Ex: ROTA10, FOZVIP, SUMMERNIGHT" required style="text-transform: uppercase; font-family: monospace;">
+                        </div>
+                        
+                        <div>
+                            <label for="coupon-tipo" style="display:block; margin-bottom:6px; font-weight:600;">Tipo *</label>
+                            <select id="coupon-tipo" class="form-control" required onchange="updateValorPlaceholder()">
+                                <option value="porcentagem">Porcentagem (%)</option>
+                                <option value="fixo">Valor Fixo (R$)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="coupon-valor" style="display:block; margin-bottom:6px; font-weight:600;">Valor do Desconto *</label>
+                            <input type="number" step="0.01" min="0.01" id="coupon-valor" class="form-control" placeholder="Ex: 10" required>
+                        </div>
+
+                        <div class="form-group-full">
+                            <label for="coupon-ativo" style="display:block; margin-bottom:6px; font-weight:600;">Status</label>
+                            <select id="coupon-ativo" class="form-control">
+                                <option value="true">Ativo</option>
+                                <option value="false">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCouponModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Cupom</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+    <script src="assets/admin.js"></script>
+
+    <script>
+        let cuponsList = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+            loadCuponsData();
+        });
+
+        async function loadCuponsData() {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('cupons').select('*');
+                    if (error) console.error("Erro ao buscar cupons do Supabase:", error);
+                    else if (data) {
+                        cuponsList = data;
+                        localStorage.setItem('rota_cupons', JSON.stringify(cuponsList));
+                        renderCuponsTable();
+                        return;
+                    }
+                } catch(e) {}
+            }
+
+            cuponsList = JSON.parse(localStorage.getItem('rota_cupons') || '[]');
+            // Se vazio, insere cupons padrão inicial
+            if (cuponsList.length === 0) {
+                cuponsList = [
+                    { id: 'c_1', codigo: 'ROTA10', tipo: 'porcentagem', valor: 10, ativo: true },
+                    { id: 'c_2', codigo: 'FOZVIP', tipo: 'fixo', valor: 20, ativo: true },
+                    { id: 'c_3', codigo: 'BEMVINDO', tipo: 'porcentagem', valor: 10, ativo: true }
+                ];
+                localStorage.setItem('rota_cupons', JSON.stringify(cuponsList));
+            }
+            renderCuponsTable();
+        }
+
+        function renderCuponsTable() {
+            const tbody = document.getElementById('cuponsTableBody');
+            tbody.innerHTML = '';
+
+            if (cuponsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Nenhum cupom cadastrado. Clique em <b>"➕ Criar Novo Cupom"</b> para adicionar!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            cuponsList.forEach(c => {
+                const tr = document.createElement('tr');
+                const tipoText = c.tipo === 'fixo' ? 'Valor Fixo (R$)' : 'Porcentagem (%)';
+                const valorText = c.tipo === 'fixo' ? `R$ ${parseFloat(c.valor).toFixed(2)} OFF` : `${c.valor}% OFF`;
+                const statusBadge = c.ativo !== false ? 
+                    `<span class="badge badge-confirmed">Ativo</span>` : 
+                    `<span class="badge badge-cancelled">Inativo</span>`;
+
+                tr.innerHTML = `
+                    <td><span class="code-badge">${c.codigo}</span></td>
+                    <td>${tipoText}</td>
+                    <td style="font-weight: 700; color: #4caf50;">${valorText}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align: center;">
+                        <div style="display:flex; gap:6px; justify-content:center;">
+                            <button class="btn-action-sm btn-edit-sm" onclick="editCoupon('${c.id}')">✏️ Editar</button>
+                            <button class="btn-action-sm btn-delete-sm" onclick="deleteCoupon('${c.id}')">🗑️ Excluir</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateValorPlaceholder() {
+            const tipo = document.getElementById('coupon-tipo').value;
+            const inputValor = document.getElementById('coupon-valor');
+            if (tipo === 'fixo') {
+                inputValor.placeholder = "Ex: 20 (R$ 20 de desconto)";
+            } else {
+                inputValor.placeholder = "Ex: 10 (10% de desconto)";
+            }
+        }
+
+        function openNewCouponModal() {
+            document.getElementById('coupon-id').value = '';
+            document.getElementById('coupon-codigo').value = '';
+            document.getElementById('coupon-tipo').value = 'porcentagem';
+            document.getElementById('coupon-valor').value = '';
+            document.getElementById('coupon-ativo').value = 'true';
+            document.getElementById('modalCouponTitle').innerText = '➕ Criar Novo Cupom';
+            updateValorPlaceholder();
+            document.getElementById('couponModal').style.display = 'flex';
+        }
+
+        function closeCouponModal() {
+            document.getElementById('couponModal').style.display = 'none';
+        }
+
+        function editCoupon(id) {
+            const c = cuponsList.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('coupon-id').value = c.id;
+            document.getElementById('coupon-codigo').value = c.codigo;
+            document.getElementById('coupon-tipo').value = c.tipo || 'porcentagem';
+            document.getElementById('coupon-valor').value = c.valor;
+            document.getElementById('coupon-ativo').value = c.ativo !== false ? 'true' : 'false';
+            document.getElementById('modalCouponTitle').innerText = '✏️ Editar Cupom';
+            updateValorPlaceholder();
+            document.getElementById('couponModal').style.display = 'flex';
+        }
+
+        async function deleteCoupon(id) {
+            const c = cuponsList.find(item => item.id === id);
+            if (!c) return;
+
+            if (confirm(`Excluir o cupom "${c.codigo}"?`)) {
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        await supabaseClient.from('cupons').delete().eq('id', id);
+                    } catch(e) {}
+                }
+                cuponsList = cuponsList.filter(item => item.id !== id);
+                localStorage.setItem('rota_cupons', JSON.stringify(cuponsList));
+                renderCuponsTable();
+            }
+        }
+
+        async function handleCouponSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('coupon-id').value || ('c_' + Date.now());
+            const codigo = document.getElementById('coupon-codigo').value.trim().toUpperCase();
+            const tipo = document.getElementById('coupon-tipo').value;
+            const valor = parseFloat(document.getElementById('coupon-valor').value) || 0;
+            const ativo = document.getElementById('coupon-ativo').value === 'true';
+
+            const couponObj = { id, codigo, tipo, valor, ativo, criadoEm: new Date().toISOString() };
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('cupons').upsert(couponObj, { onConflict: 'id' });
+                } catch(e) {}
+            }
+
+            const idx = cuponsList.findIndex(item => item.id === id);
+            if (idx !== -1) cuponsList[idx] = couponObj;
+            else cuponsList.push(couponObj);
+
+            localStorage.setItem('rota_cupons', JSON.stringify(cuponsList));
+            closeCouponModal();
+            renderCuponsTable();
+        }
+    </script>
+</body>
+</html>

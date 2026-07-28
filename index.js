@@ -516,10 +516,106 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL' }).format(value);
     }
 
+    // --- Coupon & Referral System State ---
+    let activeAppliedCoupon = null;
+
+    function lookupCoupon(codeStr) {
+        if (!codeStr) return null;
+        const clean = codeStr.trim().toUpperCase();
+
+        // 1. Check custom coupons stored in localStorage / Supabase
+        try {
+            const storedCupons = localStorage.getItem('rota_cupons');
+            if (storedCupons) {
+                const list = JSON.parse(storedCupons);
+                const found = list.find(c => c.codigo && c.codigo.toUpperCase() === clean && (c.ativo === undefined || c.ativo === true));
+                if (found) {
+                    return {
+                        codigo: found.codigo.toUpperCase(),
+                        tipo: found.tipo || 'porcentagem',
+                        valor: parseFloat(found.valor) || 0,
+                        descricao: found.tipo === 'fixo' ? `R$ ${parseFloat(found.valor).toFixed(2)} OFF` : `${found.valor}% OFF`
+                    };
+                }
+            }
+        } catch(e) {}
+
+        // 2. Check partner list for partner-linked discount
+        try {
+            const storedPartners = localStorage.getItem('rota_parceiros');
+            if (storedPartners) {
+                const list = JSON.parse(storedPartners);
+                const found = list.find(p => p.slug && (p.slug.toUpperCase() === clean || (p.cupom && p.cupom.toUpperCase() === clean)));
+                if (found) {
+                    const descVal = parseFloat(found.desconto) || 10;
+                    return {
+                        codigo: found.slug.toUpperCase(),
+                        tipo: 'porcentagem',
+                        valor: descVal,
+                        parceiroNome: found.nome,
+                        parceiroSlug: found.slug,
+                        descricao: `${descVal}% OFF (Indicação ${found.nome})`
+                    };
+                }
+            }
+        } catch(e) {}
+
+        // 3. Default built-in promotional coupons
+        const builtIn = {
+            'ROTA10': { codigo: 'ROTA10', tipo: 'porcentagem', valor: 10, descricao: '10% OFF' },
+            'ROTA5': { codigo: 'ROTA5', tipo: 'porcentagem', valor: 5, descricao: '5% OFF' },
+            'BEMVINDO': { codigo: 'BEMVINDO', tipo: 'porcentagem', valor: 10, descricao: '10% OFF' },
+            'FOZVIP': { codigo: 'FOZVIP', tipo: 'fixo', valor: 20, descricao: 'R$ 20,00 OFF' },
+            'DESCONTO10': { codigo: 'DESCONTO10', tipo: 'porcentagem', valor: 10, descricao: '10% OFF' }
+        };
+
+        if (builtIn[clean]) return builtIn[clean];
+
+        return null;
+    }
+
+    function applyCouponAction(code, isAuto = false) {
+        const input = document.getElementById('cupomInput');
+        const msgEl = document.getElementById('couponMessage');
+        
+        if (!code || !code.trim()) {
+            activeAppliedCoupon = null;
+            if (msgEl) msgEl.style.display = 'none';
+            return false;
+        }
+
+        const coupon = lookupCoupon(code);
+        if (coupon) {
+            activeAppliedCoupon = coupon;
+            if (input) input.value = coupon.codigo;
+            if (msgEl) {
+                msgEl.style.display = 'block';
+                msgEl.style.color = '#4caf50';
+                msgEl.innerText = `✅ Cupom "${coupon.codigo}" aplicado: ${coupon.descricao}!`;
+            }
+            // Recalcula cotação se o formulário já tiver sido submetido
+            if (quoteResult && quoteResult.style.display === 'block') {
+                quoteForm.dispatchEvent(new Event('submit'));
+            }
+            return true;
+        } else {
+            if (!isAuto) {
+                activeAppliedCoupon = null;
+                if (msgEl) {
+                    msgEl.style.display = 'block';
+                    msgEl.style.color = '#f44336';
+                    msgEl.innerText = `❌ Cupom "${code.toUpperCase()}" é inválido ou expirou.`;
+                }
+            }
+            return false;
+        }
+    }
+
     // --- Referral & Partner System Logic ---
     function initReferralSystem() {
         const urlParams = new URLSearchParams(window.location.search);
         const refCode = urlParams.get('ref') || urlParams.get('parceiro') || urlParams.get('p');
+        const customCouponParam = urlParams.get('cupom') || urlParams.get('c');
         
         let partnersList = [];
         try {
@@ -547,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: 'p_' + Date.now(),
                     nome: formattedName,
                     slug: slug,
+                    desconto: 10,
                     cliques: 0,
                     criadoEm: new Date().toISOString()
                 };
@@ -560,12 +657,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
             }
 
-            renderPartnerWelcomeBanner(partner.nome);
+            const discountPct = partner.desconto || 10;
+            applyCouponAction(partner.slug, true);
+            renderPartnerWelcomeBanner(partner.nome, discountPct);
+        } else if (customCouponParam) {
+            applyCouponAction(customCouponParam, false);
         } else {
             const activePartner = getActivePartnerInfo();
             if (activePartner && activePartner.nome) {
-                renderPartnerWelcomeBanner(activePartner.nome);
+                const discountPct = activePartner.desconto || 10;
+                applyCouponAction(activePartner.slug, true);
+                renderPartnerWelcomeBanner(activePartner.nome, discountPct);
             }
+        }
+
+        // Setup Apply Coupon Button Click Event
+        const btnApply = document.getElementById('btnApplyCoupon');
+        const cupomInput = document.getElementById('cupomInput');
+        if (btnApply && cupomInput) {
+            btnApply.addEventListener('click', () => {
+                applyCouponAction(cupomInput.value);
+            });
+            cupomInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyCouponAction(cupomInput.value);
+                }
+            });
         }
     }
 
@@ -584,7 +702,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
             slug: storedRef,
-            nome: storedRef.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+            nome: storedRef.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+            desconto: 10
         };
     }
 
@@ -611,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderPartnerWelcomeBanner(partnerName) {
+    function renderPartnerWelcomeBanner(partnerName, discountPct = 10) {
         if (document.getElementById('partnerWelcomeBanner')) return;
 
         const banner = document.createElement('div');
@@ -619,8 +738,8 @@ document.addEventListener('DOMContentLoaded', () => {
         banner.className = 'partner-welcome-banner';
         banner.innerHTML = `
             <div class="banner-content">
-                <span class="banner-icon">✨</span>
-                <span>Você foi indicado por <strong>${partnerName}</strong> — Atendimento Exclusivo Rota CDE!</span>
+                <span class="banner-icon">🎉</span>
+                <span>Você foi indicado por <strong>${partnerName}</strong>! Seu cupom exclusivo de <strong>${discountPct}% OFF</strong> foi aplicado automaticamente.</span>
             </div>
             <button class="banner-close" onclick="document.getElementById('partnerWelcomeBanner').remove()">&times;</button>
         `;
@@ -782,20 +901,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let estimateText = "";
             let basePrice = finalPrice;
+            let originalCalculatedPrice = 0;
+            let discountValue = 0;
+
             if (basePrice > 0) {
                 if (parseInt(passageiros) > 4) {
-                    finalPrice = Math.round(basePrice * 1.6);
-                    let vanSuffix = " (Veículo Grande/Van)";
-                    if (currentLang === 'es') vanSuffix = " (Vehículo Grande/Van)";
-                    if (currentLang === 'en') vanSuffix = " (Large Vehicle/Van)";
-                    estimateText = `R$ ${finalPrice},00${vanSuffix}`;
+                    originalCalculatedPrice = Math.round(basePrice * 1.6);
                 } else {
-                    estimateText = `R$ ${finalPrice},00`;
+                    originalCalculatedPrice = basePrice;
                 }
+
+                // Aplica desconto do cupom se ativo
+                if (activeAppliedCoupon) {
+                    if (activeAppliedCoupon.tipo === 'porcentagem') {
+                        discountValue = Math.round(originalCalculatedPrice * (activeAppliedCoupon.valor / 100));
+                    } else if (activeAppliedCoupon.tipo === 'fixo') {
+                        discountValue = Math.min(originalCalculatedPrice, activeAppliedCoupon.valor);
+                    }
+                }
+
+                finalPrice = Math.max(0, originalCalculatedPrice - discountValue);
+
+                let vanSuffix = parseInt(passageiros) > 4 ? (currentLang === 'es' ? " (Vehículo Grande/Van)" : (currentLang === 'en' ? " (Large Vehicle/Van)" : " (Veículo Grande/Van)")) : "";
+                estimateText = `R$ ${finalPrice},00${vanSuffix}`;
             } else {
                 estimateText = TRANSLATIONS[currentLang]['val_sob_consulta'] || "Sob Consulta";
             }
-
 
             // Format date for the message (pt-BR format)
             let formattedDate = dataVal;
@@ -807,6 +938,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Show Results
+            const resultPriceOrigEl = document.getElementById('resultPriceOriginal');
+            const resultDiscountBadge = document.getElementById('resultDiscountBadge');
+
+            if (discountValue > 0 && originalCalculatedPrice > 0) {
+                if (resultPriceOrigEl) {
+                    resultPriceOrigEl.textContent = `R$ ${originalCalculatedPrice},00`;
+                    resultPriceOrigEl.style.display = 'inline';
+                }
+                if (resultDiscountBadge) {
+                    resultDiscountBadge.textContent = `🎉 Cupom ${activeAppliedCoupon.codigo}: Economia de R$ ${discountValue},00 (${activeAppliedCoupon.descricao})`;
+                    resultDiscountBadge.style.display = 'block';
+                }
+            } else {
+                if (resultPriceOrigEl) resultPriceOrigEl.style.display = 'none';
+                if (resultDiscountBadge) resultDiscountBadge.style.display = 'none';
+            }
+
             resultPrice.textContent = estimateText;
             quoteResult.style.display = "block";
 
@@ -824,24 +972,36 @@ document.addEventListener('DOMContentLoaded', () => {
 *Destino:* ${destinoLabel}
 *Fecha:* ${formattedDate}
 *Pasajeros:* ${passageiros}
-*Maletas:* ${malas}
-*Valor Estimado:* ${estimateText}`;
+*Maletas:* ${malas}`;
+                if (discountValue > 0) {
+                    message += `\n*Precio Original:* R$ ${originalCalculatedPrice},00`;
+                    message += `\n*Cupón Aplicado:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                }
+                message += `\n*Valor Estimado Final:* ${estimateText}`;
             } else if (currentLang === 'en') {
                 message = `Hello Rota CDE Transfer! I would like to book a transfer. Here are the details of the quote:
 *Origin:* ${origemLabel}
 *Destination:* ${destinoLabel}
 *Date:* ${formattedDate}
 *Passengers:* ${passageiros}
-*Baggage:* ${malas}
-*Estimated Value:* ${estimateText}`;
+*Baggage:* ${malas}`;
+                if (discountValue > 0) {
+                    message += `\n*Original Price:* R$ ${originalCalculatedPrice},00`;
+                    message += `\n*Coupon Applied:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                }
+                message += `\n*Final Estimated Value:* ${estimateText}`;
             } else {
                 message = `Olá Rota CDE Transfer! Gostaria de reservar um transfer. Seguem os dados da cotação:
 *Origem:* ${origemLabel}
 *Destino:* ${destinoLabel}
 *Data:* ${formattedDate}
 *Passageiros:* ${passageiros}
-*Malas:* ${malas}
-*Valor Estimado:* ${estimateText}`;
+*Malas:* ${malas}`;
+                if (discountValue > 0) {
+                    message += `\n*Valor Tabela:* R$ ${originalCalculatedPrice},00`;
+                    message += `\n*Cupom Aplicado:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                }
+                message += `\n*Valor Final com Desconto:* ${estimateText}`;
             }
 
             const activePartner = getActivePartnerInfo();
