@@ -190,43 +190,96 @@
             }
         });
 
+        function normalize(str) {
+            return (str || '')
+                .trim()
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s@.-]/g, '')
+                .trim();
+        }
+
         async function handlePartnerLogin(e) {
             e.preventDefault();
             const errEl = document.getElementById('loginError');
+            const btn = document.querySelector('.btn-login');
+
             errEl.style.display = 'none';
+            btn.textContent = '⏳ Verificando...';
+            btn.disabled = true;
 
-            const cred = document.getElementById('partnerCred').value.trim().toLowerCase();
-            if (!cred) return;
+            const rawCred = document.getElementById('partnerCred').value.trim();
+            if (!rawCred) {
+                btn.textContent = '🔑 Entrar no Painel';
+                btn.disabled = false;
+                return;
+            }
 
+            const credLower = rawCred.toLowerCase();
+            const credNorm = normalize(rawCred).replace(/\s+/g, '-').replace(/-+/g, '-');
+
+            // Coleta lista completa de parceiros (Supabase + localStorage merge)
             let partnersList = [];
 
-            // 1. Tenta buscar no Supabase
+            // 1. Tenta Supabase primeiro
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient.from('parceiros').select('*');
-                    if (data && data.length > 0) {
+                    if (!error && data && data.length > 0) {
                         partnersList = data;
-                        localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+                        // Atualiza cache local
+                        localStorage.setItem('rota_parceiros', JSON.stringify(data));
+                        console.log(`[Login] ${data.length} parceiros carregados do Supabase.`);
+                    } else if (error) {
+                        console.warn('[Login] Erro Supabase:', error.message);
                     }
-                } catch (err) {}
+                } catch (err) {
+                    console.warn('[Login] Falha de conexão Supabase:', err);
+                }
             }
 
+            // 2. Se Supabase não retornou nada, usa localStorage
             if (partnersList.length === 0) {
                 try {
                     partnersList = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
-                } catch (e) {}
+                    console.log(`[Login] ${partnersList.length} parceiros carregados do localStorage.`);
+                } catch (e) {
+                    partnersList = [];
+                }
             }
 
-            // Normaliza o termo digitado
-            const cleanCred = cred.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            console.log('[Login] Lista de parceiros disponíveis:', partnersList.map(p => ({ slug: p.slug, nome: p.nome, email: p.email || '(sem email)' })));
+            console.log('[Login] Credencial digitada:', rawCred, '| Normalizada:', credNorm);
 
-            // Procura por slug ou email ou id ou nome
+            // 3. Busca flexível: slug exato, slug parcial, email, nome parcial, id
             const partner = partnersList.find(p => {
-                if (p.slug && p.slug.toLowerCase() === cleanCred) return true;
-                if (p.email && p.email.toLowerCase() === cred) return true;
-                if (p.slug && p.slug.toLowerCase() === cred) return true;
+                const pSlug = (p.slug || '').toLowerCase().trim();
+                const pNome = normalize(p.nome || '');
+                const pEmail = (p.email || '').toLowerCase().trim();
+                const pId = (p.id || '').toLowerCase().trim();
+
+                // Slug exato
+                if (pSlug && pSlug === credLower) return true;
+                if (pSlug && pSlug === credNorm) return true;
+
+                // Email exato
+                if (pEmail && pEmail === credLower) return true;
+
+                // Nome parcial (digitou parte do nome)
+                if (pNome && pNome.includes(normalize(rawCred))) return true;
+
+                // ID exato
+                if (pId && pId === credLower) return true;
+
+                // Slug contém a credencial
+                if (pSlug && pSlug.includes(credNorm) && credNorm.length >= 3) return true;
+
                 return false;
             });
+
+            btn.textContent = '🔑 Entrar no Painel';
+            btn.disabled = false;
 
             if (partner) {
                 const sessionData = {
@@ -241,10 +294,24 @@
                 localStorage.setItem('rota_partner_session', JSON.stringify(sessionData));
                 window.location.href = 'parceiro-painel.html';
             } else {
-                errEl.innerText = `Parceiro com o código ou e-mail "${cred}" não encontrado. Verifique se digitou corretamente ou faça seu cadastro na página de parceiros.`;
+                // Mostra os slugs disponíveis para ajudar o usuário
+                const slugsDisponiveis = partnersList.map(p => p.slug).filter(Boolean).join(', ');
+                const totalEncontrados = partnersList.length;
+
+                let mensagem = `❌ Código ou nome "${rawCred}" não encontrado.`;
+
+                if (totalEncontrados === 0) {
+                    mensagem += `\n\n⚠️ Nenhum parceiro cadastrado no sistema ainda. Acesse o Painel Administrativo e cadastre o parceiro primeiro.`;
+                } else {
+                    mensagem += `\n\n✅ Parceiros cadastrados (${totalEncontrados}): ${slugsDisponiveis || '(sem código)'}`;
+                    mensagem += `\n\nDica: Digite exatamente o "Código do Link" que aparece no campo (?ref=) ao cadastrar o parceiro no admin.`;
+                }
+
+                errEl.innerHTML = mensagem.replace(/\n/g, '<br>');
                 errEl.style.display = 'block';
             }
         }
     </script>
 </body>
 </html>
+
