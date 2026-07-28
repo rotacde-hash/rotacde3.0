@@ -1389,3 +1389,59 @@ section {
         height: 54px;
     }
 }
+
+/* --- Partner Referral Banner --- */
+.partner-welcome-banner {
+    background: linear-gradient(90deg, #09121f 0%, #152538 100%);
+    border-bottom: 2px solid var(--primary-gold);
+    color: #ffffff;
+    padding: 10px 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    animation: fadeInDown 0.4s ease-out;
+}
+
+.partner-welcome-banner .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.partner-welcome-banner strong {
+    color: var(--primary-gold);
+    font-weight: 700;
+}
+
+.partner-welcome-banner .banner-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 6px;
+    transition: color 0.2s ease;
+}
+
+.partner-welcome-banner .banner-close:hover {
+    color: #ffffff;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

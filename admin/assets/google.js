@@ -282,7 +282,7 @@ function setupGoogleCalendarClient() {
 
 // Auto setup se estiver na página de dashboard ou configuracoes
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('configuracoes.html')) {
+    if (window.location.pathname.includes('dashboard') || window.location.pathname.includes('configuracoes')) {
         setTimeout(setupGoogleCalendarClient, 1000); // pequeno delay para garantir carregamento base
     }
 });
