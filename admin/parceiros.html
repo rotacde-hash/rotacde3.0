@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Gestão de Parceiros & Links - Rota CDE Transfer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+    
+    <style>
+        /* Modern Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            max-width: 650px;
+            width: 100%;
+            box-shadow: var(--shadow-premium);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+        
+        .close-modal-btn:hover {
+            color: var(--text-light);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        .link-badge {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--primary-gold);
+            border: 1px dashed rgba(212, 175, 55, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            display: inline-block;
+        }
+
+        .btn-copy {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--primary-gold);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background: var(--primary-gold);
+            color: #000;
+        }
+
+        .btn-wa-share {
+            background: #25D366;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-wa-share:hover {
+            background: #1da851;
+            color: #fff;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--primary-gold);
+            color: #000;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+        }
+
+        .partner-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .partner-table th, .partner-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .partner-table th {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .partner-table tr:hover {
+            background: rgba(255,255,255,0.015);
+        }
+
+        .partner-name {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .partner-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .stat-badge-clicks {
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .stat-badge-leads {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .history-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+    </style>
+    
+    <!-- Google Consent Mode Default -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      
+      if (localStorage.getItem('cookie_consent') === null) {
+        gtag('consent', 'default', {
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied',
+          'analytics_storage': 'denied'
+        });
+      } else {
+        try {
+          const consent = JSON.parse(localStorage.getItem('cookie_consent'));
+          gtag('consent', 'default', {
+            'ad_storage': consent.ad_storage || 'denied',
+            'ad_user_data': consent.ad_user_data || 'denied',
+            'ad_personalization': consent.ad_personalization || 'denied',
+            'analytics_storage': consent.analytics_storage || 'denied'
+          });
+        } catch (e) {}
+      }
+    </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJPZYG2G9Z"></script>
+    <script>
+      gtag('js', new Date());
+      gtag('config', 'G-MJPZYG2G9Z');
+    </script>
+    <script src="../assets/cookie-consent.js" defer></script>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item active"><a href="parceiros.html">🤝 &nbsp; Parceiros</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Area de Conteudo Principal -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🤝 Links de Parceiros & Indicações</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Crie links personalizados para hotéis, pousadas e agências e acompanhe quantos clientes cada um enviou.</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="openNewPartnerModal()">➕ Cadastrar Parceiro</button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Total de Parceiros</span>
+                    <span class="stat-value" id="stat-total-parceiros">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Cliques Totais nos Links</span>
+                    <span class="stat-value" id="stat-total-cliques">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Orçamentos Gerados (WhatsApp)</span>
+                    <span class="stat-value" id="stat-total-leads">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Taxa Média de Conversão</span>
+                    <span class="stat-value" id="stat-taxa-conversao">0%</span>
+                </div>
+            </div>
+            
+            <!-- Filtros e Busca -->
+            <div class="filter-card">
+                <div class="filter-group" style="flex: 1;">
+                    <label for="filter-search-parceiro">Buscar Parceiro</label>
+                    <input type="text" id="filter-search-parceiro" class="form-control" placeholder="Buscar por nome, código ou telefone..." oninput="renderPartnersTable()">
+                </div>
+            </div>
+            
+            <!-- Listagem de Parceiros (Tabela) -->
+            <div class="table-container">
+                <table class="partner-table">
+                    <thead>
+                        <tr>
+                            <th>Instituição / Parceiro</th>
+                            <th>Código & Link Único</th>
+                            <th>Acessos (Cliques)</th>
+                            <th>Orçamentos (WhatsApp)</th>
+                            <th>Ações Rápidas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partners-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                                Carregando parceiros...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Modal Novo / Editar Parceiro -->
+    <div class="modal" id="partnerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalPartnerTitle">➕ Novo Parceiro</h3>
+                <button class="close-modal-btn" onclick="closePartnerModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="partnerForm" onsubmit="handlePartnerSubmit(event)">
+                    <input type="hidden" id="partner-id">
+                    
+                    <div class="form-grid">
+                        <div class="form-group-full">
+                            <label for="partner-nome" style="display:block; margin-bottom:6px; font-weight:600;">Nome da Instituição / Parceiro *</label>
+                            <input type="text" id="partner-nome" class="form-control" placeholder="Ex: Hotel Bella Italia, Pousada Foz, Agência CDE" required oninput="generateSlugFromNome()">
+                        </div>
+                        
+                        <div>
+                            <label for="partner-slug" style="display:block; margin-bottom:6px; font-weight:600;">Código do Link (?ref=) *</label>
+                            <input type="text" id="partner-slug" class="form-control" placeholder="Ex: bella-italia" required style="font-family: monospace;">
+                            <span style="font-size:11px; color: var(--text-muted);">Será usado no link: rotacde.site/?ref=<b>seu-codigo</b></span>
+                        </div>
+                        
+                        <div>
+                            <label for="partner-whatsapp" style="display:block; margin-bottom:6px; font-weight:600;">WhatsApp do Parceiro (Opcional)</label>
+                            <input type="text" id="partner-whatsapp" class="form-control" placeholder="Ex: 5545999999999">
+                        </div>
+                        
+                        <div class="form-group-full">
+                            <label for="partner-obs" style="display:block; margin-bottom:6px; font-weight:600;">Observações / Acordo de Comissão</label>
+                            <textarea id="partner-obs" class="form-control" rows="3" placeholder="Ex: Paga 10% de comissão por corrida concluída. Contato: Recepcionista Carlos."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                        <button type="button" class="btn btn-secondary" onclick="closePartnerModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Parceiro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Histórico de Orçamentos do Parceiro -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="historyModalTitle">📊 Histórico de Indicações</h3>
+                <button class="close-modal-btn" onclick="closeHistoryModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="historyModalBody">
+                <!-- Conteúdo dinâmico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toast">Link copiado com sucesso!</div>
+
+    <!-- Admin JS base -->
+    <script src="assets/admin.js"></script>
+    
+    <script>
+        // Data Structure
+        let partners = [];
+        let leads = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile sidebar toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            }
+
+            loadPartnersData();
+        });
+
+        function getBaseSiteUrl() {
+            const path = window.location.pathname;
+            const rootPath = path.substring(0, path.indexOf('/admin'));
+            return window.location.origin + rootPath + '/';
+        }
+
+        function loadPartnersData() {
+            try {
+                const storedPartners = localStorage.getItem('rota_parceiros');
+                if (storedPartners) {
+                    partners = JSON.parse(storedPartners);
+                } else {
+                    partners = [
+                        {
+                            id: 'p_ex_1',
+                            nome: 'Hotel Copacabana Foz',
+                            slug: 'hotel-copacabana',
+                            whatsapp: '5545999999999',
+                            obs: 'Exemplo de parceiro pré-cadastrado',
+                            cliques: 12,
+                            criadoEm: new Date().toISOString()
+                        }
+                    ];
+                    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+                }
+
+                const storedLeads = localStorage.getItem('rota_parceiros_leads');
+                if (storedLeads) {
+                    leads = JSON.parse(storedLeads);
+                } else {
+                    leads = [];
+                }
+            } catch (e) {
+                console.error("Erro ao carregar parceiros:", e);
+                partners = [];
+                leads = [];
+            }
+
+            updateDashboardStats();
+            renderPartnersTable();
+        }
+
+        function savePartnersToStorage() {
+            localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+        }
+
+        function updateDashboardStats() {
+            const totalPartners = partners.length;
+            let totalClicks = 0;
+            partners.forEach(p => totalClicks += (p.cliques || 0));
+            const totalLeads = leads.length;
+
+            const conversionRate = totalClicks > 0 ? ((totalLeads / totalClicks) * 100).toFixed(1) + '%' : '0%';
+
+            document.getElementById('stat-total-parceiros').innerText = totalPartners;
+            document.getElementById('stat-total-cliques').innerText = totalClicks;
+            document.getElementById('stat-total-leads').innerText = totalLeads;
+            document.getElementById('stat-taxa-conversao').innerText = conversionRate;
+        }
+
+        function renderPartnersTable() {
+            const tbody = document.getElementById('partners-table-body');
+            const search = (document.getElementById('filter-search-parceiro').value || '').toLowerCase();
+            
+            tbody.innerHTML = '';
+
+            const filtered = partners.filter(p => 
+                p.nome.toLowerCase().includes(search) || 
+                p.slug.toLowerCase().includes(search) ||
+                (p.whatsapp && p.whatsapp.includes(search))
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Nenhum parceiro encontrado. Clique em <b>"➕ Cadastrar Parceiro"</b> acima para criar o primeiro link!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const baseUrl = getBaseSiteUrl();
+
+            filtered.forEach(p => {
+                const partnerLeads = leads.filter(l => l.parceiroSlug === p.slug);
+                const leadCount = partnerLeads.length;
+                const clickCount = p.cliques || 0;
+                const shareUrl = `${baseUrl}?ref=${p.slug}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="partner-name">${p.nome}</div>
+                        ${p.obs ? `<div class="partner-sub">📝 ${p.obs}</div>` : ''}
+                    </td>
+                    <td>
+                        <div class="link-badge">${shareUrl}</div>
+                    </td>
+                    <td>
+                        <span class="stat-badge-clicks">👁️ ${clickCount} cliques</span>
+                    </td>
+                    <td>
+                        <span class="stat-badge-leads">💬 ${leadCount} orçamentos</span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="btn-copy" onclick="copyPartnerLink('${shareUrl}')" title="Copiar link compartilhável">📋 Copiar Link</button>
+                            ${p.whatsapp ? `
+                                <a href="https://wa.me/${p.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent('Olá ' + p.nome + '! Aqui está seu link exclusivo de indicação do Rota CDE Transfer:\n' + shareUrl)}" target="_blank" class="btn-wa-share" title="Enviar link para o WhatsApp do parceiro">💬 WhatsApp</a>
+                            ` : ''}
+                            <button class="btn-copy" style="background:rgba(255,255,255,0.05); color:#fff; border-color:rgba(255,255,255,0.1);" onclick="viewPartnerHistory('${p.slug}')" title="Ver histórico de clientes indicados">📊 Histórico (${leadCount})</button>
+                            <button class="btn-copy" style="background:rgba(54, 162, 235, 0.15); color:#36a2eb; border-color:rgba(54, 162, 235, 0.3);" onclick="editPartner('${p.id}')" title="Editar parceiro">✏️</button>
+                            <button class="btn-copy" style="background:rgba(231, 76, 60, 0.15); color:#e74c3c; border-color:rgba(231, 76, 60, 0.3);" onclick="deletePartner('${p.id}')" title="Excluir parceiro">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function copyPartnerLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('📋 Link copiado para a área de transferência!');
+            }).catch(err => {
+                const input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast('📋 Link copiado!');
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function generateSlugFromNome() {
+            const nomeInput = document.getElementById('partner-nome');
+            const slugInput = document.getElementById('partner-slug');
+            
+            if (!document.getElementById('partner-id').value) {
+                const slug = nomeInput.value
+                    .toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                slugInput.value = slug;
+            }
+        }
+
+        function openNewPartnerModal() {
+            document.getElementById('partner-id').value = '';
+            document.getElementById('partner-nome').value = '';
+            document.getElementById('partner-slug').value = '';
+            document.getElementById('partner-whatsapp').value = '';
+            document.getElementById('partner-obs').value = '';
+            document.getElementById('modalPartnerTitle').innerText = '➕ Novo Parceiro';
+            document.getElementById('partnerModal').style.display = 'flex';
+        }
+
+        function closePartnerModal() {
+            document.getElementById('partnerModal').style.display = 'none';
+        }
+
+        function editPartner(id) {
+            const partner = partners.find(p => p.id === id);
+            if (!partner) return;
+
+            document.getElementById('partner-id').value = partner.id;
+            document.getElementById('partner-nome').value = partner.nome;
+            document.getElementById('partner-slug').value = partner.slug;
+            document.getElementById('partner-whatsapp').value = partner.whatsapp || '';
+            document.getElementById('partner-obs').value = partner.obs || '';
+            document.getElementById('modalPartnerTitle').innerText = '✏️ Editar Parceiro';
+            document.getElementById('partnerModal').style.display = 'flex';
+        }
+
+        function deletePartner(id) {
+            const partner = partners.find(p => p.id === id);
+            if (!partner) return;
+
+            if (confirm(`Tem certeza que deseja excluir o parceiro "${partner.nome}"?\n\nOs links ativos desse parceiro deixarão de contabilizar indicações.`)) {
+                partners = partners.filter(p => p.id !== id);
+                savePartnersToStorage();
+                updateDashboardStats();
+                renderPartnersTable();
+                showToast('Parceiro removido.');
+            }
+        }
+
+        function handlePartnerSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('partner-id').value;
+            const nome = document.getElementById('partner-nome').value.trim();
+            let slug = document.getElementById('partner-slug').value.trim().toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            const whatsapp = document.getElementById('partner-whatsapp').value.trim();
+            const obs = document.getElementById('partner-obs').value.trim();
+
+            if (!slug) {
+                alert('Por favor, informe um código válido para o link.');
+                return;
+            }
+
+            const duplicate = partners.find(p => p.slug === slug && p.id !== id);
+            if (duplicate) {
+                alert(`O código "${slug}" já está sendo usado pelo parceiro "${duplicate.nome}". Escolha um código diferente.`);
+                return;
+            }
+
+            if (id) {
+                const partner = partners.find(p => p.id === id);
+                if (partner) {
+                    partner.nome = nome;
+                    partner.slug = slug;
+                    partner.whatsapp = whatsapp;
+                    partner.obs = obs;
+                }
+                showToast('Parceiro atualizado com sucesso!');
+            } else {
+                const newPartner = {
+                    id: 'p_' + Date.now(),
+                    nome: nome,
+                    slug: slug,
+                    whatsapp: whatsapp,
+                    obs: obs,
+                    cliques: 0,
+                    criadoEm: new Date().toISOString()
+                };
+                partners.push(newPartner);
+                showToast('✅ Novo parceiro cadastrado com sucesso!');
+            }
+
+            savePartnersToStorage();
+            closePartnerModal();
+            updateDashboardStats();
+            renderPartnersTable();
+        }
+
+        function viewPartnerHistory(slug) {
+            const partner = partners.find(p => p.slug === slug);
+            if (!partner) return;
+
+            const partnerLeads = leads.filter(l => l.parceiroSlug === slug);
+
+            document.getElementById('historyModalTitle').innerText = `📊 Indicações — ${partner.nome}`;
+            const body = document.getElementById('historyModalBody');
+
+            if (partnerLeads.length === 0) {
+                body.innerHTML = `
+                    <div style="text-align:center; padding: 30px; color: var(--text-muted);">
+                        Nenhum orçamento enviado via WhatsApp por clientes com o link deste parceiro ainda.
+                        <br><br>
+                        <b>Link para divulgar:</b>
+                        <div class="link-badge" style="margin-top:10px;">${getBaseSiteUrl()}?ref=${partner.slug}</div>
+                    </div>
+                `;
+            } else {
+                let html = `<div style="margin-bottom:16px; font-size:13px; color: var(--text-muted);">Exibindo <b>${partnerLeads.length}</b> orçamentos solicitados via WhatsApp:</div>`;
+                partnerLeads.slice().reverse().forEach(l => {
+                    const dataFormatada = new Date(l.data).toLocaleString('pt-BR');
+                    html += `
+                        <div class="history-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-weight:700; color:var(--primary-gold);">📍 ${l.origem || 'Origem não inf.'} ➔ ${l.destino || 'Destino não inf.'}</span>
+                                <span style="font-size:11px; color:var(--text-muted);">${dataFormatada}</span>
+                            </div>
+                            <div style="font-size:13px; color:#fff;">
+                                👥 ${l.passageiros || 1} pass. | 🧳 ${l.malas || 0} malas | 💰 ${l.valor || 'Sob Consulta'}
+                            </div>
+                        </div>
+                    `;
+                });
+                body.innerHTML = html;
+            }
+
+            document.getElementById('historyModal').style.display = 'flex';
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

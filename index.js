@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nav_diferenciais: "Diferenciais",
             nav_precos: "Preços",
             nav_faq: "Dúvidas",
+            nav_admin: "Painel Administrativo",
             header_wa: "Falar no WhatsApp",
             hero_badge: "Sua conexão premium Brasil ⇄ Paraguai",
             hero_title: "Transfer Privativo entre Foz do Iguaçu e Ciudad del Este",
@@ -197,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nav_diferenciais: "Diferenciales",
             nav_precos: "Precios",
             nav_faq: "Dudas",
+            nav_admin: "Panel Administrativo",
             header_wa: "Hablar por WhatsApp",
             hero_badge: "Su conexión premium Brasil ⇄ Paraguay",
             hero_title: "Transfer Privado entre Foz de Iguazú y Ciudad del Este",
@@ -320,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nav_diferenciais: "Differentiators",
             nav_precos: "Prices",
             nav_faq: "FAQ",
+            nav_admin: "Admin Panel",
             header_wa: "Talk on WhatsApp",
             hero_badge: "Your premium connection Brazil ⇄ Paraguay",
             hero_title: "Private Transfer between Foz do Iguaçu and Ciudad del Este",
@@ -513,6 +516,118 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL' }).format(value);
     }
 
+    // --- Referral & Partner System Logic ---
+    function initReferralSystem() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCode = urlParams.get('ref') || urlParams.get('parceiro') || urlParams.get('p');
+        
+        let partnersList = [];
+        try {
+            const stored = localStorage.getItem('rota_parceiros');
+            if (stored) partnersList = JSON.parse(stored);
+        } catch (e) {}
+
+        if (refCode) {
+            const slug = refCode.trim().toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            localStorage.setItem('rota_active_ref', slug);
+            
+            let partner = partnersList.find(p => p.slug === slug);
+            if (!partner) {
+                const formattedName = slug
+                    .split('-')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(' ');
+                    
+                partner = {
+                    id: 'p_' + Date.now(),
+                    nome: formattedName,
+                    slug: slug,
+                    cliques: 0,
+                    criadoEm: new Date().toISOString()
+                };
+                partnersList.push(partner);
+            }
+            
+            const clickedSessionKey = 'rota_clicked_ref_' + slug;
+            if (!sessionStorage.getItem(clickedSessionKey)) {
+                sessionStorage.setItem(clickedSessionKey, '1');
+                partner.cliques = (partner.cliques || 0) + 1;
+                localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+            }
+
+            renderPartnerWelcomeBanner(partner.nome);
+        } else {
+            const activePartner = getActivePartnerInfo();
+            if (activePartner && activePartner.nome) {
+                renderPartnerWelcomeBanner(activePartner.nome);
+            }
+        }
+    }
+
+    function getActivePartnerInfo() {
+        const storedRef = localStorage.getItem('rota_active_ref');
+        if (!storedRef) return null;
+        
+        try {
+            const stored = localStorage.getItem('rota_parceiros');
+            if (stored) {
+                const list = JSON.parse(stored);
+                const found = list.find(p => p.slug === storedRef);
+                if (found) return found;
+            }
+        } catch (e) {}
+
+        return {
+            slug: storedRef,
+            nome: storedRef.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        };
+    }
+
+    function registerPartnerLead(leadData) {
+        const partner = getActivePartnerInfo();
+        if (!partner) return;
+
+        try {
+            const storedLeads = localStorage.getItem('rota_parceiros_leads') || '[]';
+            const leads = JSON.parse(storedLeads);
+            
+            const newLead = {
+                id: 'lead_' + Date.now(),
+                parceiroSlug: partner.slug,
+                parceiroNome: partner.nome,
+                data: new Date().toISOString(),
+                ...leadData
+            };
+            
+            leads.push(newLead);
+            localStorage.setItem('rota_parceiros_leads', JSON.stringify(leads));
+        } catch (e) {
+            console.error("Erro ao registrar lead do parceiro:", e);
+        }
+    }
+
+    function renderPartnerWelcomeBanner(partnerName) {
+        if (document.getElementById('partnerWelcomeBanner')) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'partnerWelcomeBanner';
+        banner.className = 'partner-welcome-banner';
+        banner.innerHTML = `
+            <div class="banner-content">
+                <span class="banner-icon">✨</span>
+                <span>Você foi indicado por <strong>${partnerName}</strong> — Atendimento Exclusivo Rota CDE!</span>
+            </div>
+            <button class="banner-close" onclick="document.getElementById('partnerWelcomeBanner').remove()">&times;</button>
+        `;
+        
+        document.body.prepend(banner);
+    }
+
     // --- Update Dynamic WhatsApp Links on the Page ---
     function updateWhatsAppLinks() {
         let textDefault = "Olá! Gostaria de informações sobre o transfer para Ciudad del Este.";
@@ -524,6 +639,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (currentLang === 'en') {
             textDefault = "Hello! I would like information about the transfer to Ciudad del Este.";
             textReserve = "Hello! I would like to make a transfer booking now.";
+        }
+
+        const activePartner = getActivePartnerInfo();
+        if (activePartner && activePartner.nome) {
+            textDefault += ` (Indicado por ${activePartner.nome})`;
+            textReserve += ` (Indicado por ${activePartner.nome})`;
         }
 
         const textDefaultEnc = encodeURIComponent(textDefault);
@@ -723,7 +844,24 @@ document.addEventListener('DOMContentLoaded', () => {
 *Valor Estimado:* ${estimateText}`;
             }
 
+            const activePartner = getActivePartnerInfo();
+            if (activePartner && activePartner.nome) {
+                message += `\n*Indicação / Parceiro:* ${activePartner.nome}`;
+            }
+
             btnContinueWhatsApp.href = `https://wa.me/${currentPhone}?text=${encodeURIComponent(message)}`;
+            
+            btnContinueWhatsApp.onclick = () => {
+                if (activePartner) {
+                    registerPartnerLead({
+                        origem: origemLabel,
+                        destino: destinoLabel,
+                        valor: estimateText,
+                        passageiros: passageiros,
+                        malas: malas
+                    });
+                }
+            };
             
             // Scroll result into view smoothly
             setTimeout(() => {
@@ -870,5 +1008,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initialization ---
+    initReferralSystem();
     translatePage(currentLang);
 });
