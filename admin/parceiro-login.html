@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Área do Parceiro - Login | Rota CDE Transfer</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+
+    <style>
+        body {
+            background-color: var(--primary-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 30px;
+            box-shadow: var(--shadow-premium);
+            text-align: center;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .login-logo img {
+            height: 48px;
+            width: auto;
+        }
+
+        .login-logo-text {
+            text-align: left;
+        }
+
+        .login-logo-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            display: block;
+        }
+
+        .login-logo-sub {
+            font-size: 11px;
+            color: var(--primary-gold);
+            font-weight: 700;
+            letter-spacing: 2px;
+            display: block;
+        }
+
+        .login-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .login-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-light);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition-normal);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-gold);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-gold);
+            color: #000;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .btn-login:hover {
+            background-color: var(--accent-gold);
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.15);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="../assets/logo_icon.png" alt="Rota CDE Logo">
+            <div class="login-logo-text">
+                <span class="login-logo-brand">ROTA CDE</span>
+                <span class="login-logo-sub">PAINEL DO PARCEIRO</span>
+            </div>
+        </div>
+
+        <h1 class="login-title">Acesse seus Dados</h1>
+        <p class="login-desc">Digite seu e-mail ou o código exclusivo do seu link de parceiro para acessar seu painel de comissões.</p>
+
+        <div id="loginError" class="error-message"></div>
+
+        <form id="partnerLoginForm" onsubmit="handlePartnerLogin(event)">
+            <div class="form-group">
+                <label for="partnerCred">E-mail ou Código do Link (?ref=)</label>
+                <input type="text" id="partnerCred" class="form-control" placeholder="Ex: hotel-bella-italia ou seu@email.com" required autofocus>
+            </div>
+
+            <button type="submit" class="btn-login">🔑 Entrar no Painel</button>
+        </form>
+
+        <div style="margin-top: 24px; font-size: 13px; color: var(--text-muted);">
+            Ainda não é um parceiro registrado? <br>
+            <a href="../parceiros.html" style="color: var(--primary-gold); font-weight: 600;">Cadastre-se gratuitamente aqui</a>
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Se já tiver sessão de parceiro ativa e válida, redireciona para o painel
+            const session = localStorage.getItem('rota_partner_session');
+            if (session) {
+                try {
+                    const data = JSON.parse(session);
+                    if (Date.now() < data.expireAt) {
+                        window.location.href = 'parceiro-painel.html';
+                        return;
+                    }
+                } catch(e) {}
+            }
+        });
+
+        async function handlePartnerLogin(e) {
+            e.preventDefault();
+            const errEl = document.getElementById('loginError');
+            errEl.style.display = 'none';
+
+            const cred = document.getElementById('partnerCred').value.trim().toLowerCase();
+            if (!cred) return;
+
+            let partnersList = [];
+
+            // 1. Tenta buscar no Supabase
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('parceiros').select('*');
+                    if (data && data.length > 0) {
+                        partnersList = data;
+                        localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+                    }
+                } catch (err) {}
+            }
+
+            if (partnersList.length === 0) {
+                try {
+                    partnersList = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+                } catch (e) {}
+            }
+
+            // Normaliza o termo digitado
+            const cleanCred = cred.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+            // Procura por slug ou email ou id ou nome
+            const partner = partnersList.find(p => {
+                if (p.slug && p.slug.toLowerCase() === cleanCred) return true;
+                if (p.email && p.email.toLowerCase() === cred) return true;
+                if (p.slug && p.slug.toLowerCase() === cred) return true;
+                return false;
+            });
+
+            if (partner) {
+                const sessionData = {
+                    partnerId: partner.id,
+                    partnerSlug: partner.slug,
+                    partnerNome: partner.nome,
+                    whatsapp: partner.whatsapp || '',
+                    desconto: partner.desconto || 10,
+                    loginAt: Date.now(),
+                    expireAt: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
+                };
+                localStorage.setItem('rota_partner_session', JSON.stringify(sessionData));
+                window.location.href = 'parceiro-painel.html';
+            } else {
+                errEl.innerText = `Parceiro com o código ou e-mail "${cred}" não encontrado. Verifique se digitou corretamente ou faça seu cadastro na página de parceiros.`;
+                errEl.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
