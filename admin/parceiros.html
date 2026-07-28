@@ -471,6 +471,8 @@
                             nome: p.nome,
                             slug: p.slug,
                             whatsapp: p.whatsapp || '',
+                            email: p.email || '',
+                            desconto: p.desconto !== undefined ? p.desconto : 10,
                             obs: p.obs || '',
                             cliques: p.cliques || 0,
                             criadoEm: p.criadoEm || p.created_at
