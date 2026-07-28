@@ -420,6 +420,10 @@
     <!-- Toast Notification -->
     <div class="toast-notification" id="toast">Link copiado com sucesso!</div>
 
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
     <!-- Admin JS base -->
     <script src="assets/admin.js"></script>
     
@@ -447,24 +451,49 @@
             return window.location.origin + rootPath + '/';
         }
 
-        function loadPartnersData() {
+        async function loadPartnersData() {
+            // Tenta carregar os parceiros do Supabase
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('parceiros').select('*');
+                    if (error) {
+                        console.error("Erro ao buscar parceiros do Supabase:", error);
+                    } else if (data) {
+                        partners = data.map(p => ({
+                            id: p.id,
+                            nome: p.nome,
+                            slug: p.slug,
+                            whatsapp: p.whatsapp || '',
+                            obs: p.obs || '',
+                            cliques: p.cliques || 0,
+                            criadoEm: p.criadoEm || p.created_at
+                        }));
+                        localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+                    }
+                } catch (e) {
+                    console.warn("Falha de conexão com Supabase para parceiros, usando LocalStorage:", e);
+                }
+            }
+
             try {
-                const storedPartners = localStorage.getItem('rota_parceiros');
-                if (storedPartners) {
-                    partners = JSON.parse(storedPartners);
-                } else {
-                    partners = [
-                        {
-                            id: 'p_ex_1',
-                            nome: 'Hotel Copacabana Foz',
-                            slug: 'hotel-copacabana',
-                            whatsapp: '5545999999999',
-                            obs: 'Exemplo de parceiro pré-cadastrado',
-                            cliques: 12,
-                            criadoEm: new Date().toISOString()
-                        }
-                    ];
-                    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+                if (partners.length === 0) {
+                    const storedPartners = localStorage.getItem('rota_parceiros');
+                    if (storedPartners) {
+                        partners = JSON.parse(storedPartners);
+                    } else {
+                        partners = [
+                            {
+                                id: 'p_ex_1',
+                                nome: 'Hotel Copacabana Foz',
+                                slug: 'hotel-copacabana',
+                                whatsapp: '5545999999999',
+                                obs: 'Exemplo de parceiro pré-cadastrado',
+                                cliques: 12,
+                                criadoEm: new Date().toISOString()
+                            }
+                        ];
+                        localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+                    }
                 }
 
                 const storedLeads = localStorage.getItem('rota_parceiros_leads');
@@ -474,8 +503,8 @@
                     leads = [];
                 }
             } catch (e) {
-                console.error("Erro ao carregar parceiros:", e);
-                partners = [];
+                console.error("Erro ao carregar parceiros locais:", e);
+                if (partners.length === 0) partners = [];
                 leads = [];
             }
 
@@ -628,11 +657,23 @@
             document.getElementById('partnerModal').style.display = 'flex';
         }
 
-        function deletePartner(id) {
+        async function deletePartner(id) {
             const partner = partners.find(p => p.id === id);
             if (!partner) return;
 
             if (confirm(`Tem certeza que deseja excluir o parceiro "${partner.nome}"?\n\nOs links ativos desse parceiro deixarão de contabilizar indicações.`)) {
+                // Remove do Supabase se disponível
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        const { error } = await supabaseClient.from('parceiros').delete().eq('id', id);
+                        if (error) {
+                            console.error("Erro ao excluir parceiro no Supabase:", error);
+                        }
+                    } catch (err) {
+                        console.error("Erro de conexão ao excluir parceiro no Supabase:", err);
+                    }
+                }
+
                 partners = partners.filter(p => p.id !== id);
                 savePartnersToStorage();
                 updateDashboardStats();
@@ -641,7 +682,7 @@
             }
         }
 
-        function handlePartnerSubmit(e) {
+        async function handlePartnerSubmit(e) {
             e.preventDefault();
 
             const id = document.getElementById('partner-id').value;
@@ -665,6 +706,8 @@
                 return;
             }
 
+            let targetPartner = null;
+
             if (id) {
                 const partner = partners.find(p => p.id === id);
                 if (partner) {
@@ -672,10 +715,10 @@
                     partner.slug = slug;
                     partner.whatsapp = whatsapp;
                     partner.obs = obs;
+                    targetPartner = partner;
                 }
-                showToast('Parceiro atualizado com sucesso!');
             } else {
-                const newPartner = {
+                targetPartner = {
                     id: 'p_' + Date.now(),
                     nome: nome,
                     slug: slug,
@@ -684,11 +727,38 @@
                     cliques: 0,
                     criadoEm: new Date().toISOString()
                 };
-                partners.push(newPartner);
-                showToast('✅ Novo parceiro cadastrado com sucesso!');
+                partners.push(targetPartner);
+            }
+
+            // Salva no Supabase se disponível
+            if (typeof supabaseClient !== 'undefined' && supabaseClient && targetPartner) {
+                try {
+                    const { error } = await supabaseClient.from('parceiros').upsert({
+                        id: targetPartner.id,
+                        nome: targetPartner.nome,
+                        slug: targetPartner.slug,
+                        whatsapp: targetPartner.whatsapp,
+                        obs: targetPartner.obs,
+                        cliques: targetPartner.cliques,
+                        criadoEm: targetPartner.criadoEm
+                    }, { onConflict: 'id' });
+                    
+                    if (error) {
+                        console.error("Erro ao salvar parceiro no Supabase:", error);
+                    }
+                } catch (err) {
+                    console.error("Erro de conexão ao salvar parceiro no Supabase:", err);
+                }
             }
 
             savePartnersToStorage();
+            
+            if (id) {
+                showToast('Parceiro atualizado com sucesso!');
+            } else {
+                showToast('✅ Novo parceiro cadastrado com sucesso!');
+            }
+
             closePartnerModal();
             updateDashboardStats();
             renderPartnersTable();
