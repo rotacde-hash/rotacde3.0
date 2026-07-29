@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const partnerRegisterForm = document.getElementById('partnerRegisterForm');
     if (partnerRegisterForm) {
-        partnerRegisterForm.addEventListener('submit', async (e) => {
+        partnerRegisterForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const nome = document.getElementById('pNome').value.trim();
@@ -1190,55 +1190,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = document.getElementById('pEmail').value.trim();
             const tipo = document.getElementById('pTipo').value;
 
-            // Gera o código do link automático a partir do nome/empresa
-            const slug = (empresa || nome)
-                .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9]/g, '-')
-                .replace(/-+/g, '-')
-                .replace(/^-|-$/g, '');
-
-            const newPartner = {
-                id: 'p_' + Date.now(),
-                nome: `${nome} (${empresa})`,
-                slug: slug,
-                whatsapp: whatsapp,
-                email: email,
-                tipo: tipo,
-                desconto: 10,
-                cliques: 0,
-                obs: `Cadastro via site. Categoria: ${tipo}`,
-                criadoEm: new Date().toISOString()
-            };
-
-            // 1. Salvar no Supabase se disponível (ou LocalStorage)
-            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-                try {
-                    await supabaseClient.from('parceiros').upsert(newPartner, { onConflict: 'id' });
-                } catch (err) {
-                    console.error("Erro ao cadastrar parceiro no Supabase:", err);
-                }
-            }
-
-            let partnersList = [];
-            try {
-                partnersList = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
-            } catch(e) {}
-            partnersList.push(newPartner);
-            localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
-
-            // 2. Abrir WhatsApp pré-formatado para confirmação imediata
+            // Envia mensagem direta ao WhatsApp sem inserir no banco de dados automaticamente
             const waMessage = `Olá Rota CDE Transfer! Gostaria de me cadastrar no *Programa de Parceiros*:
 *Nome:* ${nome}
 *Empresa/Atuação:* ${empresa}
 *WhatsApp:* ${whatsapp}
 *E-mail:* ${email}
-*Categoria:* ${tipo}
-*Link Solicitado:* rotacde.site/?ref=${slug}`;
+*Categoria:* ${tipo}`;
 
             const waUrl = `https://wa.me/${currentPhone}?text=${encodeURIComponent(waMessage)}`;
 
-            alert(`Obrigado pelo cadastro, ${nome}! Seu link exclusivo sugerido é: rotacde.site/?ref=${slug}.\n\nVocê será redirecionado para o WhatsApp para confirmar sua ativação e receber seu acesso.`);
+            alert(`Obrigado pela solicitação, ${nome}! Você será redirecionado ao WhatsApp para enviar seus dados à nossa equipe. O cadastro será ativado manualmente no painel admin.`);
             window.open(waUrl, '_blank');
             partnerRegisterForm.reset();
         });
