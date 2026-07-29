@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Referral & Partner System Logic ---
-    function initReferralSystem() {
+    async function initReferralSystem() {
         const urlParams = new URLSearchParams(window.location.search);
         const refCode = urlParams.get('ref') || urlParams.get('parceiro') || urlParams.get('p');
         const customCouponParam = urlParams.get('cupom') || urlParams.get('c');
@@ -632,7 +632,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
             localStorage.setItem('rota_active_ref', slug);
             
-            let partner = partnersList.find(p => p.slug === slug);
+            let partner = null;
+
+            // 1. Tenta buscar o parceiro atualizado diretamente do Supabase!
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('parceiros').select('*').eq('slug', slug);
+                    if (!error && data && data.length > 0) {
+                        partner = {
+                            id: data[0].id,
+                            nome: data[0].nome,
+                            slug: data[0].slug,
+                            desconto: data[0].desconto !== undefined ? data[0].desconto : 10,
+                            cliques: data[0].cliques || 0,
+                            whatsapp: data[0].whatsapp || '',
+                            obs: data[0].obs || '',
+                            criadoEm: data[0].criadoEm || data[0].created_at
+                        };
+                        
+                        // Atualiza na lista local de parceiros
+                        const existingIdx = partnersList.findIndex(p => p.slug === slug);
+                        if (existingIdx !== -1) {
+                            partnersList[existingIdx] = partner;
+                        } else {
+                            partnersList.push(partner);
+                        }
+                        localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+                    }
+                } catch (err) {
+                    console.warn('[Referral] Falha ao buscar parceiro no Supabase:', err);
+                }
+            }
+
+            // 2. Fallback para lista local se falhou Supabase
+            if (!partner) {
+                partner = partnersList.find(p => p.slug === slug);
+            }
+
+            // 3. Fallback final se parceiro não existe localmente nem no Supabase
             if (!partner) {
                 const formattedName = slug
                     .split('-')
@@ -648,6 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     criadoEm: new Date().toISOString()
                 };
                 partnersList.push(partner);
+                localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
             }
             
             const clickedSessionKey = 'rota_clicked_ref_' + slug;
@@ -655,6 +693,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.setItem(clickedSessionKey, '1');
                 partner.cliques = (partner.cliques || 0) + 1;
                 localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+
+                // Registra o clique no Supabase para atualizar as estatísticas
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        await supabaseClient.from('parceiros').update({ cliques: partner.cliques }).eq('id', partner.id);
+                    } catch (e) {}
+                }
             }
 
             const discountPct = partner.desconto || 10;
@@ -663,9 +708,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (customCouponParam) {
             applyCouponAction(customCouponParam, false);
         } else {
+            // Se já tiver parceiro ativo salvo na sessão
             const activePartner = getActivePartnerInfo();
             if (activePartner && activePartner.nome) {
-                const discountPct = activePartner.desconto || 10;
+                // Tenta recarregar dados dele do Supabase em background para garantir desconto atualizado!
+                let discountPct = activePartner.desconto || 10;
+                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                    try {
+                        const { data } = await supabaseClient.from('parceiros').select('*').eq('slug', activePartner.slug);
+                        if (data && data.length > 0) {
+                            activePartner.desconto = data[0].desconto !== undefined ? data[0].desconto : 10;
+                            activePartner.nome = data[0].nome;
+                            discountPct = activePartner.desconto;
+                            
+                            // Atualiza no cache local
+                            const idx = partnersList.findIndex(p => p.slug === activePartner.slug);
+                            if (idx !== -1) {
+                                partnersList[idx] = { ...partnersList[idx], desconto: discountPct, nome: data[0].nome };
+                                localStorage.setItem('rota_parceiros', JSON.stringify(partnersList));
+                            }
+                        }
+                    } catch (e) {}
+                }
                 applyCouponAction(activePartner.slug, true);
                 renderPartnerWelcomeBanner(activePartner.nome, discountPct);
             }
