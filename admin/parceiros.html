@@ -395,6 +395,12 @@
                             <input type="number" id="partner-desconto" class="form-control" value="10" min="0" max="100" placeholder="Ex: 10" required>
                             <span style="font-size:11px; color: var(--text-muted);">Desconto concedido aos clientes deste link</span>
                         </div>
+
+                        <div>
+                            <label for="partner-senha" style="display:block; margin-bottom:6px; font-weight:600;">Senha do Parceiro *</label>
+                            <input type="text" id="partner-senha" class="form-control" placeholder="Ex: senha123" required>
+                            <span style="font-size:11px; color: var(--text-muted);">Senha para o parceiro acessar o painel</span>
+                        </div>
                         
                         <div class="form-group-full">
                             <label for="partner-obs" style="display:block; margin-bottom:6px; font-weight:600;">Observações / Acordo de Comissão</label>
@@ -645,6 +651,7 @@
             document.getElementById('partner-slug').value = '';
             document.getElementById('partner-whatsapp').value = '';
             document.getElementById('partner-desconto').value = '10';
+            document.getElementById('partner-senha').value = '';
             document.getElementById('partner-obs').value = '';
             document.getElementById('modalPartnerTitle').innerText = '➕ Novo Parceiro';
             document.getElementById('partnerModal').style.display = 'flex';
@@ -663,6 +670,7 @@
             document.getElementById('partner-slug').value = partner.slug;
             document.getElementById('partner-whatsapp').value = partner.whatsapp || '';
             document.getElementById('partner-desconto').value = partner.desconto !== undefined ? partner.desconto : 10;
+            document.getElementById('partner-senha').value = partner.senha || '';
             document.getElementById('partner-obs').value = partner.obs || '';
             document.getElementById('modalPartnerTitle').innerText = '✏️ Editar Parceiro';
             document.getElementById('partnerModal').style.display = 'flex';
@@ -705,6 +713,7 @@
                 .replace(/^-|-$/g, '');
             const whatsapp = document.getElementById('partner-whatsapp').value.trim();
             const desconto = parseFloat(document.getElementById('partner-desconto').value) || 10;
+            const senha = document.getElementById('partner-senha').value.trim();
             const obs = document.getElementById('partner-obs').value.trim();
 
             if (!slug) {
@@ -727,6 +736,7 @@
                     partner.slug = slug;
                     partner.whatsapp = whatsapp;
                     partner.desconto = desconto;
+                    partner.senha = senha;
                     partner.obs = obs;
                     targetPartner = partner;
                 }
@@ -737,6 +747,7 @@
                     slug: slug,
                     whatsapp: whatsapp,
                     desconto: desconto,
+                    senha: senha,
                     obs: obs,
                     cliques: 0,
                     criadoEm: new Date().toISOString()
@@ -753,6 +764,7 @@
                         slug: targetPartner.slug,
                         whatsapp: targetPartner.whatsapp,
                         desconto: targetPartner.desconto,
+                        senha: targetPartner.senha,
                         obs: targetPartner.obs,
                         cliques: targetPartner.cliques,
                         criadoEm: targetPartner.criadoEm
