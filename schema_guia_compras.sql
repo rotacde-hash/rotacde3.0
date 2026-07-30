@@ -86,6 +86,24 @@ INSERT INTO public.shopping_categories (name, slug, description, icon) VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 -- 7. INSERIR LOJAS DESTAQUE EM CIUDAD DEL ESTE
+-- 8. CRIAR BUCKET PÚBLICO "shopping-guide" NO SUPABASE STORAGE VIA SQL
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('shopping-guide', 'shopping-guide', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- POLÍTICAS DE RLS PARA O STORAGE BUCKET "shopping-guide"
+DROP POLICY IF EXISTS "Permitir download publico do e-book" ON storage.objects;
+CREATE POLICY "Permitir download publico do e-book" ON storage.objects
+    FOR SELECT USING (bucket_id = 'shopping-guide');
+
+DROP POLICY IF EXISTS "Permitir upload do e-book" ON storage.objects;
+CREATE POLICY "Permitir upload do e-book" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'shopping-guide');
+
+DROP POLICY IF EXISTS "Permitir substituicao do e-book" ON storage.objects;
+CREATE POLICY "Permitir substituicao do e-book" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'shopping-guide');
+
 INSERT INTO public.shopping_stores 
 (name, slug, short_description, description, address, neighborhood, latitude, longitude, phone, whatsapp, website, instagram, opening_hours, image_url, active, featured) 
 VALUES
