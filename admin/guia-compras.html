@@ -1,42 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
     <title>Gerenciar Guia de Compras - Rota CDE Admin</title>
-    
-    <!-- Fonts -->
+
+    <!-- Google Fonts (Outfit & Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS do Painel Admin -->
     <link rel="stylesheet" href="assets/admin.css">
 
     <style>
-        .tabs-nav {
+        .tabs-header {
             display: flex;
             gap: 12px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             margin-bottom: 24px;
         }
 
         .tab-btn {
-            background: transparent;
+            background: none;
             border: none;
             color: var(--text-muted);
             padding: 12px 20px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1rem;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            border-bottom: 2px solid transparent;
             transition: var(--transition-fast);
         }
 
-        .tab-btn:hover, .tab-btn.active {
+        .tab-btn.active {
             color: var(--primary-gold);
             border-bottom-color: var(--primary-gold);
         }
@@ -52,8 +50,9 @@
         .modal-admin-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
+            background: rgba(5, 11, 20, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1100;
             display: none;
             align-items: center;
             justify-content: center;
@@ -61,38 +60,65 @@
         }
 
         .modal-admin-card {
-            background: #0e1a2f;
+            background: var(--bg-card);
             border: 1px solid var(--primary-gold);
-            border-radius: 12px;
+            border-radius: var(--border-radius-lg);
             max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
             padding: 24px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.6);
         }
 
         .form-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 12px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             .form-grid-2 {
                 grid-template-columns: 1fr;
             }
         }
+
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-online {
+            background: rgba(76, 175, 80, 0.15);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+
+        .status-offline {
+            background: rgba(244, 67, 54, 0.15);
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
     </style>
 </head>
-<body>
+
+<body class="admin-body">
+
+    <!-- Topbar Mobile -->
+    <div class="mobile-topbar">
+        <button class="menu-toggle" id="menu-toggle">☰</button>
+        <span class="brand-title">ROTA CDE ADMIN</span>
+        <span></span>
+    </div>
 
     <div class="admin-layout">
-        
-        <!-- Sidebar -->
-        <aside class="admin-sidebar" id="sidebar">
+        <!-- Sidebar Menu -->
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-icon">
                 <div class="brand-text">
                     <span class="brand-title">ROTA CDE</span>
                     <span class="brand-subtitle">PAINEL</span>
@@ -103,55 +129,54 @@
                 <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
                 <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
                 <li class="menu-item"><a href="parceiros.html">🤝 &nbsp; Parceiros</a></li>
+                <li class="menu-item"><a href="cupons.html">🏷️ &nbsp; Cupons</a></li>
                 <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
                 <li class="menu-item active"><a href="guia-compras.html">🛍️ &nbsp; Guia de Compras</a></li>
                 <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
             </ul>
             <div class="sidebar-footer">
-                <span>v1.0.0</span>
+                <span>v3.0.1</span>
                 <button class="logout-btn" onclick="logout()">Sair</button>
             </div>
         </aside>
-        
-        <!-- Main Content -->
+
+        <!-- Area de Conteudo Principal -->
         <div class="admin-main">
-            <!-- Mobile Header -->
-            <header class="admin-topbar">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
-                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
-                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
-                </div>
-                <button class="logout-btn" onclick="logout()">Sair</button>
-            </header>
-            
-            <!-- Page Header -->
-            <div class="page-header">
+            <!-- Header do Painel -->
+            <div class="admin-header">
                 <div>
                     <h1 class="page-title">🛍️ Guia de Compras no Paraguai</h1>
-                    <p style="color: var(--text-muted); font-size: 14px;">Gerencie lojas, categorias e o e-book oficial exibidos no site público.</p>
+                    <p class="page-subtitle">Gerencie as lojas cadastradas, categorias e o arquivo PDF do E-book oficial de Ciudad del Este</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="supabase-connection-status" class="status-pill status-offline">Conectando Supabase...</span>
+                    <a href="../guia-de-compras.html" target="_blank" class="btn btn-secondary">🌐 Ver Página Pública</a>
                 </div>
             </div>
 
-            <!-- Abas de Navegação -->
-            <div class="tabs-nav">
-                <button class="tab-btn active" onclick="switchTab('lojas')">🏪 Lojas Cadastradas</button>
+            <!-- Navegacao por Abas -->
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab('lojas')">🏬 Lojas (${adminStores ? adminStores.length : 0})</button>
                 <button class="tab-btn" onclick="switchTab('categorias')">🏷️ Categorias</button>
-                <button class="tab-btn" onclick="switchTab('ebook')">📖 E-book Oficial (PDF)</button>
+                <button class="tab-btn" onclick="switchTab('ebook')">📖 E-book PDF</button>
             </div>
 
-            <!-- TAB 1: LOJAS -->
-            <div class="tab-content active" id="tab-lojas">
+            <!-- ABA 1: LOJAS -->
+            <div id="tab-lojas" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-                    <input type="text" id="admin-store-search" class="form-control" placeholder="Buscar loja..." style="max-width: 300px;" oninput="renderAdminStoresTable()">
-                    <button class="btn btn-primary" onclick="openStoreFormModal()">➕ Nova Loja</button>
+                    <div style="max-width: 350px; width: 100%;">
+                        <input type="text" id="admin-store-search" class="form-control" placeholder="Buscar loja por nome..." oninput="renderAdminStoresTable()">
+                    </div>
+                    <button class="btn btn-primary" onclick="openStoreFormModal()">
+                        ➕ Nova Loja
+                    </button>
                 </div>
 
                 <div class="table-card">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Loja</th>
+                                <th>Loja / Endereço</th>
                                 <th>Bairro</th>
                                 <th>Categorias</th>
                                 <th>Destaque</th>
@@ -160,17 +185,19 @@
                             </tr>
                         </thead>
                         <tbody id="admin-stores-table-body">
-                            <!-- Preenchido dinamicamente -->
+                            <!-- Injetado por JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 2: CATEGORIAS -->
-            <div class="tab-content" id="tab-categorias">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif;">Categorias de Lojas</h3>
-                    <button class="btn btn-primary" onclick="openCategoryFormModal()">➕ Nova Categoria</button>
+            <!-- ABA 2: CATEGORIAS -->
+            <div id="tab-categorias" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif;">Categorias de Produtos</h3>
+                    <button class="btn btn-primary" onclick="openCategoryFormModal()">
+                        ➕ Nova Categoria
+                    </button>
                 </div>
 
                 <div class="table-card">
@@ -185,22 +212,22 @@
                             </tr>
                         </thead>
                         <tbody id="admin-categories-table-body">
-                            <!-- Preenchido dinamicamente -->
+                            <!-- Injetado por JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- TAB 3: E-BOOK -->
-            <div class="tab-content" id="tab-ebook">
-                <div class="table-card" style="padding: 24px; max-width: 650px;">
+            <!-- ABA 3: E-BOOK PDF -->
+            <div id="tab-ebook" class="tab-content">
+                <div class="table-card" style="padding: 32px; max-width: 650px;">
                     <h3 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 12px;">📖 E-book Oficial do Guia de Compras</h3>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
-                        Este arquivo PDF é o único material oficial baixado pelos visitantes do site. Ao enviar um novo arquivo, ele substitui automaticamente o anterior no Supabase Storage.
+                    <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+                        Faça o upload do arquivo PDF oficial. O link permanecerá único no Supabase Storage no bucket <code style="color: var(--primary-gold);">shopping-guide/guia-de-compras.pdf</code>.
                     </p>
 
                     <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                        <strong style="color: var(--primary-gold); display: block; margin-bottom: 4px;">Link Atual do E-book:</strong>
+                        <strong style="color: var(--primary-gold); display: block; margin-bottom: 4px;">Link Público Atual do PDF:</strong>
                         <a id="current-ebook-link" href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" style="color: #64b5f6; font-size: 13px; word-break: break-all;">
                             https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf
                         </a>
@@ -208,7 +235,7 @@
 
                     <form id="ebook-upload-form" style="display: flex; flex-direction: column; gap: 16px;">
                         <div class="form-group">
-                            <label style="color: #fff; font-weight: 600; font-size: 14px;">Selecionar novo PDF:</label>
+                            <label style="color: #fff; font-weight: 600; font-size: 14px;">Selecionar novo arquivo PDF:</label>
                             <input type="file" id="ebook-file-input" accept=".pdf" class="form-control" required style="padding: 8px;">
                         </div>
                         <button type="submit" class="btn btn-primary" id="btn-upload-ebook">
@@ -234,7 +261,7 @@
                         <input type="text" id="store-name" class="form-control" required oninput="generateStoreSlug()">
                     </div>
                     <div class="form-group">
-                        <label>Slug (URL Amigável)</label>
+                        <label>Slug (URL Amigável) *</label>
                         <input type="text" id="store-slug" class="form-control" required>
                     </div>
                 </div>
@@ -316,7 +343,7 @@
 
                 <div style="display: flex; gap: 12px; margin-top: 16px;">
                     <button type="button" class="btn btn-secondary" onclick="closeStoreFormModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Loja</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-store" style="flex: 1;">Salvar Loja</button>
                 </div>
             </form>
         </div>
@@ -335,7 +362,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Slug (URL Amigável)</label>
+                    <label>Slug (URL Amigável) *</label>
                     <input type="text" id="category-slug" class="form-control" required>
                 </div>
 
@@ -356,7 +383,7 @@
 
                 <div style="display: flex; gap: 12px; margin-top: 16px;">
                     <button type="button" class="btn btn-secondary" onclick="closeCategoryFormModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Categoria</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-category" style="flex: 1;">Salvar Categoria</button>
                 </div>
             </form>
         </div>
@@ -371,19 +398,44 @@
     <script src="../assets/guia-compras.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        let adminStores = [];
+        let adminCategories = [];
+
+        // Verificação obrigatória de sessão e inicialização do Supabase
+        document.addEventListener('DOMContentLoaded', async () => {
             if (typeof verifySession === 'function') {
                 verifySession();
             }
 
+            // Inicialização garantida do Supabase
+            if (typeof initSupabase === 'function') {
+                initSupabase();
+            }
+
+            updateSupabaseStatusIndicator();
+
+            // Ativa menu mobile
             const toggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
             if (toggle && sidebar) {
                 toggle.addEventListener('click', () => sidebar.classList.toggle('active'));
             }
 
-            loadAdminData();
+            await loadAdminData();
         });
+
+        function updateSupabaseStatusIndicator() {
+            const statusBadge = document.getElementById('supabase-connection-status');
+            if (!statusBadge) return;
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                statusBadge.className = "status-pill status-online";
+                statusBadge.innerText = "🟢 Supabase Conectado";
+            } else {
+                statusBadge.className = "status-pill status-offline";
+                statusBadge.innerText = "🔴 Supabase Offline (Modo Local)";
+            }
+        }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -393,29 +445,53 @@
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
-        let adminStores = [];
-        let adminCategories = [];
-
+        // CARREGA DADOS DO SUPABASE DIRETO NO ADMIN
         async function loadAdminData() {
-            if (typeof allStores !== 'undefined' && allStores.length > 0) {
-                adminStores = allStores;
-            } else {
-                adminStores = FALLBACK_STORES;
+            let storesFromSupabase = false;
+            let categoriesFromSupabase = false;
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data: storeData, error: sErr } = await supabaseClient
+                        .from('shopping_stores')
+                        .select('*')
+                        .order('name');
+                    
+                    if (!sErr && storeData && storeData.length > 0) {
+                        adminStores = storeData;
+                        storesFromSupabase = true;
+                    }
+
+                    const { data: catData, error: cErr } = await supabaseClient
+                        .from('shopping_categories')
+                        .select('*')
+                        .order('name');
+                    
+                    if (!cErr && catData && catData.length > 0) {
+                        adminCategories = catData;
+                        categoriesFromSupabase = true;
+                    }
+                } catch (err) {
+                    console.warn("Aviso ao carregar dados do Supabase:", err);
+                }
             }
 
-            if (typeof allCategories !== 'undefined' && allCategories.length > 0) {
-                adminCategories = allCategories;
-            } else {
-                adminCategories = FALLBACK_CATEGORIES;
+            if (!storesFromSupabase) {
+                adminStores = (typeof FALLBACK_STORES !== 'undefined') ? FALLBACK_STORES : [];
+            }
+            if (!categoriesFromSupabase) {
+                adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? FALLBACK_CATEGORIES : [];
             }
 
             renderAdminStoresTable();
             renderAdminCategoriesTable();
         }
 
+        // TABELA DE LOJAS
         function renderAdminStoresTable() {
             const tbody = document.getElementById('admin-stores-table-body');
-            const search = document.getElementById('admin-store-search').value.toLowerCase();
+            const searchInput = document.getElementById('admin-store-search');
+            const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
             if (!tbody) return;
 
             const filtered = adminStores.filter(s => s.name.toLowerCase().includes(search));
@@ -424,7 +500,7 @@
             filtered.forEach(s => {
                 html += `
                     <tr>
-                        <td><strong>${s.name}</strong><br><small style="color: var(--text-muted);">${s.address || ''}</small></td>
+                        <td><strong>${s.name}</strong><br><small style="color: var(--text-muted);">${s.address || s.slug || ''}</small></td>
                         <td>${s.neighborhood || 'Centro'}</td>
                         <td><span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;">${(s.category_slugs || []).join(', ') || 'Geral'}</span></td>
                         <td>${s.featured ? '⭐ Sim' : 'Não'}</td>
@@ -476,9 +552,9 @@
             const s = adminStores.find(item => item.slug === slug);
             if (!s) return;
 
-            document.getElementById('store-id').value = s.id || s.slug;
-            document.getElementById('store-name').value = s.name;
-            document.getElementById('store-slug').value = s.slug;
+            document.getElementById('store-id').value = (s.id && s.id.length > 20) ? s.id : '';
+            document.getElementById('store-name').value = s.name || '';
+            document.getElementById('store-slug').value = s.slug || '';
             document.getElementById('store-short-desc').value = s.short_description || '';
             document.getElementById('store-desc').value = s.description || '';
             document.getElementById('store-address').value = s.address || '';
@@ -498,64 +574,90 @@
             document.getElementById('store-modal').style.display = 'flex';
         }
 
+        // SALVAR LOJA (SUPABASE UPSERT)
         document.getElementById('store-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const btn = document.getElementById('btn-save-store');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            const idVal = document.getElementById('store-id').value;
+
             const storeData = {
-                id: document.getElementById('store-id').value || undefined,
-                name: document.getElementById('store-name').value,
-                slug: document.getElementById('store-slug').value,
-                short_description: document.getElementById('store-short-desc').value,
-                description: document.getElementById('store-desc').value,
-                address: document.getElementById('store-address').value,
-                neighborhood: document.getElementById('store-neighborhood').value,
+                name: document.getElementById('store-name').value.trim(),
+                slug: document.getElementById('store-slug').value.trim(),
+                short_description: document.getElementById('store-short-desc').value.trim(),
+                description: document.getElementById('store-desc').value.trim(),
+                address: document.getElementById('store-address').value.trim(),
+                neighborhood: document.getElementById('store-neighborhood').value.trim() || 'Centro',
                 latitude: parseFloat(document.getElementById('store-lat').value) || null,
                 longitude: parseFloat(document.getElementById('store-lng').value) || null,
-                phone: document.getElementById('store-phone').value,
-                whatsapp: document.getElementById('store-whatsapp').value,
-                instagram: document.getElementById('store-instagram').value,
-                website: document.getElementById('store-website').value,
-                opening_hours: document.getElementById('store-hours').value,
-                image_url: document.getElementById('store-image-url').value,
+                phone: document.getElementById('store-phone').value.trim(),
+                whatsapp: document.getElementById('store-whatsapp').value.trim(),
+                instagram: document.getElementById('store-instagram').value.trim(),
+                website: document.getElementById('store-website').value.trim(),
+                opening_hours: document.getElementById('store-hours').value.trim(),
+                image_url: document.getElementById('store-image-url').value.trim(),
                 featured: document.getElementById('store-featured').checked,
-                active: document.getElementById('store-active').checked
+                active: document.getElementById('store-active').checked,
+                updated_at: new Date().toISOString()
             };
+
+            if (idVal && idVal.length > 20) {
+                storeData.id = idVal;
+            }
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
-                    await supabaseClient.from('shopping_stores').upsert(storeData, { onConflict: 'slug' });
+                    const { data, error } = await supabaseClient
+                        .from('shopping_stores')
+                        .upsert(storeData, { onConflict: 'slug' })
+                        .select();
+
+                    if (error) {
+                        console.error("Erro no Supabase:", error);
+                        alert(`Atenção! Não foi possível salvar no Supabase:\n\n${error.message || JSON.stringify(error)}\n\nCertifique-se de ter executado o script "schema_guia_compras.sql" no SQL Editor do Supabase.`);
+                    } else {
+                        alert(`Loja "${storeData.name}" salva com SUCESSO no Supabase! 🎉`);
+                    }
                 } catch (err) {
-                    console.error("Erro ao salvar no Supabase:", err);
+                    console.error("Erro inesperado ao salvar no Supabase:", err);
+                    alert(`Erro inesperado: ${err.message}`);
                 }
+            } else {
+                alert("Aviso: Supabase não está conectado. A alteração foi apenas temporária no navegador.");
             }
 
-            const existingIndex = adminStores.findIndex(s => s.slug === storeData.slug);
-            if (existingIndex >= 0) {
-                adminStores[existingIndex] = { ...adminStores[existingIndex], ...storeData };
-            } else {
-                adminStores.push(storeData);
-            }
+            btn.disabled = false;
+            btn.innerText = "Salvar Loja";
 
             closeStoreFormModal();
-            renderAdminStoresTable();
-            alert("Loja salva com sucesso!");
+            await loadAdminData();
         });
 
+        // DELETAR LOJA
         async function deleteStore(slug) {
             if (!confirm(`Tem certeza que deseja excluir a loja "${slug}"?`)) return;
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
-                    await supabaseClient.from('shopping_stores').delete().eq('slug', slug);
+                    const { error } = await supabaseClient.from('shopping_stores').delete().eq('slug', slug);
+                    if (error) {
+                        console.error("Erro ao deletar no Supabase:", error);
+                        alert(`Erro ao excluir no Supabase: ${error.message}`);
+                        return;
+                    }
+                    alert(`Loja "${slug}" excluída com SUCESSO no Supabase!`);
                 } catch (err) {
                     console.error("Erro ao deletar no Supabase:", err);
                 }
             }
 
-            adminStores = adminStores.filter(s => s.slug !== slug);
-            renderAdminStoresTable();
+            await loadAdminData();
         }
 
+        // TABELA DE CATEGORIAS
         function renderAdminCategoriesTable() {
             const tbody = document.getElementById('admin-categories-table-body');
             if (!tbody) return;
@@ -574,7 +676,7 @@
                     </tr>
                 `;
             });
-            tbody.innerHTML = html;
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">Nenhuma categoria encontrada.</td></tr>';
         }
 
         function openCategoryFormModal() {
@@ -602,9 +704,9 @@
             const c = adminCategories.find(item => item.slug === slug);
             if (!c) return;
 
-            document.getElementById('category-id').value = c.id || c.slug;
-            document.getElementById('category-name').value = c.name;
-            document.getElementById('category-slug').value = c.slug;
+            document.getElementById('category-id').value = (c.id && c.id.length > 20) ? c.id : '';
+            document.getElementById('category-name').value = c.name || '';
+            document.getElementById('category-slug').value = c.slug || '';
             document.getElementById('category-icon').value = c.icon || '🛍️';
             document.getElementById('category-desc').value = c.description || '';
             document.getElementById('category-active').checked = Boolean(c.active);
@@ -613,37 +715,58 @@
             document.getElementById('category-modal').style.display = 'flex';
         }
 
+        // SALVAR CATEGORIA (SUPABASE UPSERT)
         document.getElementById('category-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const btn = document.getElementById('btn-save-category');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            const idVal = document.getElementById('category-id').value;
+
             const catData = {
-                name: document.getElementById('category-name').value,
-                slug: document.getElementById('category-slug').value,
-                icon: document.getElementById('category-icon').value,
-                description: document.getElementById('category-desc').value,
-                active: document.getElementById('category-active').checked
+                name: document.getElementById('category-name').value.trim(),
+                slug: document.getElementById('category-slug').value.trim(),
+                icon: document.getElementById('category-icon').value.trim() || '🛍️',
+                description: document.getElementById('category-desc').value.trim(),
+                active: document.getElementById('category-active').checked,
+                updated_at: new Date().toISOString()
             };
+
+            if (idVal && idVal.length > 20) {
+                catData.id = idVal;
+            }
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
-                    await supabaseClient.from('shopping_categories').upsert(catData, { onConflict: 'slug' });
+                    const { data, error } = await supabaseClient
+                        .from('shopping_categories')
+                        .upsert(catData, { onConflict: 'slug' })
+                        .select();
+
+                    if (error) {
+                        console.error("Erro no Supabase:", error);
+                        alert(`Atenção! Não foi possível salvar a categoria no Supabase:\n\n${error.message || JSON.stringify(error)}`);
+                    } else {
+                        alert(`Categoria "${catData.name}" salva com SUCESSO no Supabase! 🎉`);
+                    }
                 } catch (err) {
                     console.error("Erro ao salvar categoria no Supabase:", err);
+                    alert(`Erro: ${err.message}`);
                 }
+            } else {
+                alert("Aviso: Supabase não está conectado.");
             }
 
-            const existingIndex = adminCategories.findIndex(c => c.slug === catData.slug);
-            if (existingIndex >= 0) {
-                adminCategories[existingIndex] = { ...adminCategories[existingIndex], ...catData };
-            } else {
-                adminCategories.push(catData);
-            }
+            btn.disabled = false;
+            btn.innerText = "Salvar Categoria";
 
             closeCategoryFormModal();
-            renderAdminCategoriesTable();
-            alert("Categoria salva com sucesso!");
+            await loadAdminData();
         });
 
+        // UPLOAD DO PDF EBOOK NO SUPABASE STORAGE
         document.getElementById('ebook-upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const fileInput = document.getElementById('ebook-file-input');
@@ -663,14 +786,18 @@
                             upsert: true
                         });
 
-                    if (error) throw error;
-                    alert("E-book oficial enviado com sucesso para o Supabase Storage!");
+                    if (error) {
+                        console.error("Erro no upload do Supabase Storage:", error);
+                        alert(`Erro no upload do PDF para o Supabase Storage:\n\n${error.message}\n\nCertifique-se de ter criado o bucket público chamado "shopping-guide" no menu Storage do Supabase.`);
+                    } else {
+                        alert("E-book oficial enviado e atualizado com SUCESSO no Supabase Storage! 🎉");
+                    }
                 } catch (err) {
                     console.error("Erro ao enviar E-book para o Supabase:", err);
-                    alert("Upload concluído localmente. Lembre-se de criar o bucket 'shopping-guide' no Supabase Storage.");
+                    alert(`Erro: ${err.message}`);
                 }
             } else {
-                alert("Supabase não conectado. Configure as chaves em Configurações para habilitar o upload real em nuvem.");
+                alert("Supabase não está conectado.");
             }
 
             btn.disabled = false;
