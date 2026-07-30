@@ -1,10 +1,10 @@
 // ============================================================================
-// ROTA CDE TRANSFER - GUIA DE COMPRAS NO PARAGUAI (MOTOR PRINCIPAL)
+// ROTA CDE TRANSFER - GUIA DE COMPRAS NO PARAGUAI (MOTOR PRINCIPAL REFINADO)
 // ============================================================================
 
 const LOCAL_STORAGE_ROUTE_KEY = "transfer_shopping_route";
 
-// Lista fallback de categorias padronizadas caso Supabase não responda
+// Lista fallback de categorias padronizadas
 const FALLBACK_CATEGORIES = [
     { id: "cat-1", name: "Eletrônicos", slug: "eletronicos", icon: "📱", description: "Celulares, câmeras, áudio e eletrodomésticos" },
     { id: "cat-2", name: "Informática", slug: "informatica", icon: "💻", description: "Notebooks, hardware e periféricos" },
@@ -19,7 +19,7 @@ const FALLBACK_CATEGORIES = [
     { id: "cat-11", name: "Destaques", slug: "destaques", icon: "⭐", description: "Lojas mais recomendadas em CDE" }
 ];
 
-// Lista fallback de lojas de destaque caso Supabase esteja desconectado
+// Lista fallback de lojas
 const FALLBACK_STORES = [
     {
         id: "store-1",
@@ -128,16 +128,16 @@ const FALLBACK_STORES = [
     }
 ];
 
-// Estado Global da Aplicação Pública
+// Estado Global
 let allCategories = [];
 let allStores = [];
 let activeCategoryFilter = "todos";
 let searchQuery = "";
-let selectedRouteStores = []; // Guardado no LocalStorage
+let selectedRouteStores = [];
 let leafletMap = null;
 let mapMarkers = [];
 
-// --- GERENCIAMENTO DE LOCALSTORAGE DO ROTEIRO ---
+// --- LOCALSTORAGE DO ROTEIRO ---
 function loadRouteFromLocalStorage() {
     try {
         const saved = localStorage.getItem(LOCAL_STORAGE_ROUTE_KEY);
@@ -177,7 +177,17 @@ function addStoreToRoute(store) {
             image_url: store.image_url || ''
         });
         saveRouteToLocalStorage();
+        triggerRouteBadgePulse();
         showToast(`"<strong>${store.name}</strong>" adicionada ao seu roteiro! 🎉`);
+    }
+}
+
+function triggerRouteBadgePulse() {
+    const badge = document.getElementById('floating-route-badge');
+    if (badge) {
+        badge.classList.remove('pulse');
+        void badge.offsetWidth;
+        badge.classList.add('pulse');
     }
 }
 
@@ -207,14 +217,13 @@ function clearRoute() {
     }
 }
 
-// --- BUSCA DE DADOS DO SUPABASE COM FALLBACK LOCAL ---
+// --- BUSCA DE DADOS ---
 async function fetchShoppingData() {
     let categoriesLoaded = false;
     let storesLoaded = false;
 
     if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         try {
-            // Busca Categorias
             const { data: catData, error: catError } = await supabaseClient
                 .from('shopping_categories')
                 .select('*')
@@ -226,7 +235,6 @@ async function fetchShoppingData() {
                 categoriesLoaded = true;
             }
 
-            // Busca Lojas + Relacionamento com Categorias
             const { data: storeData, error: storeError } = await supabaseClient
                 .from('shopping_stores')
                 .select(`
@@ -249,23 +257,19 @@ async function fetchShoppingData() {
                 storesLoaded = true;
             }
         } catch (err) {
-            console.warn("Falha ao consultar Supabase para o Guia de Compras. Usando fallback local:", err);
+            console.warn("Falha ao consultar Supabase. Usando dados fallback:", err);
         }
     }
 
-    if (!categoriesLoaded) {
-        allCategories = FALLBACK_CATEGORIES;
-    }
-    if (!storesLoaded) {
-        allStores = FALLBACK_STORES;
-    }
+    if (!categoriesLoaded) allCategories = FALLBACK_CATEGORIES;
+    if (!storesLoaded) allStores = FALLBACK_STORES;
 
     renderCategoryChips();
     filterAndRenderStores();
     initLeafletMap();
 }
 
-// --- CARREGAMENTO DE ROTEIRO COMPARTILHADO VIA URL (`?roteiro=slug1,slug2`) ---
+// --- ROTEIRO VIA URL ---
 function checkSharedRouteURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const sharedParam = urlParams.get('roteiro') || urlParams.get('lojas');
@@ -295,21 +299,21 @@ function checkSharedRouteURL() {
     }
 }
 
-// --- RENDERIZAÇÃO DAS CATEGORIAS (CHIPS) ---
+// --- CATEGORIAS (CHIPS) ---
 function renderCategoryChips() {
     const container = document.getElementById('category-chips-container');
     if (!container) return;
 
     let html = `
         <button class="chip-btn ${activeCategoryFilter === 'todos' ? 'active' : ''}" onclick="setCategoryFilter('todos')">
-            ✨ Todas as Lojas
+            ✨ TODAS AS LOJAS
         </button>
     `;
 
     allCategories.forEach(cat => {
         html += `
             <button class="chip-btn ${activeCategoryFilter === cat.slug ? 'active' : ''}" onclick="setCategoryFilter('${cat.slug}')">
-                ${cat.icon || '🛍️'} ${cat.name}
+                ${cat.icon || '🛍️'} ${cat.name.toUpperCase()}
             </button>
         `;
     });
@@ -323,7 +327,7 @@ function setCategoryFilter(slug) {
     filterAndRenderStores();
 }
 
-// --- RENDERIZAÇÃO DO GRID DE LOJAS ---
+// --- GRID DE LOJAS ---
 function filterAndRenderStores() {
     const container = document.getElementById('stores-grid-container');
     const emptyState = document.getElementById('stores-empty-state');
@@ -363,19 +367,19 @@ function filterAndRenderStores() {
             <div class="store-card">
                 <div class="store-card-image">
                     <img src="${store.image_url || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=600&q=80'}" alt="${store.name}" loading="lazy">
-                    ${store.featured ? '<span class="badge-featured">⭐ Destaque</span>' : ''}
+                    ${store.featured ? '<span class="badge-featured">⭐ DESTAQUE</span>' : ''}
                 </div>
                 <div class="store-card-body">
-                    <span class="store-location-badge">📍 ${store.neighborhood || 'Ciudad del Este'}</span>
+                    <span class="store-location-badge">📍 ${store.neighborhood || 'Centro'}</span>
                     <h3 class="store-card-title">${store.name}</h3>
                     <p class="store-card-desc">${store.short_description || store.description || ''}</p>
                     
                     <div class="store-card-actions">
                         <button class="btn btn-outline-gold btn-sm" onclick="openStoreModal('${store.slug}')">
-                            ℹ️ Ver Detalhes
+                            ℹ️ Ver detalhes
                         </button>
                         <button class="btn ${inRoute ? 'btn-success' : 'btn-primary'} btn-sm" onclick="toggleRouteStore('${store.slug}')">
-                            ${inRoute ? '✓ No Meu Roteiro' : '+ Adicionar ao Roteiro'}
+                            ${inRoute ? '✓ No Meu Roteiro' : '+ Adicionar ao roteiro'}
                         </button>
                     </div>
                 </div>
@@ -398,7 +402,7 @@ function toggleRouteStore(slug) {
     filterAndRenderStores();
 }
 
-// --- MODAL DE DETALHES DA LOJA ---
+// --- MODAL DE DETALHES ---
 function openStoreModal(slug) {
     const store = allStores.find(s => s.slug === slug);
     if (!store) return;
@@ -420,7 +424,7 @@ function openStoreModal(slug) {
                     <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; color: #fff; margin-bottom: 4px;">${store.name}</h2>
                     <p style="color: var(--primary-gold); font-weight: 600; font-size: 0.9rem;">📍 ${store.address || store.neighborhood || 'Ciudad del Este'}</p>
                 </div>
-                ${store.featured ? '<span class="badge-featured" style="position: static;">⭐ Destaque</span>' : ''}
+                ${store.featured ? '<span class="badge-featured" style="position: static;">⭐ DESTAQUE</span>' : ''}
             </div>
 
             <p style="color: rgba(255,255,255,0.85); line-height: 1.6; margin: 16px 0;">${store.description || store.short_description || ''}</p>
@@ -456,7 +460,7 @@ function closeStoreModal() {
     }
 }
 
-// --- MAPA INTERATIVO (LEAFLET.JS - OPENSTREETMAP GRATUITO) ---
+// --- MAPA LEAFLET ---
 function initLeafletMap() {
     const mapElement = document.getElementById('mapa-compras');
     if (!mapElement || typeof L === 'undefined') return;
@@ -515,7 +519,7 @@ function updateMapMarkers(storesToDisplay) {
     }
 }
 
-// --- ATUALIZAÇÃO DA UI DO ROTEIRO DO CLIENTE ---
+// --- UI DO ROTEIRO ---
 function updateRouteUI() {
     const routeBadge = document.getElementById('route-badge-count');
     const floatingBadge = document.getElementById('floating-route-badge-count');
@@ -559,7 +563,7 @@ function updateRouteUI() {
     }
 }
 
-// --- COMPARTILHAMENTO DO ROTEIRO ---
+// --- COMPARTILHAR ---
 function shareMyRoute() {
     if (selectedRouteStores.length === 0) {
         showToast("Adicione pelo menos uma loja ao seu roteiro para compartilhar.");
@@ -580,7 +584,7 @@ function shareMyRoute() {
     }
 }
 
-// --- REDIRECIONAR PARA RESERVA DO TRANSFER COM ROTEIRO ---
+// --- RESERVA TRANSFER ---
 function reserveTransferWithRoute() {
     if (selectedRouteStores.length > 0) {
         const storeNames = selectedRouteStores.map(s => s.name).join(', ');
@@ -591,7 +595,7 @@ function reserveTransferWithRoute() {
     }
 }
 
-// --- SENSOR DE TOAST / NOTIFICAÇÕES RÁPIDAS ---
+// --- TOAST ---
 function showToast(message) {
     let toast = document.getElementById('guiacompras-toast');
     if (!toast) {
@@ -607,7 +611,7 @@ function showToast(message) {
     }, 3200);
 }
 
-// --- INICIALIZAÇÃO AO CARREGAR A PÁGINA ---
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-store-input');
     if (searchInput) {
