@@ -11,14 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- CSS do Painel Admin -->
+    <!-- CSS Padrão do Painel Admin -->
     <link rel="stylesheet" href="assets/admin.css">
 
     <style>
         .tabs-header {
             display: flex;
             gap: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-color);
             margin-bottom: 24px;
         }
 
@@ -31,7 +31,11 @@
             font-weight: 600;
             cursor: pointer;
             border-bottom: 2px solid transparent;
-            transition: var(--transition-fast);
+            transition: var(--transition-normal);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
         }
 
         .tab-btn.active {
@@ -62,19 +66,19 @@
         .modal-admin-card {
             background: var(--bg-card);
             border: 1px solid var(--primary-gold);
-            border-radius: var(--border-radius-lg);
+            border-radius: var(--border-radius-md);
             max-width: 700px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 24px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+            padding: 28px;
+            box-shadow: var(--shadow-premium);
         }
 
         .form-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 16px;
         }
 
         @media (max-width: 640px) {
@@ -82,43 +86,16 @@
                 grid-template-columns: 1fr;
             }
         }
-
-        .status-pill {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .status-online {
-            background: rgba(76, 175, 80, 0.15);
-            color: #4caf50;
-            border: 1px solid #4caf50;
-        }
-
-        .status-offline {
-            background: rgba(244, 67, 54, 0.15);
-            color: #f44336;
-            border: 1px solid #f44336;
-        }
     </style>
 </head>
 
-<body class="admin-body">
-
-    <!-- Topbar Mobile -->
-    <div class="mobile-topbar">
-        <button class="menu-toggle" id="menu-toggle">☰</button>
-        <span class="brand-title">ROTA CDE ADMIN</span>
-        <span></span>
-    </div>
+<body>
 
     <div class="admin-layout">
-        <!-- Sidebar Menu -->
-        <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Menu (Padrão Oficial) -->
+        <aside class="admin-sidebar" id="sidebar">
             <div class="sidebar-brand">
-                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-icon">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
                 <div class="brand-text">
                     <span class="brand-title">ROTA CDE</span>
                     <span class="brand-subtitle">PAINEL</span>
@@ -142,38 +119,72 @@
 
         <!-- Area de Conteudo Principal -->
         <div class="admin-main">
-            <!-- Header do Painel -->
-            <div class="admin-header">
+
+            <!-- Header Mobile (Padrão Oficial) -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+
+            <!-- Page Header (Padrão Oficial) -->
+            <div class="page-header">
                 <div>
                     <h1 class="page-title">🛍️ Guia de Compras no Paraguai</h1>
-                    <p class="page-subtitle">Gerencie as lojas cadastradas, categorias e o arquivo PDF do E-book oficial de Ciudad del Este</p>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">
+                        Gerencie as lojas cadastradas, categorias e o arquivo PDF do E-book oficial de Ciudad del Este.
+                    </p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span id="supabase-connection-status" class="status-pill status-offline">Conectando Supabase...</span>
+                <div class="page-actions" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span id="supabase-connection-status" style="background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid #4caf50; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 700;">🟢 Supabase Conectado</span>
                     <a href="../guia-de-compras.html" target="_blank" class="btn btn-secondary">🌐 Ver Página Pública</a>
                 </div>
             </div>
 
-            <!-- Navegacao por Abas -->
+            <!-- Dashboard Stats Grid (Padrão Oficial) -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-title">Total de Lojas</span>
+                    <span class="stat-value" id="stat-total-lojas">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Lojas em Destaque</span>
+                    <span class="stat-value" id="stat-destaque-lojas">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">Categorias Ativas</span>
+                    <span class="stat-value" id="stat-total-categorias">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title">E-book PDF Oficial</span>
+                    <span class="stat-value" style="font-size: 16px; font-weight: 700; color: #4caf50;">✓ Ativo</span>
+                </div>
+            </div>
+
+            <!-- Navegacao por Abas (Padrão Oficial) -->
             <div class="tabs-header">
-                <button class="tab-btn active" onclick="switchTab('lojas')">🏬 Lojas (${adminStores ? adminStores.length : 0})</button>
-                <button class="tab-btn" onclick="switchTab('categorias')">🏷️ Categorias</button>
+                <button class="tab-btn active" onclick="switchTab('lojas')">🏬 Lojas (<span id="stores-count-badge">0</span>)</button>
+                <button class="tab-btn" onclick="switchTab('categorias')">🏷️ Categorias (<span id="categories-count-badge">0</span>)</button>
                 <button class="tab-btn" onclick="switchTab('ebook')">📖 E-book PDF</button>
             </div>
 
             <!-- ABA 1: LOJAS -->
             <div id="tab-lojas" class="tab-content active">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-                    <div style="max-width: 350px; width: 100%;">
-                        <input type="text" id="admin-store-search" class="form-control" placeholder="Buscar loja por nome..." oninput="renderAdminStoresTable()">
+                <div class="filter-card" style="justify-content: space-between;">
+                    <div class="filter-group" style="flex: 1; max-width: 400px;">
+                        <label for="admin-store-search">Buscar por Nome da Loja</label>
+                        <input type="text" id="admin-store-search" class="form-control" placeholder="Digite o nome da loja..." oninput="renderAdminStoresTable()">
                     </div>
-                    <button class="btn btn-primary" onclick="openStoreFormModal()">
+                    <button class="btn btn-primary" onclick="openStoreFormModal()" style="align-self: flex-end;">
                         ➕ Nova Loja
                     </button>
                 </div>
 
-                <div class="table-card">
-                    <table class="data-table">
+                <div class="admin-table-container">
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Loja / Endereço</th>
@@ -181,11 +192,11 @@
                                 <th>Categorias</th>
                                 <th>Destaque</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="admin-stores-table-body">
-                            <!-- Injetado por JS -->
+                            <!-- Injetado dinamicamente via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -193,26 +204,29 @@
 
             <!-- ABA 2: CATEGORIAS -->
             <div id="tab-categorias" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif;">Categorias de Produtos</h3>
+                <div class="filter-card" style="justify-content: space-between;">
+                    <div>
+                        <h3 style="color: #fff; font-size: 16px; font-weight: 700;">Categorias de Produtos</h3>
+                        <p style="color: var(--text-muted); font-size: 13px;">Gerencie as categorias exibidas nos filtros do Guia de Compras</p>
+                    </div>
                     <button class="btn btn-primary" onclick="openCategoryFormModal()">
                         ➕ Nova Categoria
                     </button>
                 </div>
 
-                <div class="table-card">
-                    <table class="data-table">
+                <div class="admin-table-container">
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Ícone</th>
-                                <th>Nome</th>
+                                <th>Nome da Categoria</th>
                                 <th>Slug</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th style="text-align: right;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="admin-categories-table-body">
-                            <!-- Injetado por JS -->
+                            <!-- Injetado dinamicamente via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -220,14 +234,14 @@
 
             <!-- ABA 3: E-BOOK PDF -->
             <div id="tab-ebook" class="tab-content">
-                <div class="table-card" style="padding: 32px; max-width: 650px;">
-                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 12px;">📖 E-book Oficial do Guia de Compras</h3>
+                <div class="config-section" style="max-width: 650px;">
+                    <h3 class="config-section-title">📖 E-book Oficial do Guia de Compras</h3>
                     <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
-                        Faça o upload do arquivo PDF oficial. O link permanecerá único no Supabase Storage no bucket <code style="color: var(--primary-gold);">shopping-guide/guia-de-compras.pdf</code>.
+                        Faça o upload do arquivo PDF oficial. O link único no Supabase Storage no bucket <code style="color: var(--primary-gold);">shopping-guide/guia-de-compras.pdf</code> será atualizado.
                     </p>
 
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                        <strong style="color: var(--primary-gold); display: block; margin-bottom: 4px;">Link Público Atual do PDF:</strong>
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); padding: 16px; margin-bottom: 24px;">
+                        <strong style="color: var(--primary-gold); display: block; margin-bottom: 6px; font-size: 13px;">Link Público Atual do PDF:</strong>
                         <a id="current-ebook-link" href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" style="color: #64b5f6; font-size: 13px; word-break: break-all;">
                             https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf
                         </a>
@@ -248,11 +262,11 @@
         </div>
     </div>
 
-    <!-- MODAL LOJA -->
+    <!-- MODAL LOJA (Padrão Oficial) -->
     <div class="modal-admin-overlay" id="store-modal">
         <div class="modal-admin-card">
-            <h2 id="store-modal-title" style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 20px;">Nova Loja</h2>
-            <form id="store-form" style="display: flex; flex-direction: column; gap: 14px;">
+            <h2 id="store-modal-title" style="color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Nova Loja</h2>
+            <form id="store-form" style="display: flex; flex-direction: column; gap: 16px;">
                 <input type="hidden" id="store-id">
 
                 <div class="form-grid-2">
@@ -331,29 +345,29 @@
                 </div>
 
                 <div class="form-grid-2">
-                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-                        <input type="checkbox" id="store-featured" style="width: 18px; height: 18px;">
-                        <label for="store-featured" style="margin: 0; color: #fff;">⭐ Loja em Destaque</label>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                        <input type="checkbox" id="store-featured" style="width: 18px; height: 18px; accent-color: var(--primary-gold);">
+                        <label for="store-featured" style="margin: 0; color: #fff; cursor: pointer;">⭐ Loja em Destaque</label>
                     </div>
-                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-                        <input type="checkbox" id="store-active" checked style="width: 18px; height: 18px;">
-                        <label for="store-active" style="margin: 0; color: #fff;">✅ Ativa no Site</label>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                        <input type="checkbox" id="store-active" checked style="width: 18px; height: 18px; accent-color: var(--primary-gold);">
+                        <label for="store-active" style="margin: 0; color: #fff; cursor: pointer;">✅ Ativa no Site</label>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeStoreFormModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btn-save-store" style="flex: 1;">Salvar Loja</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-store">Salvar Loja</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL CATEGORIA -->
+    <!-- MODAL CATEGORIA (Padrão Oficial) -->
     <div class="modal-admin-overlay" id="category-modal">
         <div class="modal-admin-card" style="max-width: 500px;">
-            <h2 id="category-modal-title" style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 20px;">Nova Categoria</h2>
-            <form id="category-form" style="display: flex; flex-direction: column; gap: 14px;">
+            <h2 id="category-modal-title" style="color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">Nova Categoria</h2>
+            <form id="category-form" style="display: flex; flex-direction: column; gap: 16px;">
                 <input type="hidden" id="category-id">
 
                 <div class="form-group">
@@ -377,13 +391,13 @@
                 </div>
 
                 <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="category-active" checked style="width: 18px; height: 18px;">
-                    <label for="category-active" style="margin: 0; color: #fff;">✅ Ativa no Site</label>
+                    <input type="checkbox" id="category-active" checked style="width: 18px; height: 18px; accent-color: var(--primary-gold);">
+                    <label for="category-active" style="margin: 0; color: #fff; cursor: pointer;">✅ Ativa no Site</label>
                 </div>
 
-                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeCategoryFormModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btn-save-category" style="flex: 1;">Salvar Categoria</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-category">Salvar Categoria</button>
                 </div>
             </form>
         </div>
@@ -429,10 +443,14 @@
             if (!statusBadge) return;
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-                statusBadge.className = "status-pill status-online";
+                statusBadge.style.background = "rgba(76, 175, 80, 0.15)";
+                statusBadge.style.color = "#4caf50";
+                statusBadge.style.borderColor = "#4caf50";
                 statusBadge.innerText = "🟢 Supabase Conectado";
             } else {
-                statusBadge.className = "status-pill status-offline";
+                statusBadge.style.background = "rgba(244, 67, 54, 0.15)";
+                statusBadge.style.color = "#f44336";
+                statusBadge.style.borderColor = "#f44336";
                 statusBadge.innerText = "🔴 Supabase Offline (Modo Local)";
             }
         }
@@ -483,6 +501,19 @@
                 adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? FALLBACK_CATEGORIES : [];
             }
 
+            // Atualiza contadores nas abas e no dashboard
+            const storeCountEl = document.getElementById('stores-count-badge');
+            const catCountEl = document.getElementById('categories-count-badge');
+            const statTotalEl = document.getElementById('stat-total-lojas');
+            const statFeaturedEl = document.getElementById('stat-destaque-lojas');
+            const statCatEl = document.getElementById('stat-total-categorias');
+
+            if (storeCountEl) storeCountEl.innerText = adminStores.length;
+            if (catCountEl) catCountEl.innerText = adminCategories.length;
+            if (statTotalEl) statTotalEl.innerText = adminStores.length;
+            if (statFeaturedEl) statFeaturedEl.innerText = adminStores.filter(s => s.featured).length;
+            if (statCatEl) statCatEl.innerText = adminCategories.filter(c => c.active !== false).length;
+
             renderAdminStoresTable();
             renderAdminCategoriesTable();
         }
@@ -498,22 +529,35 @@
 
             let html = '';
             filtered.forEach(s => {
+                const categoryBadges = (s.category_slugs || []).map(cat => {
+                    return `<span style="background: rgba(197, 155, 39, 0.12); color: var(--primary-gold); border: 1px solid rgba(197, 155, 39, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; margin: 2px 2px 2px 0;">${cat}</span>`;
+                }).join('') || '<span style="color: var(--text-muted); font-size: 12px;">Geral</span>';
+
+                const statusPill = s.active 
+                    ? '<span style="background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid #4caf50; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">Ativa</span>'
+                    : '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid #f44336; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">Inativa</span>';
+
                 html += `
                     <tr>
-                        <td><strong>${s.name}</strong><br><small style="color: var(--text-muted);">${s.address || s.slug || ''}</small></td>
-                        <td>${s.neighborhood || 'Centro'}</td>
-                        <td><span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;">${(s.category_slugs || []).join(', ') || 'Geral'}</span></td>
-                        <td>${s.featured ? '⭐ Sim' : 'Não'}</td>
-                        <td>${s.active ? '<span class="badge badge-confirmado">Ativa</span>' : '<span class="badge badge-cancelado">Inativa</span>'}</td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="editStore('${s.slug}')">✏️ Editar</button>
-                            <button class="btn btn-sm btn-secondary" onclick="deleteStore('${s.slug}')">🗑️ Excluir</button>
+                            <strong style="font-size: 15px; color: #fff;">${s.name}</strong>
+                            <br><small style="color: var(--text-muted); font-size: 12px;">${s.address || s.slug || ''}</small>
+                        </td>
+                        <td style="color: var(--text-muted);">${s.neighborhood || 'Centro'}</td>
+                        <td>${categoryBadges}</td>
+                        <td>${s.featured ? '<span style="color: #e5c158; font-weight: 700;">⭐ Sim</span>' : '<span style="color: var(--text-muted);">Não</span>'}</td>
+                        <td>${statusPill}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="editStore('${s.slug}')">✏️ Editar</button>
+                                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteStore('${s.slug}')">🗑️ Excluir</button>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
 
-            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">Nenhuma loja encontrada.</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 30px; color: var(--text-muted);">Nenhuma loja encontrada.</td></tr>';
         }
 
         function openStoreFormModal() {
@@ -617,7 +661,7 @@
 
                     if (error) {
                         console.error("Erro no Supabase:", error);
-                        alert(`Atenção! Não foi possível salvar no Supabase:\n\n${error.message || JSON.stringify(error)}\n\nCertifique-se de ter executado o script "schema_guia_compras.sql" no SQL Editor do Supabase.`);
+                        alert(`Atenção! Não foi possível salvar no Supabase:\n\n${error.message || JSON.stringify(error)}`);
                     } else {
                         alert(`Loja "${storeData.name}" salva com SUCESSO no Supabase! 🎉`);
                     }
@@ -664,19 +708,25 @@
 
             let html = '';
             adminCategories.forEach(c => {
+                const statusPill = c.active 
+                    ? '<span style="background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid #4caf50; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">Ativa</span>'
+                    : '<span style="background: rgba(244, 67, 54, 0.15); color: #f44336; border: 1px solid #f44336; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">Inativa</span>';
+
                 html += `
                     <tr>
-                        <td>${c.icon || '🛍️'}</td>
-                        <td><strong>${c.name}</strong></td>
-                        <td><code>${c.slug}</code></td>
-                        <td>${c.active ? '<span class="badge badge-confirmado">Ativa</span>' : '<span class="badge badge-cancelado">Inativa</span>'}</td>
+                        <td style="font-size: 18px;">${c.icon || '🛍️'}</td>
+                        <td><strong style="font-size: 15px; color: #fff;">${c.name}</strong></td>
+                        <td><code style="color: var(--primary-gold); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${c.slug}</code></td>
+                        <td>${statusPill}</td>
                         <td>
-                            <button class="btn btn-sm btn-secondary" onclick="editCategory('${c.slug}')">✏️ Editar</button>
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="editCategory('${c.slug}')">✏️ Editar</button>
+                            </div>
                         </td>
                     </tr>
                 `;
             });
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">Nenhuma categoria encontrada.</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--text-muted);">Nenhuma categoria encontrada.</td></tr>';
         }
 
         function openCategoryFormModal() {
