@@ -475,7 +475,7 @@
                         .select('*')
                         .order('name');
                     
-                    if (!sErr && storeData && storeData.length > 0) {
+                    if (!sErr && storeData) {
                         adminStores = storeData;
                         storesFromSupabase = true;
                     }
@@ -485,7 +485,7 @@
                         .select('*')
                         .order('name');
                     
-                    if (!cErr && catData && catData.length > 0) {
+                    if (!cErr && catData) {
                         adminCategories = catData;
                         categoriesFromSupabase = true;
                     }
@@ -494,11 +494,11 @@
                 }
             }
 
-            if (!storesFromSupabase) {
-                adminStores = (typeof FALLBACK_STORES !== 'undefined') ? FALLBACK_STORES : [];
+            if (!storesFromSupabase && adminStores.length === 0) {
+                adminStores = (typeof FALLBACK_STORES !== 'undefined') ? [...FALLBACK_STORES] : [];
             }
-            if (!categoriesFromSupabase) {
-                adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? FALLBACK_CATEGORIES : [];
+            if (!categoriesFromSupabase && adminCategories.length === 0) {
+                adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? [...FALLBACK_CATEGORIES] : [];
             }
 
             // Atualiza contadores nas abas e no dashboard
@@ -689,14 +689,25 @@
                     const { error } = await supabaseClient.from('shopping_stores').delete().eq('slug', slug);
                     if (error) {
                         console.error("Erro ao deletar no Supabase:", error);
-                        alert(`Erro ao excluir no Supabase: ${error.message}`);
+                        alert(`Erro ao excluir no Supabase: ${error.message || JSON.stringify(error)}`);
                         return;
                     }
-                    alert(`Loja "${slug}" excluída com SUCESSO no Supabase!`);
                 } catch (err) {
                     console.error("Erro ao deletar no Supabase:", err);
+                    alert(`Erro inesperado ao excluir: ${err.message}`);
+                    return;
                 }
             }
+
+            // Remove da lista local e dos fallbacks para nao reaparecer
+            adminStores = adminStores.filter(s => s.slug !== slug);
+            if (typeof FALLBACK_STORES !== 'undefined') {
+                const idx = FALLBACK_STORES.findIndex(s => s.slug === slug);
+                if (idx >= 0) FALLBACK_STORES.splice(idx, 1);
+            }
+
+            renderAdminStoresTable();
+            alert(`Loja "${slug}" excluída com SUCESSO! 🎉`);
 
             await loadAdminData();
         }
@@ -721,12 +732,44 @@
                         <td>
                             <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                 <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="editCategory('${c.slug}')">✏️ Editar</button>
+                                <button class="btn btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteCategory('${c.slug}')">🗑️ Excluir</button>
                             </div>
                         </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--text-muted);">Nenhuma categoria encontrada.</td></tr>';
+        }
+
+        // DELETAR CATEGORIA
+        async function deleteCategory(slug) {
+            if (!confirm(`Tem certeza que deseja excluir a categoria "${slug}"?`)) return;
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('shopping_categories').delete().eq('slug', slug);
+                    if (error) {
+                        console.error("Erro ao deletar categoria no Supabase:", error);
+                        alert(`Erro ao excluir categoria no Supabase: ${error.message || JSON.stringify(error)}`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Erro ao deletar categoria no Supabase:", err);
+                    alert(`Erro inesperado: ${err.message}`);
+                    return;
+                }
+            }
+
+            adminCategories = adminCategories.filter(c => c.slug !== slug);
+            if (typeof FALLBACK_CATEGORIES !== 'undefined') {
+                const idx = FALLBACK_CATEGORIES.findIndex(c => c.slug === slug);
+                if (idx >= 0) FALLBACK_CATEGORIES.splice(idx, 1);
+            }
+
+            renderAdminCategoriesTable();
+            alert(`Categoria "${slug}" excluída com SUCESSO! 🎉`);
+
+            await loadAdminData();
         }
 
         function openCategoryFormModal() {
