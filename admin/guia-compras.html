@@ -829,6 +829,13 @@
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
+                    // Tentativa automática de criar o bucket caso não exista
+                    try {
+                        await supabaseClient.storage.createBucket('shopping-guide', { public: true });
+                    } catch (bErr) {
+                        console.log("Status de criação do bucket:", bErr);
+                    }
+
                     const { data, error } = await supabaseClient.storage
                         .from('shopping-guide')
                         .upload('guia-de-compras.pdf', file, {
@@ -838,7 +845,11 @@
 
                     if (error) {
                         console.error("Erro no upload do Supabase Storage:", error);
-                        alert(`Erro no upload do PDF para o Supabase Storage:\n\n${error.message}\n\nCertifique-se de ter criado o bucket público chamado "shopping-guide" no menu Storage do Supabase.`);
+                        if (error.message && error.message.includes("Bucket not found")) {
+                            alert(`🚨 O Bucket "shopping-guide" não existe no Supabase Storage!\n\nCOMO CRIAR EM 30 SEGUNDOS:\n1. Acesse o seu painel do Supabase (https://supabase.com/dashboard)\n2. No menu lateral, clique em "Storage"\n3. Clique no botão "+ New bucket"\n4. Digite o nome exato: shopping-guide\n5. Marque a chave "Public bucket" para HABILITAR acesso público!\n6. Salve o bucket e clique em "Enviar PDF" novamente aqui.`);
+                        } else {
+                            alert(`Erro no upload do PDF para o Supabase Storage:\n\n${error.message || JSON.stringify(error)}`);
+                        }
                     } else {
                         alert("E-book oficial enviado e atualizado com SUCESSO no Supabase Storage! 🎉");
                     }
