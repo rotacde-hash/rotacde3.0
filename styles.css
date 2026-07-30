@@ -244,13 +244,14 @@ button, input, select, textarea {
 .nav-menu {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 20px;
 }
 
 .nav-item {
     color: var(--text-light-muted);
     font-weight: 500;
-    font-size: 15px;
+    font-size: 14.5px;
+    white-space: nowrap;
 }
 
 .nav-item:hover {
