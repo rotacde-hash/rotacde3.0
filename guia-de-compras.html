@@ -31,12 +31,58 @@
     <!-- CSS Principal do Projeto -->
     <link rel="stylesheet" href="styles.css">
 
-    <!-- Estilos Específicos do Guia de Compras (Design System Rota CDE) -->
+    <!-- Refinamento Visual do Guia de Compras (Design System Rota CDE) -->
     <style>
-        /* --- Hero Section --- */
+        body {
+            background-color: var(--primary-dark, #050B14);
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Header Padronizado --- */
+        .header {
+            background-color: var(--primary-dark, #050B14);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* --- Breadcrumb --- */
+        .breadcrumb-wrapper {
+            padding: 16px 20px 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb-nav {
+            font-size: 0.88rem;
+            color: var(--text-light-muted, #9ba8bc);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--text-light-muted, #9ba8bc);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-gold, #c59b27);
+        }
+
+        .breadcrumb-nav .active {
+            color: var(--primary-gold, #c59b27);
+            font-weight: 600;
+        }
+
+        /* --- Hero Section Refinado --- */
         .shopping-hero {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-navy) 100%);
-            padding: 140px 20px 80px;
+            background: linear-gradient(135deg, var(--primary-dark, #050B14) 0%, var(--primary-navy, #0e1a2f) 100%);
+            padding: 32px 20px 60px;
             text-align: center;
             color: #fff;
             position: relative;
@@ -48,17 +94,17 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at 50% 30%, rgba(197, 155, 39, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle at 50% 30%, rgba(197, 155, 39, 0.12) 0%, transparent 70%);
             pointer-events: none;
         }
 
         .hero-tag {
             display: inline-block;
             background: rgba(197, 155, 39, 0.15);
-            color: var(--primary-gold);
-            padding: 6px 16px;
-            border-radius: var(--border-radius-full);
-            font-size: 0.85rem;
+            color: var(--primary-gold, #c59b27);
+            padding: 5px 14px;
+            border-radius: var(--border-radius-full, 9999px);
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -68,64 +114,88 @@
 
         .hero-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.8rem;
+            font-size: 2.6rem;
             font-weight: 800;
-            line-height: 1.15;
-            margin-bottom: 16px;
+            line-height: 1.18;
+            margin: 0 auto 16px;
             color: #ffffff;
-        }
-
-        .hero-title span {
-            color: var(--primary-gold);
+            max-width: 800px;
         }
 
         .hero-subtitle {
-            font-size: 1.15rem;
-            color: var(--text-light-muted);
-            max-width: 720px;
-            margin: 0 auto 32px;
+            font-size: 1.1rem;
+            color: var(--text-light-muted, #9ba8bc);
+            max-width: 700px;
+            margin: 0 auto 28px;
             line-height: 1.6;
         }
 
         .hero-actions {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 16px;
             flex-wrap: wrap;
         }
 
+        .btn-hero-main {
+            padding: 16px 32px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-hero-sub {
+            padding: 14px 28px;
+            font-size: 1rem;
+        }
+
+        .hero-link-tertiary {
+            color: var(--primary-gold, #c59b27);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: underline;
+            padding: 8px 12px;
+            transition: color 0.2s ease;
+        }
+
+        .hero-link-tertiary:hover {
+            color: #ffffff;
+        }
+
         /* --- Barra de Pesquisa e Filtros --- */
         .search-filter-section {
-            background: var(--primary-navy);
-            padding: 32px 20px;
+            background: var(--primary-navy, #0e1a2f);
+            padding: 24px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             position: sticky;
-            top: 70px;
+            top: 96px;
             z-index: 90;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
         .search-container {
-            max-width: 900px;
-            margin: 0 auto 20px;
+            max-width: 850px;
+            margin: 0 auto 16px;
             position: relative;
         }
 
         .search-input {
             width: 100%;
-            padding: 16px 20px 16px 48px;
+            height: 52px;
+            padding: 12px 20px 12px 48px;
             background: #08111e;
-            border: 1px solid rgba(197, 155, 39, 0.3);
-            border-radius: var(--border-radius-md);
+            border: 1px solid rgba(197, 155, 39, 0.35);
+            border-radius: var(--border-radius-md, 12px);
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.98rem;
             outline: none;
             transition: var(--transition-fast);
         }
 
         .search-input:focus {
             border-color: var(--primary-gold);
-            box-shadow: 0 0 16px rgba(197, 155, 39, 0.25);
+            box-shadow: 0 0 16px rgba(197, 155, 39, 0.3);
         }
 
         .search-icon {
@@ -135,24 +205,30 @@
             transform: translateY(-50%);
             font-size: 1.2rem;
             color: var(--primary-gold);
+            pointer-events: none;
         }
 
         .chips-scroll {
             display: flex;
             gap: 10px;
             overflow-x: auto;
-            padding-bottom: 8px;
+            padding-bottom: 4px;
             max-width: 1200px;
             margin: 0 auto;
-            scrollbar-width: thin;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .chips-scroll::-webkit-scrollbar {
+            display: none;
         }
 
         .chip-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #d1d5db;
-            padding: 8px 16px;
-            border-radius: var(--border-radius-full);
+            padding: 10px 18px;
+            border-radius: var(--border-radius-full, 9999px);
             font-size: 0.88rem;
             font-weight: 600;
             white-space: nowrap;
@@ -170,40 +246,57 @@
             font-weight: 700;
         }
 
-        /* --- Layout de Grid de Lojas --- */
+        /* --- Grid de Lojas Refinado --- */
         .stores-section {
-            padding: 60px 20px;
-            background: var(--primary-dark);
-            min-height: 500px;
+            padding: 50px 20px;
+            background: var(--primary-dark, #050B14);
+            min-height: 400px;
         }
 
         .stores-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 24px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
+        @media (max-width: 1023px) {
+            .stores-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stores-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 1.9rem;
+            }
+        }
+
         .store-card {
             background: rgba(14, 26, 47, 0.85);
             border: 1px solid rgba(197, 155, 39, 0.2);
-            border-radius: var(--border-radius-md);
+            border-radius: var(--border-radius-md, 12px);
             overflow: hidden;
             transition: var(--transition-normal);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            height: 100%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
         .store-card:hover {
             transform: translateY(-4px);
             border-color: var(--primary-gold);
-            box-shadow: 0 8px 24px rgba(197, 155, 39, 0.15);
+            box-shadow: 0 8px 24px rgba(197, 155, 39, 0.18);
         }
 
         .store-card-image {
-            height: 180px;
+            height: 200px;
+            width: 100%;
             position: relative;
             overflow: hidden;
             background: #08111e;
@@ -249,7 +342,7 @@
 
         .store-card-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
             color: #fff;
             margin-bottom: 8px;
         }
@@ -260,15 +353,20 @@
             line-height: 1.5;
             margin-bottom: 20px;
             flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .store-card-actions {
             display: flex;
             gap: 10px;
+            margin-top: auto;
         }
 
         .btn-sm {
-            padding: 8px 12px;
+            padding: 10px 12px;
             font-size: 0.85rem;
             flex: 1;
             text-align: center;
@@ -290,9 +388,9 @@
             border: 1px solid #4caf50 !important;
         }
 
-        /* --- Mapa Section --- */
+        /* --- Mapa Section Refinado --- */
         .map-section {
-            padding: 60px 20px;
+            padding: 50px 20px;
             background: var(--primary-navy);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -300,16 +398,22 @@
         .map-container {
             max-width: 1200px;
             margin: 0 auto;
-            height: 450px;
+            height: 420px;
             border-radius: var(--border-radius-md);
             overflow: hidden;
             border: 1px solid var(--primary-gold);
             box-shadow: 0 8px 30px rgba(0,0,0,0.4);
         }
 
-        /* --- Meu Roteiro Section --- */
+        @media (max-width: 640px) {
+            .map-container {
+                height: 350px;
+            }
+        }
+
+        /* --- Meu Roteiro Section Refinado --- */
         .route-section {
-            padding: 60px 20px;
+            padding: 50px 20px;
             background: var(--primary-dark);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -320,7 +424,7 @@
             background: rgba(14, 26, 47, 0.9);
             border: 1px solid rgba(197, 155, 39, 0.3);
             border-radius: var(--border-radius-lg);
-            padding: 32px 24px;
+            padding: 28px 24px;
             box-shadow: 0 12px 40px rgba(0,0,0,0.5);
         }
 
@@ -392,28 +496,34 @@
             color: #fff;
         }
 
-        /* --- Sticky Mobile Badge --- */
+        /* --- Floating Route Badge --- */
         .mobile-route-badge {
             position: fixed;
             bottom: 24px;
             right: 24px;
             background: var(--primary-gold);
             color: var(--primary-dark);
-            padding: 12px 20px;
+            padding: 12px 22px;
             border-radius: var(--border-radius-full);
             font-weight: 800;
             font-size: 0.95rem;
             box-shadow: 0 8px 24px rgba(197, 155, 39, 0.5);
-            z-index: 100;
+            z-index: 990;
             display: flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .mobile-route-badge:active {
-            transform: scale(0.95);
+        @keyframes badgePulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(197, 155, 39, 0.4); }
+            50% { transform: scale(1.12); box-shadow: 0 0 20px rgba(197, 155, 39, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 8px 24px rgba(197, 155, 39, 0.5); }
+        }
+
+        .mobile-route-badge.pulse {
+            animation: badgePulse 0.6s ease-in-out;
         }
 
         /* --- Modal Detalhes --- */
@@ -516,67 +626,58 @@
 
 <body>
 
-    <!-- Header Principal -->
+    <!-- Header Principal (Estrutura Padrão Rota CDE) -->
     <header class="header">
-        <div class="header-container">
-            <a href="index.html" class="logo">
-                <img src="assets/logo_icon.png" alt="Rota CDE Logo" class="logo-img">
+        <div class="container header-container">
+            <a href="index.html" class="logo-link">
+                <img src="assets/logo_icon.png" alt="Rota CDE Transfer Logo" class="logo-img">
                 <div class="logo-text">
-                    <span class="logo-title">ROTA CDE</span>
-                    <span class="logo-subtitle">TRANSFER PRIVATIVO</span>
+                    <span class="logo-brand">ROTA CDE</span>
+                    <span class="logo-segment">TRANSFER</span>
                 </div>
             </a>
-
-            <nav class="nav-desktop">
-                <a href="index.html#inicio">Início</a>
-                <a href="index.html#servicos">Serviços</a>
-                <a href="index.html#cotacao">Cotação</a>
-                <a href="guia-de-compras.html" class="active" style="color: var(--primary-gold); font-weight: 700;">🛍️ Guia de Compras</a>
-                <a href="parceiros.html">Parceiros</a>
-                <a href="index.html#contato">Contato</a>
+            <nav class="nav-menu" id="navMenu">
+                <a href="index.html#servicos" class="nav-item">Serviços</a>
+                <a href="index.html#cotacao" class="nav-item">Cotação</a>
+                <a href="guia-de-compras.html" class="nav-item active" style="color: var(--primary-gold); font-weight:700;">🛍️ Guia de Compras</a>
+                <a href="parceiros.html" class="nav-item">Parceiros</a>
+                <a href="index.html#faq" class="nav-item">Dúvidas</a>
             </nav>
-
             <div class="header-actions">
-                <a href="index.html#cotacao" class="btn btn-primary btn-header">Reservar Transfer</a>
-                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
-                    <span></span><span></span><span></span>
+                <a href="index.html#cotacao" class="btn btn-nav">Reservar Transfer</a>
+                <button class="mobile-menu-toggle" id="menuToggle" aria-label="Abrir Menu">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Drawer Nav -->
-    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
-    <div class="mobile-nav-drawer" id="mobileNavDrawer">
-        <div class="drawer-header">
-            <img src="assets/logo_icon.png" alt="Rota CDE Logo" height="32">
-            <button class="drawer-close-btn" id="drawerCloseBtn">&times;</button>
-        </div>
-        <nav class="drawer-menu">
-            <a href="index.html#inicio">Início</a>
-            <a href="index.html#servicos">Serviços</a>
-            <a href="index.html#cotacao">Cotação Rápida</a>
-            <a href="guia-de-compras.html" class="active">🛍️ Guia de Compras</a>
-            <a href="parceiros.html">Parceiros</a>
-            <a href="index.html#contato">Contato</a>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-wrapper">
+        <nav class="breadcrumb-nav">
+            <a href="index.html">Início</a> &nbsp;/&nbsp; <span class="active">Guia de Compras</span>
         </nav>
     </div>
 
-    <!-- Hero Section -->
+    <!-- Hero Section Refinado -->
     <section class="shopping-hero">
-        <div class="hero-tag">🇵🇾 Ciudad del Este</div>
+        <div class="hero-tag">🇵🇾 CIUDAD DEL ESTE</div>
         <h1 class="hero-title">GUIA DE COMPRAS NO PARAGUAI</h1>
         <p class="hero-subtitle">
-            Encontre as principais lojas de Ciudad del Este, descubra onde comprar produtos 100% originais e monte seu roteiro personalizado antes da viagem.
+            Encontre as principais lojas de Ciudad del Este, descubra onde comprar produtos 100% originais e monte seu roteiro de compras.
         </p>
         <div class="hero-actions">
-            <a href="#meu-roteiro" class="btn btn-primary">📋 Montar Meu Roteiro</a>
-            <a href="#explorar-lojas" class="btn btn-outline-gold">🛍️ Ver Lojas</a>
-            <a href="#ebook-gratuito" class="btn btn-gold">📖 Baixar Guia Gratuito</a>
+            <a href="#meu-roteiro" class="btn btn-primary btn-hero-main">📋 MONTAR MEU ROTEIRO</a>
+            <a href="#explorar-lojas" class="btn btn-secondary btn-hero-sub">🛍️ VER LOJAS</a>
+            <a href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" download="Guia-de-Compras-Paraguai-RotaCDE.pdf" class="hero-link-tertiary">
+                📥 Baixar Guia Gratuitos (PDF)
+            </a>
         </div>
     </section>
 
-    <!-- Barra de Pesquisa e Categorias -->
+    <!-- Barra de Pesquisa e Categorias Refinada -->
     <section class="search-filter-section" id="explorar-lojas">
         <div class="search-container">
             <span class="search-icon">🔎</span>
@@ -588,7 +689,7 @@
         </div>
     </section>
 
-    <!-- Grid de Lojas -->
+    <!-- Grid de Lojas Refinado -->
     <section class="stores-section">
         <div class="stores-grid" id="stores-grid-container">
             <!-- Cards de Lojas renderizados via JS -->
@@ -601,35 +702,33 @@
         </div>
     </section>
 
-    <!-- Mapa Interativo de Compras -->
+    <!-- Mapa Interativo de Compras Refinado -->
     <section class="map-section">
         <div style="text-align: center; margin-bottom: 24px;">
-            <span style="color: var(--primary-gold); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Localização Exata</span>
+            <span style="color: var(--primary-gold); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">LOCALIZAÇÃO DAS LOJAS</span>
             <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin-top: 4px;">🗺️ MAPA DE COMPRAS EM CDE</h2>
-            <p style="color: var(--text-light-muted); font-size: 0.95rem;">Veja onde ficam as melhores lojas no centro de Ciudad del Este</p>
+            <p style="color: var(--text-light-muted); font-size: 0.95rem;">Veja a localização exata das lojas no centro de Ciudad del Este</p>
         </div>
 
         <div class="map-container" id="mapa-compras"></div>
     </section>
 
-    <!-- Meu Roteiro Section -->
+    <!-- Meu Roteiro Section Refinado -->
     <section class="route-section" id="meu-roteiro">
         <div class="route-box">
-            <div style="text-align: center; margin-bottom: 24px;">
+            <div style="text-align: center; margin-bottom: 20px;">
                 <span style="color: var(--primary-gold); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Planejamento Pessoal</span>
-                <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin-top: 4px;">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: #fff; margin-top: 4px;">
                     📋 MEU ROTEIRO (<span id="route-badge-count">0</span>)
                 </h2>
             </div>
 
-            <!-- View Vazio -->
-            <div id="route-empty-view" style="text-align: center; padding: 32px 16px;">
-                <span style="font-size: 2.8rem; display: block; margin-bottom: 12px;">🛒</span>
-                <h3 style="font-family: 'Outfit', sans-serif; color: #fff; font-size: 1.4rem; margin-bottom: 8px;">SEU ROTEIRO ESTÁ VAZIO</h3>
-                <p style="color: var(--text-light-muted); font-size: 0.95rem; max-width: 500px; margin: 0 auto 24px;">
-                    Adicione as lojas que deseja visitar durante suas compras para organizar seu itinerário antes da viagem.
+            <!-- View Vazio (Compacto) -->
+            <div id="route-empty-view" style="text-align: center; padding: 20px 16px;">
+                <p style="color: var(--text-light-muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto 20px;">
+                    Seu roteiro está vazio. Adicione lojas para organizar seu dia de compras em Ciudad del Este.
                 </p>
-                <a href="#explorar-lojas" class="btn btn-primary">EXPLORAR LOJAS</a>
+                <a href="#explorar-lojas" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.9rem;">EXPLORAR LOJAS</a>
             </div>
 
             <!-- View Preenchido -->
@@ -653,76 +752,81 @@
         </div>
     </section>
 
-    <!-- E-book Gratuito -->
-    <section id="ebook-gratuito" style="padding: 60px 20px; background: var(--primary-navy); border-top: 1px solid rgba(255,255,255,0.05);">
-        <div style="max-width: 900px; margin: 0 auto; background: linear-gradient(145deg, #0e1a2f 0%, #050B14 100%); border: 1px solid var(--primary-gold); border-radius: var(--border-radius-lg); padding: 40px 24px; text-align: center; box-shadow: 0 12px 36px rgba(0,0,0,0.5);">
+    <!-- E-book Gratuito Refinado -->
+    <section id="ebook-gratuito" style="padding: 50px 20px; background: var(--primary-navy); border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="max-width: 850px; margin: 0 auto; background: linear-gradient(145deg, #0e1a2f 0%, #050B14 100%); border: 1px solid var(--primary-gold); border-radius: var(--border-radius-lg); padding: 36px 24px; text-align: center; box-shadow: 0 12px 36px rgba(0,0,0,0.5);">
             <span style="font-size: 3rem; display: block; margin-bottom: 12px;">📖</span>
-            <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: #fff; margin-bottom: 8px;">GUIA DE COMPRAS GRATUITO (PDF)</h2>
-            <p style="color: var(--text-light-muted); max-width: 600px; margin: 0 auto 24px; line-height: 1.6;">
-                Baixe gratuitamente o nosso material exclusivo com dicas essenciais sobre cotas, moedas, garantias e segurança em Ciudad del Este.
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 2rem; color: #fff; margin-bottom: 8px;">GUIA DE COMPRAS GRATUITO</h2>
+            <p style="color: var(--text-light-muted); max-width: 580px; margin: 0 auto 24px; line-height: 1.6;">
+                Baixe nosso guia e tenha informações importantes para organizar suas compras em Ciudad del Este.
             </p>
-            <a href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" download="Guia-de-Compras-Paraguai-RotaCDE.pdf" class="btn btn-gold" style="display: inline-block;">
+            <a href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" download="Guia-de-Compras-Paraguai-RotaCDE.pdf" class="btn btn-primary" style="display: inline-block; padding: 14px 28px; font-weight: 700;">
                 📥 BAIXAR GUIA GRATUITO
             </a>
         </div>
     </section>
 
-    <!-- Dicas de Segurança -->
-    <section id="dicas-seguranca" style="padding: 60px 20px; background: var(--primary-dark); border-top: 1px solid rgba(255,255,255,0.05);">
+    <!-- Dicas de Segurança Refinadas -->
+    <section id="dicas-seguranca" style="padding: 50px 20px; background: var(--primary-dark); border-top: 1px solid rgba(255,255,255,0.05);">
         <div style="max-width: 1100px; margin: 0 auto;">
-            <div style="text-align: center; margin-bottom: 40px;">
+            <div style="text-align: center; margin-bottom: 36px;">
                 <span style="color: var(--primary-gold); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Compras Tranquilas</span>
                 <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; color: #fff; margin-top: 4px;">⚠️ DICAS PARA COMPRAR COM SEGURANÇA</h2>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;" class="safety-grid">
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">1. Pesquise Antes</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Compare os preços em lojas oficiais antes de comprar. Se o valor for absurdamente baixo, desconfie da procedência.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">1. Pesquise Antes</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Compare os preços em lojas oficiais antes de comprar. Se o valor for absurdamente baixo, desconfie da procedência.</p>
                 </div>
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">2. Teste os Produtos</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Abra a caixa e teste eletrônicos no setor de testes da própria loja antes de efetuar o pagamento final.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">2. Teste os Produtos</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Abra a caixa e teste eletrônicos no setor de testes da própria loja antes de efetuar o pagamento final.</p>
                 </div>
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">3. Cuidado com Nomes Parecidos</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Verifique o endereço correto. Algumas galerias utilizam nomes semelhantes a lojas famosas.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">3. Cuidado com Nomes Parecidos</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Verifique o endereço correto. Algumas galerias utilizam nomes semelhantes a lojas famosas.</p>
                 </div>
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">4. Exija Nota Fiscal</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Solicite sempre a fatura comercial ou comprovante com descrição detalhada e número de série.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">4. Exija Nota Fiscal</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Solicite sempre a fatura comercial ou comprovante com descrição detalhada e número de série.</p>
                 </div>
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">5. Cuidado com Abordagens</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Evite acompanhar guias de rua não autorizados ("pânfleteiros") que prometem descontos irreais.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">5. Cuidado com Abordagens</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Evite acompanhar guias de rua não autorizados ("pânfleteiros") que prometem descontos irreais.</p>
                 </div>
                 <div style="background: rgba(14, 26, 47, 0.6); border: 1px solid rgba(197, 155, 39, 0.2); border-radius: 12px; padding: 20px;">
-                    <h4 style="color: var(--primary-gold); font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin-bottom: 8px;">6. Transporte Legal e Confortável</h4>
-                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">Atravesse a ponte com motoristas credenciados para maior conforto e agilidade com as compras.</p>
+                    <div style="color: var(--primary-gold); font-size: 1.3rem; font-weight: 800; margin-bottom: 6px;">6. Transporte Legal e Confortável</div>
+                    <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5; margin: 0;">Atravesse a ponte com motoristas credenciados para maior conforto e agilidade com as compras.</p>
                 </div>
             </div>
 
+            <style>
+                @media (max-width: 1023px) { .safety-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+                @media (max-width: 640px) { .safety-grid { grid-template-columns: 1fr !important; } }
+            </style>
+
             <p style="text-align: center; color: var(--text-light-muted); font-size: 0.8rem; margin-top: 24px;">
-                * Informações sujeitas a alterações sem aviso prévio. Consulte sempre fontes oficiais da Receita Federal e Aduana antes da sua viagem.
+                * Informações sujeitas a alterações sem aviso prévio. Consulte sempre fontes oficiais antes da sua viagem.
             </p>
         </div>
     </section>
 
-    <!-- Conversão Final Transfer -->
+    <!-- Conversão Final Transfer Refinada -->
     <section style="padding: 60px 20px; background: linear-gradient(135deg, var(--primary-navy) 0%, var(--primary-dark) 100%); text-align: center; border-top: 1px solid rgba(197, 155, 39, 0.3);">
         <div style="max-width: 750px; margin: 0 auto;">
             <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.4rem; color: #fff; margin-bottom: 12px;">🚗 JÁ SABE ONDE QUER COMPRAR?</h2>
-            <p style="color: var(--text-light-muted); font-size: 1.1rem; margin-bottom: 24px; line-height: 1.6;">
+            <p style="color: var(--text-light-muted); font-size: 1.1rem; margin-bottom: 28px; line-height: 1.6;">
                 Agora que você já escolheu suas lojas, faça suas compras com mais tranquilidade e segurança utilizando nosso Transfer Privativo.
             </p>
-            <button onclick="reserveTransferWithRoute()" class="btn btn-primary btn-lg" style="padding: 16px 32px; font-size: 1.1rem;">
+            <button onclick="reserveTransferWithRoute()" class="btn btn-primary btn-large" style="padding: 16px 36px; font-size: 1.1rem; font-weight: 800;">
                 RESERVAR MEU TRANSFER
             </button>
         </div>
     </section>
 
-    <!-- Floating Badge Mobile -->
-    <a href="#meu-roteiro" class="mobile-route-badge">
+    <!-- Floating Badge Fixa no Canto Inferior Direito -->
+    <a href="#meu-roteiro" class="mobile-route-badge" id="floating-route-badge">
         📋 MEU ROTEIRO (<span id="floating-route-badge-count">0</span>)
     </a>
 
@@ -733,40 +837,40 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px;">
-            <div class="footer-col" style="max-width: 320px;">
-                <div class="logo" style="margin-bottom: 16px;">
-                    <img src="assets/logo_icon.png" alt="Rota CDE Logo" class="logo-img">
+    <!-- Footer Padronizado -->
+    <footer class="footer" style="background-color: #03070d; border-top: 1px solid rgba(255,255,255,0.08); padding: 48px 20px 24px;">
+        <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-bottom: 32px;">
+            <div>
+                <a href="index.html" class="logo-link" style="margin-bottom: 16px; display: inline-flex;">
+                    <img src="assets/logo_icon.png" alt="Rota CDE Logo" class="logo-img" style="height: 44px;">
                     <div class="logo-text">
-                        <span class="logo-title">ROTA CDE</span>
-                        <span class="logo-subtitle">TRANSFER PRIVATIVO</span>
+                        <span class="logo-brand">ROTA CDE</span>
+                        <span class="logo-segment">TRANSFER</span>
                     </div>
-                </div>
-                <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.5;">
+                </a>
+                <p style="color: var(--text-light-muted); font-size: 0.9rem; line-height: 1.6;">
                     Seu parceiro de confiança para transporte executivo e transfer privativo entre Foz do Iguaçu e Ciudad del Este.
                 </p>
             </div>
-            <div class="footer-col">
-                <h4 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 12px;">Navegação</h4>
-                <p><a href="index.html" style="color: var(--text-light-muted); text-decoration: none;">Início</a></p>
-                <p><a href="guia-de-compras.html" style="color: var(--primary-gold); text-decoration: none;">Guia de Compras</a></p>
-                <p><a href="parceiros.html" style="color: var(--text-light-muted); text-decoration: none;">Parceiros</a></p>
-                <p><a href="admin/index.html" style="color: var(--text-light-muted); text-decoration: none;">Área Restrita</a></p>
+            <div>
+                <h4 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 16px; font-size: 1.1rem;">Navegação</h4>
+                <p style="margin-bottom: 8px;"><a href="index.html" style="color: var(--text-light-muted);">Início</a></p>
+                <p style="margin-bottom: 8px;"><a href="guia-de-compras.html" style="color: var(--primary-gold); font-weight: 600;">Guia de Compras</a></p>
+                <p style="margin-bottom: 8px;"><a href="parceiros.html" style="color: var(--text-light-muted);">Parceiros</a></p>
+                <p style="margin-bottom: 8px;"><a href="admin/index.html" style="color: var(--text-light-muted);">Área Restrita</a></p>
             </div>
-            <div class="footer-col">
-                <h4 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 12px;">Contato e Reservas</h4>
-                <p style="color: var(--text-light-muted); font-size: 0.9rem;">WhatsApp: +595 973 953874</p>
-                <p style="color: var(--text-light-muted); font-size: 0.9rem;">Atendimento: 24 Horas / 7 dias</p>
+            <div>
+                <h4 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 16px; font-size: 1.1rem;">Contato e Reservas</h4>
+                <p style="color: var(--text-light-muted); font-size: 0.9rem; margin-bottom: 8px;">💬 WhatsApp: +595 973 953874</p>
+                <p style="color: var(--text-light-muted); font-size: 0.9rem; margin-bottom: 8px;">🕒 Atendimento: 24 Horas / 7 dias</p>
             </div>
         </div>
-        <div style="text-align: center; padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); color: var(--text-light-muted); font-size: 0.85rem;">
+        <div style="text-align: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); color: var(--text-light-muted); font-size: 0.85rem;">
             &copy; 2026 Rota CDE Transfer. Todos os direitos reservados.
         </div>
     </footer>
 
-    <!-- Leaflet.js SDK (Mapa Interativo Gratuito) -->
+    <!-- Leaflet.js SDK -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Supabase SDK & Config -->
@@ -777,25 +881,17 @@
     <script src="assets/guia-compras.js"></script>
 
     <script>
-        // Toggle Menu Mobile
+        // Menu Mobile Global
         document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('mobileMenuBtn');
-            const drawer = document.getElementById('mobileNavDrawer');
-            const overlay = document.getElementById('mobileNavOverlay');
-            const closeBtn = document.getElementById('drawerCloseBtn');
+            const menuToggle = document.getElementById('menuToggle');
+            const navMenu = document.getElementById('navMenu');
 
-            function openDrawer() {
-                drawer.classList.add('active');
-                overlay.classList.add('active');
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', () => {
+                    menuToggle.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
             }
-            function closeDrawer() {
-                drawer.classList.remove('active');
-                overlay.classList.remove('active');
-            }
-
-            if (btn) btn.addEventListener('click', openDrawer);
-            if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
-            if (overlay) overlay.addEventListener('click', closeDrawer);
         });
     </script>
 </body>
