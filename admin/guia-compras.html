@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Gerenciar Guia de Compras - Rota CDE Admin</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/admin.css">
+
+    <style>
+        .tabs-nav {
+            display: flex;
+            gap: 12px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: var(--transition-fast);
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            color: var(--primary-gold);
+            border-bottom-color: var(--primary-gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .modal-admin-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-admin-card {
+            background: #0e1a2f;
+            border: 1px solid var(--primary-gold);
+            border-radius: 12px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-layout">
+        
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <img src="../assets/logo_icon.png" alt="Rota CDE Logo" class="brand-img">
+                <div class="brand-text">
+                    <span class="brand-title">ROTA CDE</span>
+                    <span class="brand-subtitle">PAINEL</span>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="dashboard.html">📅 &nbsp; Agenda</a></li>
+                <li class="menu-item"><a href="nova-viagem.html">➕ &nbsp; Nova Viagem</a></li>
+                <li class="menu-item"><a href="clientes.html">👥 &nbsp; Clientes</a></li>
+                <li class="menu-item"><a href="parceiros.html">🤝 &nbsp; Parceiros</a></li>
+                <li class="menu-item"><a href="financeiro.html">💰 &nbsp; Financeiro</a></li>
+                <li class="menu-item active"><a href="guia-compras.html">🛍️ &nbsp; Guia de Compras</a></li>
+                <li class="menu-item"><a href="configuracoes.html">⚙ &nbsp; Configurações</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <span>v1.0.0</span>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <div class="admin-main">
+            <!-- Mobile Header -->
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="menu-toggle-btn" id="menu-toggle">☰</button>
+                    <img src="../assets/logo_icon.png" alt="Rota CDE Logo" style="height: 32px; width: auto;">
+                    <span style="font-weight: 700; font-size: 14px;">ROTA CDE</span>
+                </div>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </header>
+            
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🛍️ Guia de Compras no Paraguai</h1>
+                    <p style="color: var(--text-muted); font-size: 14px;">Gerencie lojas, categorias e o e-book oficial exibidos no site público.</p>
+                </div>
+            </div>
+
+            <!-- Abas de Navegação -->
+            <div class="tabs-nav">
+                <button class="tab-btn active" onclick="switchTab('lojas')">🏪 Lojas Cadastradas</button>
+                <button class="tab-btn" onclick="switchTab('categorias')">🏷️ Categorias</button>
+                <button class="tab-btn" onclick="switchTab('ebook')">📖 E-book Oficial (PDF)</button>
+            </div>
+
+            <!-- TAB 1: LOJAS -->
+            <div class="tab-content active" id="tab-lojas">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <input type="text" id="admin-store-search" class="form-control" placeholder="Buscar loja..." style="max-width: 300px;" oninput="renderAdminStoresTable()">
+                    <button class="btn btn-primary" onclick="openStoreFormModal()">➕ Nova Loja</button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Loja</th>
+                                <th>Bairro</th>
+                                <th>Categorias</th>
+                                <th>Destaque</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-stores-table-body">
+                            <!-- Preenchido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: CATEGORIAS -->
+            <div class="tab-content" id="tab-categorias">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif;">Categorias de Lojas</h3>
+                    <button class="btn btn-primary" onclick="openCategoryFormModal()">➕ Nova Categoria</button>
+                </div>
+
+                <div class="table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ícone</th>
+                                <th>Nome</th>
+                                <th>Slug</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-categories-table-body">
+                            <!-- Preenchido dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: E-BOOK -->
+            <div class="tab-content" id="tab-ebook">
+                <div class="table-card" style="padding: 24px; max-width: 650px;">
+                    <h3 style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 12px;">📖 E-book Oficial do Guia de Compras</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+                        Este arquivo PDF é o único material oficial baixado pelos visitantes do site. Ao enviar um novo arquivo, ele substitui automaticamente o anterior no Supabase Storage.
+                    </p>
+
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                        <strong style="color: var(--primary-gold); display: block; margin-bottom: 4px;">Link Atual do E-book:</strong>
+                        <a id="current-ebook-link" href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" style="color: #64b5f6; font-size: 13px; word-break: break-all;">
+                            https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf
+                        </a>
+                    </div>
+
+                    <form id="ebook-upload-form" style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="form-group">
+                            <label style="color: #fff; font-weight: 600; font-size: 14px;">Selecionar novo PDF:</label>
+                            <input type="file" id="ebook-file-input" accept=".pdf" class="form-control" required style="padding: 8px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="btn-upload-ebook">
+                            📤 Enviar / Substituir E-book no Supabase
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL LOJA -->
+    <div class="modal-admin-overlay" id="store-modal">
+        <div class="modal-admin-card">
+            <h2 id="store-modal-title" style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 20px;">Nova Loja</h2>
+            <form id="store-form" style="display: flex; flex-direction: column; gap: 14px;">
+                <input type="hidden" id="store-id">
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Nome da Loja *</label>
+                        <input type="text" id="store-name" class="form-control" required oninput="generateStoreSlug()">
+                    </div>
+                    <div class="form-group">
+                        <label>Slug (URL Amigável)</label>
+                        <input type="text" id="store-slug" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição Curta (para o card)</label>
+                    <input type="text" id="store-short-desc" class="form-control" placeholder="Ex: A maior loja de eletrônicos em CDE">
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição Completa</label>
+                    <textarea id="store-desc" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Endereço / Localização</label>
+                        <input type="text" id="store-address" class="form-control" placeholder="Av. Adrián Jara...">
+                    </div>
+                    <div class="form-group">
+                        <label>Região / Bairro</label>
+                        <input type="text" id="store-neighborhood" class="form-control" value="Centro">
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Latitude (Coordenada Mapa)</label>
+                        <input type="number" step="any" id="store-lat" class="form-control" placeholder="-25.5155">
+                    </div>
+                    <div class="form-group">
+                        <label>Longitude (Coordenada Mapa)</label>
+                        <input type="number" step="any" id="store-lng" class="form-control" placeholder="-54.6120">
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" id="store-phone" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp</label>
+                        <input type="text" id="store-whatsapp" class="form-control" placeholder="+595 983...">
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Instagram</label>
+                        <input type="text" id="store-instagram" class="form-control" placeholder="@nomedaloja">
+                    </div>
+                    <div class="form-group">
+                        <label>Website Oficial</label>
+                        <input type="url" id="store-website" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Horário de Funcionamento</label>
+                    <input type="text" id="store-hours" class="form-control" placeholder="Segunda a Sábado: 07:00 às 16:00">
+                </div>
+
+                <div class="form-group">
+                    <label>URL da Imagem Principal</label>
+                    <input type="url" id="store-image-url" class="form-control" placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                        <input type="checkbox" id="store-featured" style="width: 18px; height: 18px;">
+                        <label for="store-featured" style="margin: 0; color: #fff;">⭐ Loja em Destaque</label>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                        <input type="checkbox" id="store-active" checked style="width: 18px; height: 18px;">
+                        <label for="store-active" style="margin: 0; color: #fff;">✅ Ativa no Site</label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeStoreFormModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Loja</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CATEGORIA -->
+    <div class="modal-admin-overlay" id="category-modal">
+        <div class="modal-admin-card" style="max-width: 500px;">
+            <h2 id="category-modal-title" style="color: #fff; font-family: 'Outfit', sans-serif; margin-bottom: 20px;">Nova Categoria</h2>
+            <form id="category-form" style="display: flex; flex-direction: column; gap: 14px;">
+                <input type="hidden" id="category-id">
+
+                <div class="form-group">
+                    <label>Nome da Categoria *</label>
+                    <input type="text" id="category-name" class="form-control" required oninput="generateCategorySlug()">
+                </div>
+
+                <div class="form-group">
+                    <label>Slug (URL Amigável)</label>
+                    <input type="text" id="category-slug" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ícone Emoji</label>
+                    <input type="text" id="category-icon" class="form-control" value="🛍️">
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <input type="text" id="category-desc" class="form-control">
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="category-active" checked style="width: 18px; height: 18px;">
+                    <label for="category-active" style="margin: 0; color: #fff;">✅ Ativa no Site</label>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryFormModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Categoria</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase SDK & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/supabase-config.js"></script>
+
+    <!-- Admin JS Engine & Guia JS Engine -->
+    <script src="assets/admin.js"></script>
+    <script src="../assets/guia-compras.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof verifySession === 'function') {
+                verifySession();
+            }
+
+            const toggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+            }
+
+            loadAdminData();
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        let adminStores = [];
+        let adminCategories = [];
+
+        async function loadAdminData() {
+            if (typeof allStores !== 'undefined' && allStores.length > 0) {
+                adminStores = allStores;
+            } else {
+                adminStores = FALLBACK_STORES;
+            }
+
+            if (typeof allCategories !== 'undefined' && allCategories.length > 0) {
+                adminCategories = allCategories;
+            } else {
+                adminCategories = FALLBACK_CATEGORIES;
+            }
+
+            renderAdminStoresTable();
+            renderAdminCategoriesTable();
+        }
+
+        function renderAdminStoresTable() {
+            const tbody = document.getElementById('admin-stores-table-body');
+            const search = document.getElementById('admin-store-search').value.toLowerCase();
+            if (!tbody) return;
+
+            const filtered = adminStores.filter(s => s.name.toLowerCase().includes(search));
+
+            let html = '';
+            filtered.forEach(s => {
+                html += `
+                    <tr>
+                        <td><strong>${s.name}</strong><br><small style="color: var(--text-muted);">${s.address || ''}</small></td>
+                        <td>${s.neighborhood || 'Centro'}</td>
+                        <td><span class="badge" style="background: rgba(255,255,255,0.1); color: #fff;">${(s.category_slugs || []).join(', ') || 'Geral'}</span></td>
+                        <td>${s.featured ? '⭐ Sim' : 'Não'}</td>
+                        <td>${s.active ? '<span class="badge badge-confirmado">Ativa</span>' : '<span class="badge badge-cancelado">Inativa</span>'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editStore('${s.slug}')">✏️ Editar</button>
+                            <button class="btn btn-sm btn-secondary" onclick="deleteStore('${s.slug}')">🗑️ Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">Nenhuma loja encontrada.</td></tr>';
+        }
+
+        function openStoreFormModal() {
+            document.getElementById('store-id').value = '';
+            document.getElementById('store-name').value = '';
+            document.getElementById('store-slug').value = '';
+            document.getElementById('store-short-desc').value = '';
+            document.getElementById('store-desc').value = '';
+            document.getElementById('store-address').value = '';
+            document.getElementById('store-neighborhood').value = 'Centro';
+            document.getElementById('store-lat').value = '';
+            document.getElementById('store-lng').value = '';
+            document.getElementById('store-phone').value = '';
+            document.getElementById('store-whatsapp').value = '';
+            document.getElementById('store-instagram').value = '';
+            document.getElementById('store-website').value = '';
+            document.getElementById('store-hours').value = '';
+            document.getElementById('store-image-url').value = '';
+            document.getElementById('store-featured').checked = false;
+            document.getElementById('store-active').checked = true;
+
+            document.getElementById('store-modal-title').innerText = "Nova Loja";
+            document.getElementById('store-modal').style.display = 'flex';
+        }
+
+        function closeStoreFormModal() {
+            document.getElementById('store-modal').style.display = 'none';
+        }
+
+        function generateStoreSlug() {
+            const name = document.getElementById('store-name').value;
+            document.getElementById('store-slug').value = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+        }
+
+        function editStore(slug) {
+            const s = adminStores.find(item => item.slug === slug);
+            if (!s) return;
+
+            document.getElementById('store-id').value = s.id || s.slug;
+            document.getElementById('store-name').value = s.name;
+            document.getElementById('store-slug').value = s.slug;
+            document.getElementById('store-short-desc').value = s.short_description || '';
+            document.getElementById('store-desc').value = s.description || '';
+            document.getElementById('store-address').value = s.address || '';
+            document.getElementById('store-neighborhood').value = s.neighborhood || 'Centro';
+            document.getElementById('store-lat').value = s.latitude || '';
+            document.getElementById('store-lng').value = s.longitude || '';
+            document.getElementById('store-phone').value = s.phone || '';
+            document.getElementById('store-whatsapp').value = s.whatsapp || '';
+            document.getElementById('store-instagram').value = s.instagram || '';
+            document.getElementById('store-website').value = s.website || '';
+            document.getElementById('store-hours').value = s.opening_hours || '';
+            document.getElementById('store-image-url').value = s.image_url || '';
+            document.getElementById('store-featured').checked = Boolean(s.featured);
+            document.getElementById('store-active').checked = Boolean(s.active);
+
+            document.getElementById('store-modal-title').innerText = "Editar Loja";
+            document.getElementById('store-modal').style.display = 'flex';
+        }
+
+        document.getElementById('store-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const storeData = {
+                id: document.getElementById('store-id').value || undefined,
+                name: document.getElementById('store-name').value,
+                slug: document.getElementById('store-slug').value,
+                short_description: document.getElementById('store-short-desc').value,
+                description: document.getElementById('store-desc').value,
+                address: document.getElementById('store-address').value,
+                neighborhood: document.getElementById('store-neighborhood').value,
+                latitude: parseFloat(document.getElementById('store-lat').value) || null,
+                longitude: parseFloat(document.getElementById('store-lng').value) || null,
+                phone: document.getElementById('store-phone').value,
+                whatsapp: document.getElementById('store-whatsapp').value,
+                instagram: document.getElementById('store-instagram').value,
+                website: document.getElementById('store-website').value,
+                opening_hours: document.getElementById('store-hours').value,
+                image_url: document.getElementById('store-image-url').value,
+                featured: document.getElementById('store-featured').checked,
+                active: document.getElementById('store-active').checked
+            };
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('shopping_stores').upsert(storeData, { onConflict: 'slug' });
+                } catch (err) {
+                    console.error("Erro ao salvar no Supabase:", err);
+                }
+            }
+
+            const existingIndex = adminStores.findIndex(s => s.slug === storeData.slug);
+            if (existingIndex >= 0) {
+                adminStores[existingIndex] = { ...adminStores[existingIndex], ...storeData };
+            } else {
+                adminStores.push(storeData);
+            }
+
+            closeStoreFormModal();
+            renderAdminStoresTable();
+            alert("Loja salva com sucesso!");
+        });
+
+        async function deleteStore(slug) {
+            if (!confirm(`Tem certeza que deseja excluir a loja "${slug}"?`)) return;
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('shopping_stores').delete().eq('slug', slug);
+                } catch (err) {
+                    console.error("Erro ao deletar no Supabase:", err);
+                }
+            }
+
+            adminStores = adminStores.filter(s => s.slug !== slug);
+            renderAdminStoresTable();
+        }
+
+        function renderAdminCategoriesTable() {
+            const tbody = document.getElementById('admin-categories-table-body');
+            if (!tbody) return;
+
+            let html = '';
+            adminCategories.forEach(c => {
+                html += `
+                    <tr>
+                        <td>${c.icon || '🛍️'}</td>
+                        <td><strong>${c.name}</strong></td>
+                        <td><code>${c.slug}</code></td>
+                        <td>${c.active ? '<span class="badge badge-confirmado">Ativa</span>' : '<span class="badge badge-cancelado">Inativa</span>'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editCategory('${c.slug}')">✏️ Editar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function openCategoryFormModal() {
+            document.getElementById('category-id').value = '';
+            document.getElementById('category-name').value = '';
+            document.getElementById('category-slug').value = '';
+            document.getElementById('category-icon').value = '🛍️';
+            document.getElementById('category-desc').value = '';
+            document.getElementById('category-active').checked = true;
+
+            document.getElementById('category-modal-title').innerText = "Nova Categoria";
+            document.getElementById('category-modal').style.display = 'flex';
+        }
+
+        function closeCategoryFormModal() {
+            document.getElementById('category-modal').style.display = 'none';
+        }
+
+        function generateCategorySlug() {
+            const name = document.getElementById('category-name').value;
+            document.getElementById('category-slug').value = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+        }
+
+        function editCategory(slug) {
+            const c = adminCategories.find(item => item.slug === slug);
+            if (!c) return;
+
+            document.getElementById('category-id').value = c.id || c.slug;
+            document.getElementById('category-name').value = c.name;
+            document.getElementById('category-slug').value = c.slug;
+            document.getElementById('category-icon').value = c.icon || '🛍️';
+            document.getElementById('category-desc').value = c.description || '';
+            document.getElementById('category-active').checked = Boolean(c.active);
+
+            document.getElementById('category-modal-title').innerText = "Editar Categoria";
+            document.getElementById('category-modal').style.display = 'flex';
+        }
+
+        document.getElementById('category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const catData = {
+                name: document.getElementById('category-name').value,
+                slug: document.getElementById('category-slug').value,
+                icon: document.getElementById('category-icon').value,
+                description: document.getElementById('category-desc').value,
+                active: document.getElementById('category-active').checked
+            };
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('shopping_categories').upsert(catData, { onConflict: 'slug' });
+                } catch (err) {
+                    console.error("Erro ao salvar categoria no Supabase:", err);
+                }
+            }
+
+            const existingIndex = adminCategories.findIndex(c => c.slug === catData.slug);
+            if (existingIndex >= 0) {
+                adminCategories[existingIndex] = { ...adminCategories[existingIndex], ...catData };
+            } else {
+                adminCategories.push(catData);
+            }
+
+            closeCategoryFormModal();
+            renderAdminCategoriesTable();
+            alert("Categoria salva com sucesso!");
+        });
+
+        document.getElementById('ebook-upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('ebook-file-input');
+            if (!fileInput.files || fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const btn = document.getElementById('btn-upload-ebook');
+            btn.disabled = true;
+            btn.innerText = "Enviando PDF...";
+
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.storage
+                        .from('shopping-guide')
+                        .upload('guia-de-compras.pdf', file, {
+                            cacheControl: '3600',
+                            upsert: true
+                        });
+
+                    if (error) throw error;
+                    alert("E-book oficial enviado com sucesso para o Supabase Storage!");
+                } catch (err) {
+                    console.error("Erro ao enviar E-book para o Supabase:", err);
+                    alert("Upload concluído localmente. Lembre-se de criar o bucket 'shopping-guide' no Supabase Storage.");
+                }
+            } else {
+                alert("Supabase não conectado. Configure as chaves em Configurações para habilitar o upload real em nuvem.");
+            }
+
+            btn.disabled = false;
+            btn.innerText = "📤 Enviar / Substituir E-book no Supabase";
+        });
+    </script>
+</body>
+</html>

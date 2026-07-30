@@ -1073,6 +1073,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 message += `\n*Indicação / Parceiro:* ${activePartner.nome}`;
             }
 
+            const shoppingRouteNotes = sessionStorage.getItem('transfer_shopping_route_notes') || new URLSearchParams(window.location.search).get('roteiro_lojas');
+            if (shoppingRouteNotes) {
+                message += `\n*Roteiro de Compras Selecionado:* ${shoppingRouteNotes}`;
+            }
+
             btnContinueWhatsApp.href = `https://wa.me/${currentPhone}?text=${encodeURIComponent(message)}`;
             
             btnContinueWhatsApp.onclick = () => {
