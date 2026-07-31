@@ -690,12 +690,29 @@
             btn.disabled = true;
             btn.innerText = "Salvando...";
 
-            const idVal = document.getElementById('store-id').value;
+            const rawLatInput = document.getElementById('store-lat');
+            const rawLngInput = document.getElementById('store-lng');
+            const rawLatStr = rawLatInput ? rawLatInput.value.trim() : '';
+            const rawLngStr = rawLngInput ? rawLngInput.value.trim() : '';
 
-            const rawLatStr = document.getElementById('store-lat').value.trim();
-            const rawLngStr = document.getElementById('store-lng').value.trim();
-            const rawLat = parseFloat(rawLatStr);
-            const rawLng = parseFloat(rawLngStr);
+            let cleanLat = null;
+            let cleanLng = null;
+
+            if (rawLatStr !== '') {
+                const parsedLat = parseFloat(rawLatStr.replace(',', '.'));
+                if (!isNaN(parsedLat)) {
+                    cleanLat = Number(parsedLat.toFixed(6));
+                    if (rawLatInput) rawLatInput.value = cleanLat;
+                }
+            }
+
+            if (rawLngStr !== '') {
+                const parsedLng = parseFloat(rawLngStr.replace(',', '.'));
+                if (!isNaN(parsedLng)) {
+                    cleanLng = Number(parsedLng.toFixed(6));
+                    if (rawLngInput) rawLngInput.value = cleanLng;
+                }
+            }
 
             const storeData = {
                 name: document.getElementById('store-name').value.trim(),
@@ -704,8 +721,8 @@
                 description: document.getElementById('store-desc').value.trim(),
                 address: document.getElementById('store-address').value.trim(),
                 neighborhood: document.getElementById('store-neighborhood').value.trim() || 'Centro',
-                latitude: (rawLatStr !== '' && !isNaN(rawLat)) ? Number(rawLat.toFixed(6)) : null,
-                longitude: (rawLngStr !== '' && !isNaN(rawLng)) ? Number(rawLng.toFixed(6)) : null,
+                latitude: cleanLat,
+                longitude: cleanLng,
                 phone: document.getElementById('store-phone').value.trim(),
                 whatsapp: document.getElementById('store-whatsapp').value.trim(),
                 instagram: document.getElementById('store-instagram').value.trim(),
