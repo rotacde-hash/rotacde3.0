@@ -140,6 +140,7 @@
                 </div>
                 <div class="page-actions" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <span id="supabase-connection-status" style="background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid #4caf50; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 700;">🟢 Supabase Conectado</span>
+                    <button id="btn-sync-supabase" onclick="syncFallbackStoresToSupabase()" class="btn btn-secondary" style="font-size: 13px;">⚡ Sincronizar Lojas no Supabase</button>
                     <a href="../guia-de-compras.html" target="_blank" class="btn btn-secondary">🌐 Ver Página Pública</a>
                 </div>
             </div>
@@ -465,8 +466,8 @@
 
         // CARREGA DADOS DO SUPABASE DIRETO NO ADMIN
         async function loadAdminData() {
-            let storesFromSupabase = false;
-            let categoriesFromSupabase = false;
+            let storesLoadedFromSupabase = false;
+            let categoriesLoadedFromSupabase = false;
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
@@ -475,9 +476,9 @@
                         .select('*')
                         .order('name');
                     
-                    if (!sErr && storeData) {
+                    if (!sErr && storeData && storeData.length > 0) {
                         adminStores = storeData;
-                        storesFromSupabase = true;
+                        storesLoadedFromSupabase = true;
                     }
 
                     const { data: catData, error: cErr } = await supabaseClient
@@ -485,19 +486,20 @@
                         .select('*')
                         .order('name');
                     
-                    if (!cErr && catData) {
+                    if (!cErr && catData && catData.length > 0) {
                         adminCategories = catData;
-                        categoriesFromSupabase = true;
+                        categoriesLoadedFromSupabase = true;
                     }
                 } catch (err) {
                     console.warn("Aviso ao carregar dados do Supabase:", err);
                 }
             }
 
-            if (!storesFromSupabase && adminStores.length === 0) {
+            // Se o Supabase ainda nao tem lojas/categorias salvas, carrega as lojas padrao
+            if (!storesLoadedFromSupabase) {
                 adminStores = (typeof FALLBACK_STORES !== 'undefined') ? [...FALLBACK_STORES] : [];
             }
-            if (!categoriesFromSupabase && adminCategories.length === 0) {
+            if (!categoriesLoadedFromSupabase) {
                 adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? [...FALLBACK_CATEGORIES] : [];
             }
 
@@ -516,6 +518,68 @@
 
             renderAdminStoresTable();
             renderAdminCategoriesTable();
+        }
+
+        // SINCRONIZA AS LOJAS E CATEGORIAS PADRAO PARA O SUPABASE (1 CLIQUE)
+        async function syncFallbackStoresToSupabase() {
+            if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+                alert("O Supabase não está conectado. Configure as credenciais no painel.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-sync-supabase');
+            if (btn) { btn.disabled = true; btn.innerText = "Sincronizando..."; }
+
+            try {
+                // Sincroniza categorias
+                if (typeof FALLBACK_CATEGORIES !== 'undefined') {
+                    for (const cat of FALLBACK_CATEGORIES) {
+                        const catData = {
+                            name: cat.name,
+                            slug: cat.slug,
+                            icon: cat.icon || '🛍️',
+                            description: cat.description || '',
+                            active: true,
+                            updated_at: new Date().toISOString()
+                        };
+                        await supabaseClient.from('shopping_categories').upsert(catData, { onConflict: 'slug' });
+                    }
+                }
+
+                // Sincroniza lojas
+                if (typeof FALLBACK_STORES !== 'undefined') {
+                    for (const store of FALLBACK_STORES) {
+                        const storeData = {
+                            name: store.name,
+                            slug: store.slug,
+                            short_description: store.short_description || '',
+                            description: store.description || '',
+                            address: store.address || '',
+                            neighborhood: store.neighborhood || 'Centro',
+                            latitude: store.latitude || null,
+                            longitude: store.longitude || null,
+                            phone: store.phone || '',
+                            whatsapp: store.whatsapp || '',
+                            instagram: store.instagram || '',
+                            website: store.website || '',
+                            opening_hours: store.opening_hours || '',
+                            image_url: store.image_url || '',
+                            featured: Boolean(store.featured),
+                            active: Boolean(store.active),
+                            updated_at: new Date().toISOString()
+                        };
+                        await supabaseClient.from('shopping_stores').upsert(storeData, { onConflict: 'slug' });
+                    }
+                }
+
+                alert("🎉 Lojas e categorias iniciais sincronizadas e salvas com SUCESSO no Supabase!");
+                await loadAdminData();
+            } catch (err) {
+                console.error("Erro ao sincronizar lojas no Supabase:", err);
+                alert(`Erro ao sincronizar: ${err.message}`);
+            }
+
+            if (btn) { btn.disabled = false; btn.innerText = "⚡ Sincronizar Lojas no Supabase"; }
         }
 
         // TABELA DE LOJAS
