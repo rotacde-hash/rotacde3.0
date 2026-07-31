@@ -730,6 +730,10 @@
                         console.error("Erro no Supabase:", error);
                         alert(`Atenção! Não foi possível salvar no Supabase:\n\n${error.message || JSON.stringify(error)}`);
                     } else {
+                        // Atualiza id gerado pelo Supabase se disponivel
+                        if (data && data.length > 0) {
+                            storeData.id = data[0].id;
+                        }
                         alert(`Loja "${storeData.name}" salva com SUCESSO no Supabase! 🎉`);
                     }
                 } catch (err) {
@@ -740,10 +744,19 @@
                 alert("Aviso: Supabase não está conectado. A alteração foi apenas temporária no navegador.");
             }
 
+            // Atualiza imediatamente a lista em memoria local
+            const existingIdx = adminStores.findIndex(s => s.slug === storeData.slug || (s.id && s.id === storeData.id));
+            if (existingIdx >= 0) {
+                adminStores[existingIdx] = { ...adminStores[existingIdx], ...storeData };
+            } else {
+                adminStores.push(storeData);
+            }
+
             btn.disabled = false;
             btn.innerText = "Salvar Loja";
 
             closeStoreFormModal();
+            renderAdminStoresTable();
             await loadAdminData();
         });
 
