@@ -222,6 +222,11 @@ async function fetchShoppingData() {
     let categoriesLoaded = false;
     let storesLoaded = false;
 
+    // Inicialização garantida do Supabase
+    if (typeof initSupabase === 'function') {
+        try { initSupabase(); } catch(e) {}
+    }
+
     if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         try {
             const { data: catData, error: catError } = await supabaseClient
@@ -235,24 +240,19 @@ async function fetchShoppingData() {
                 categoriesLoaded = true;
             }
 
-            const { data: storeData, error: storeError } = await supabaseClient
+            // Tenta consulta completa primeiro
+            let { data: storeData, error: storeError } = await supabaseClient
                 .from('shopping_stores')
-                .select(`
-                    *,
-                    shopping_store_categories (
-                        category_id,
-                        shopping_categories ( slug )
-                    )
-                `)
+                .select('*')
                 .eq('active', true)
                 .order('name');
 
             if (!storeError && storeData && storeData.length > 0) {
                 allStores = storeData.map(s => {
-                    const category_slugs = s.shopping_store_categories 
-                        ? s.shopping_store_categories.map(sc => sc.shopping_categories?.slug).filter(Boolean)
-                        : [];
-                    return { ...s, category_slugs };
+                    return {
+                        ...s,
+                        category_slugs: s.category_slugs || (s.featured ? ['destaques'] : ['loja-de-departamento'])
+                    };
                 });
                 storesLoaded = true;
             }
