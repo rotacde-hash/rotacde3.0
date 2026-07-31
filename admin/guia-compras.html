@@ -667,8 +667,8 @@
             document.getElementById('store-desc').value = s.description || '';
             document.getElementById('store-address').value = s.address || '';
             document.getElementById('store-neighborhood').value = s.neighborhood || 'Centro';
-            document.getElementById('store-lat').value = s.latitude || '';
-            document.getElementById('store-lng').value = s.longitude || '';
+            document.getElementById('store-lat').value = s.latitude ? Number(s.latitude).toFixed(6) : '';
+            document.getElementById('store-lng').value = s.longitude ? Number(s.longitude).toFixed(6) : '';
             document.getElementById('store-phone').value = s.phone || '';
             document.getElementById('store-whatsapp').value = s.whatsapp || '';
             document.getElementById('store-instagram').value = s.instagram || '';
@@ -692,8 +692,10 @@
 
             const idVal = document.getElementById('store-id').value;
 
-            const rawLat = parseFloat(document.getElementById('store-lat').value);
-            const rawLng = parseFloat(document.getElementById('store-lng').value);
+            const rawLatStr = document.getElementById('store-lat').value.trim();
+            const rawLngStr = document.getElementById('store-lng').value.trim();
+            const rawLat = parseFloat(rawLatStr);
+            const rawLng = parseFloat(rawLngStr);
 
             const storeData = {
                 name: document.getElementById('store-name').value.trim(),
@@ -702,8 +704,8 @@
                 description: document.getElementById('store-desc').value.trim(),
                 address: document.getElementById('store-address').value.trim(),
                 neighborhood: document.getElementById('store-neighborhood').value.trim() || 'Centro',
-                latitude: (!isNaN(rawLat) && rawLat !== null) ? Number(rawLat.toFixed(6)) : null,
-                longitude: (!isNaN(rawLng) && rawLng !== null) ? Number(rawLng.toFixed(6)) : null,
+                latitude: (rawLatStr !== '' && !isNaN(rawLat)) ? Number(rawLat.toFixed(6)) : null,
+                longitude: (rawLngStr !== '' && !isNaN(rawLng)) ? Number(rawLng.toFixed(6)) : null,
                 phone: document.getElementById('store-phone').value.trim(),
                 whatsapp: document.getElementById('store-whatsapp').value.trim(),
                 instagram: document.getElementById('store-instagram').value.trim(),
