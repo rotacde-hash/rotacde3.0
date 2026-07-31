@@ -692,6 +692,9 @@
 
             const idVal = document.getElementById('store-id').value;
 
+            const rawLat = parseFloat(document.getElementById('store-lat').value);
+            const rawLng = parseFloat(document.getElementById('store-lng').value);
+
             const storeData = {
                 name: document.getElementById('store-name').value.trim(),
                 slug: document.getElementById('store-slug').value.trim(),
@@ -699,8 +702,8 @@
                 description: document.getElementById('store-desc').value.trim(),
                 address: document.getElementById('store-address').value.trim(),
                 neighborhood: document.getElementById('store-neighborhood').value.trim() || 'Centro',
-                latitude: parseFloat(document.getElementById('store-lat').value) || null,
-                longitude: parseFloat(document.getElementById('store-lng').value) || null,
+                latitude: (!isNaN(rawLat) && rawLat !== null) ? Number(rawLat.toFixed(6)) : null,
+                longitude: (!isNaN(rawLng) && rawLng !== null) ? Number(rawLng.toFixed(6)) : null,
                 phone: document.getElementById('store-phone').value.trim(),
                 whatsapp: document.getElementById('store-whatsapp').value.trim(),
                 instagram: document.getElementById('store-instagram').value.trim(),
