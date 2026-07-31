@@ -690,6 +690,8 @@
             btn.disabled = true;
             btn.innerText = "Salvando...";
 
+            const idVal = document.getElementById('store-id') ? document.getElementById('store-id').value : '';
+
             const rawLatInput = document.getElementById('store-lat');
             const rawLngInput = document.getElementById('store-lng');
             const rawLatStr = rawLatInput ? rawLatInput.value.trim() : '';
