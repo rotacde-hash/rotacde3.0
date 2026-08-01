@@ -1234,7 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderCorridas = document.getElementById('sliderCorridas');
     const calcCorridasVal = document.getElementById('calcCorridasVal');
     const calcResultadoGanhos = document.getElementById('calcResultadoGanhos');
-    const ESTIMATED_TICKET_PRICE = 150; // Valor médio ilustrativo por corrida (R$)
+    const ESTIMATED_TICKET_PRICE = 180; // Valor médio ilustrativo por corrida (R$)
     const COMMISSION_PERCENTAGE = 0.05; // 5% de comissão
 
     if (sliderCorridas && calcCorridasVal && calcResultadoGanhos) {

@@ -469,11 +469,18 @@ function initLeafletMap() {
         leafletMap = L.map('mapa-compras', {
             center: [-25.5155, -54.6120],
             zoom: 15,
-            zoomControl: true
+            zoomControl: true,
+            minZoom: 11,
+            maxBounds: [
+                [-25.8, -54.9],
+                [-25.2, -54.3]
+            ],
+            maxBoundsViscosity: 1.0
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap contributors',
+            noWrap: true
         }).addTo(leafletMap);
     }
 
@@ -493,29 +500,33 @@ function updateMapMarkers(storesToDisplay) {
             const lat = parseFloat(store.latitude);
             const lng = parseFloat(store.longitude);
             
-            if (!isNaN(lat) && !isNaN(lng)) {
-                const marker = L.marker([lat, lng]).addTo(leafletMap);
-                const inRoute = isStoreInRoute(store.id || store.slug);
+            // Filter invalid coordinates (like 0,0) that cause the map to zoom out to the whole world
+            if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
+                // Ensure it's roughly in the region to avoid crazy bounds
+                if (lat < -24 && lat > -27 && lng < -53 && lng > -56) {
+                    const marker = L.marker([lat, lng]).addTo(leafletMap);
+                    const inRoute = isStoreInRoute(store.id || store.slug);
 
-                const popupHtml = `
-                    <div style="font-family: 'Inter', sans-serif; padding: 4px;">
-                        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
-                        <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${store.neighborhood || 'Centro'}</p>
-                        <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
-                            ${inRoute ? '✓ No Roteiro' : '+ Adicionar'}
-                        </button>
-                    </div>
-                `;
+                    const popupHtml = `
+                        <div style="font-family: 'Inter', sans-serif; padding: 4px;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${store.neighborhood || 'Centro'}</p>
+                            <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
+                                ${inRoute ? '✓ No Roteiro' : '+ Adicionar'}
+                            </button>
+                        </div>
+                    `;
 
-                marker.bindPopup(popupHtml);
-                mapMarkers.push(marker);
-                bounds.extend([lat, lng]);
+                    marker.bindPopup(popupHtml);
+                    mapMarkers.push(marker);
+                    bounds.extend([lat, lng]);
+                }
             }
         }
     });
 
     if (mapMarkers.length > 0 && leafletMap) {
-        leafletMap.fitBounds(bounds, { padding: [30, 30] });
+        leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
     }
 }
 
