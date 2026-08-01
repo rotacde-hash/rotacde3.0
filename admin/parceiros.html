@@ -792,43 +792,151 @@
             renderPartnersTable();
         }
 
-        function viewPartnerHistory(slug) {
+        async function toggleCommissionPayment(tripId, newStatus, partnerSlug) {
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('viagens').update({ comissaoStatus: newStatus }).eq('id', tripId);
+                } catch(e) {
+                    console.error("Erro Supabase:", e);
+                }
+            }
+            try {
+                let viagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
+                const idx = viagens.findIndex(v => v.id == tripId);
+                if (idx !== -1) {
+                    viagens[idx].comissaoStatus = newStatus;
+                    localStorage.setItem('rota_viagens', JSON.stringify(viagens));
+                }
+            } catch(e) {}
+            
+            showToast(`✅ Comissão alterada para "${newStatus}"!`);
+            if (partnerSlug) viewPartnerHistory(partnerSlug);
+            renderPartnersTable();
+        }
+
+        async function viewPartnerHistory(slug) {
             const partner = partners.find(p => p.slug === slug);
             if (!partner) return;
 
             const partnerLeads = leads.filter(l => l.parceiroSlug === slug);
 
-            document.getElementById('historyModalTitle').innerText = `📊 Indicações — ${partner.nome}`;
+            // Busca corridas do parceiro
+            let allViagens = [];
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    const { data } = await supabaseClient.from('viagens').select('*');
+                    if (data) allViagens = data;
+                } catch(e) {}
+            }
+            if (allViagens.length === 0) {
+                try {
+                    allViagens = JSON.parse(localStorage.getItem('rota_viagens') || '[]');
+                } catch(e) {}
+            }
+
+            const partnerViagens = allViagens.filter(v => v.parceiroSlug === slug || (v.observacoes && v.observacoes.toLowerCase().includes(slug)));
+
+            const partnerDescPct = (partner.desconto !== undefined && partner.desconto !== null ? parseFloat(partner.desconto) : 5) / 100;
+            let comissaoPendente = 0;
+            let comissaoPaga = 0;
+
+            partnerViagens.forEach(v => {
+                const valCorrida = parseFloat(v.valor) || 0;
+                const valComissao = v.comissaoValor ? parseFloat(v.comissaoValor) : (valCorrida * partnerDescPct);
+                if (v.status === 'Confirmado' || v.status === 'Concluído') {
+                    if (v.comissaoStatus === 'Pago') {
+                        comissaoPaga += valComissao;
+                    } else {
+                        comissaoPendente += valComissao;
+                    }
+                }
+            });
+
+            document.getElementById('historyModalTitle').innerText = `📊 Gestão de Comissão — ${partner.nome}`;
             const body = document.getElementById('historyModalBody');
 
-            if (partnerLeads.length === 0) {
-                body.innerHTML = `
-                    <div style="text-align:center; padding: 30px; color: var(--text-muted);">
-                        Nenhum orçamento enviado via WhatsApp por clientes com o link deste parceiro ainda.
-                        <br><br>
-                        <b>Link para divulgar:</b>
-                        <div class="link-badge" style="margin-top:10px;">${getBaseSiteUrl()}?ref=${partner.slug}</div>
+            let html = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-muted); display: block;">TAXA COMISSÃO</span>
+                        <strong style="font-size: 16px; color: var(--primary-gold);">${partner.desconto !== undefined ? partner.desconto : 5}%</strong>
                     </div>
-                `;
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--text-muted); display: block;">CORRIDAS</span>
+                        <strong style="font-size: 16px; color: #fff;">${partnerViagens.length}</strong>
+                    </div>
+                    <div style="background: rgba(197, 155, 39, 0.1); border: 1px solid var(--primary-gold); padding: 10px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: var(--primary-gold); display: block;">⏳ PENDENTE</span>
+                        <strong style="font-size: 16px; color: var(--primary-gold);">R$ ${comissaoPendente.toFixed(2)}</strong>
+                    </div>
+                    <div style="background: rgba(76, 175, 80, 0.1); border: 1px solid #4caf50; padding: 10px; border-radius: 8px; text-align: center;">
+                        <span style="font-size: 11px; color: #4caf50; display: block;">🟢 JÁ PAGO</span>
+                        <strong style="font-size: 16px; color: #4caf50;">R$ ${comissaoPaga.toFixed(2)}</strong>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 14px; color: #fff; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px;">
+                    🚗 Corridas Realizadas & Pagamento de Comissões (${partnerViagens.length})
+                </h4>
+            `;
+
+            if (partnerViagens.length === 0) {
+                html += `<div style="font-size: 12px; color: var(--text-muted); padding: 10px 0 20px;">Nenhuma corrida finalizada para este parceiro ainda.</div>`;
             } else {
-                let html = `<div style="margin-bottom:16px; font-size:13px; color: var(--text-muted);">Exibindo <b>${partnerLeads.length}</b> orçamentos solicitados via WhatsApp:</div>`;
+                html += `<div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">`;
+                partnerViagens.slice().reverse().forEach(v => {
+                    const valCorrida = parseFloat(v.valor) || 0;
+                    const valComissao = v.comissaoValor ? parseFloat(v.comissaoValor) : (valCorrida * partnerDescPct);
+                    const isPaid = v.comissaoStatus === 'Pago';
+                    const dataFormatada = v.data ? new Date(v.data).toLocaleDateString('pt-BR') : 'Data n/i';
+
+                    html += `
+                        <div class="history-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <div style="font-weight: 700; color: #fff; font-size: 13px;">${v.nomeCliente || 'Cliente'} — <span style="color: var(--primary-gold);">R$ ${valCorrida.toFixed(2)}</span></div>
+                                <div style="font-size: 11px; color: var(--text-muted);">${v.tipoServico || 'Transfer'} | ${dataFormatada}</div>
+                                <div style="font-size: 12px; font-weight: 700; margin-top: 4px; color: ${isPaid ? '#4caf50' : 'var(--primary-gold)'}">
+                                    Comissão (${(partnerDescPct*100).toFixed(0)}%): <b>R$ ${valComissao.toFixed(2)}</b> — ${isPaid ? '🟢 Paga' : '⏳ Pendente'}
+                                </div>
+                            </div>
+                            <div>
+                                ${isPaid ? 
+                                    `<button class="btn-copy" style="background: rgba(231,76,60,0.2); color: #e74c3c; border-color: rgba(231,76,60,0.4);" onclick="toggleCommissionPayment('${v.id}', 'Pendente', '${slug}')">⏳ Marcar Pendente</button>` :
+                                    `<button class="btn-copy" style="background: #27ae60; color: #fff; border: none; font-weight: 700;" onclick="toggleCommissionPayment('${v.id}', 'Pago', '${slug}')">🟢 DAR BAIXA (MARCAR PAGO)</button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            html += `
+                <h4 style="font-size: 14px; color: #fff; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px;">
+                    💬 Orçamentos via WhatsApp (${partnerLeads.length})
+                </h4>
+            `;
+
+            if (partnerLeads.length === 0) {
+                html += `<div style="font-size: 12px; color: var(--text-muted); padding: 10px 0;">Nenhum orçamento pendente.</div>`;
+            } else {
                 partnerLeads.slice().reverse().forEach(l => {
                     const dataFormatada = new Date(l.data).toLocaleString('pt-BR');
                     html += `
-                        <div class="history-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <span style="font-weight:700; color:var(--primary-gold);">📍 ${l.origem || 'Origem não inf.'} ➔ ${l.destino || 'Destino não inf.'}</span>
+                        <div class="history-card" style="margin-bottom: 8px;">
+                            <div style="display:flex; justify-space-between; align-items:center; margin-bottom:4px;">
+                                <span style="font-weight:700; color:var(--primary-gold);">📍 ${l.origem || 'Origem'} ➔ ${l.destino || 'Destino'}</span>
                                 <span style="font-size:11px; color:var(--text-muted);">${dataFormatada}</span>
                             </div>
-                            <div style="font-size:13px; color:#fff;">
+                            <div style="font-size:12px; color:#fff;">
                                 👥 ${l.passageiros || 1} pass. | 🧳 ${l.malas || 0} malas | 💰 ${l.valor || 'Sob Consulta'}
                             </div>
                         </div>
                     `;
                 });
-                body.innerHTML = html;
             }
 
+            body.innerHTML = html;
             document.getElementById('historyModal').style.display = 'flex';
         }
 

@@ -262,7 +262,7 @@
                     nome: partnerSession.partnerNome,
                     slug: partnerSession.partnerSlug,
                     cliques: 0,
-                    desconto: partnerSession.desconto || 10
+                    desconto: partnerSession.desconto !== undefined ? partnerSession.desconto : 5
                 };
             }
 
@@ -270,7 +270,7 @@
             document.getElementById('partnerNameDisplay').innerText = partnerData.nome;
             document.getElementById('partnerInitials').innerText = partnerData.nome.charAt(0).toUpperCase();
             document.getElementById('partnerLinkText').innerText = `rotacde.site/?ref=${partnerData.slug}`;
-            document.getElementById('partnerCupomDisplay').innerText = `Cupom AUTOMÁTICO de ${partnerData.desconto || 10}% OFF`;
+            document.getElementById('partnerCupomDisplay').innerText = `Cupom AUTOMÁTICO de ${partnerData.desconto !== undefined ? partnerData.desconto : 5}% OFF`;
 
             // 2. Busca Viagens do Supabase / LocalStorage
             let allViagens = [];
@@ -311,7 +311,7 @@
             let comissaoPendente = 0;
             let comissaoPaga = 0;
 
-            const partnerDescPct = (partnerData.desconto || 10) / 100;
+            const partnerDescPct = (partnerData.desconto !== undefined && partnerData.desconto !== null ? parseFloat(partnerData.desconto) : 5) / 100;
 
             partnerViagens.forEach(v => {
                 const valCorrida = parseFloat(v.valor) || 0;
@@ -337,6 +337,8 @@
             const tbody = document.getElementById('partnerTableBody');
             tbody.innerHTML = '';
 
+            const partnerDescPct = (partnerData.desconto !== undefined && partnerData.desconto !== null ? parseFloat(partnerData.desconto) : 5) / 100;
+
             // Se não houver viagens diretas, mostra os leads gerados
             if (partnerViagens.length === 0 && partnerLeads.length === 0) {
                 tbody.innerHTML = `
@@ -359,7 +361,7 @@
                 else if (v.status === 'Cancelado') badgeClass = 'badge-cancelled';
 
                 const valCorrida = parseFloat(v.valor) || 0;
-                const valComissao = v.comissaoValor ? parseFloat(v.comissaoValor) : (valCorrida * 0.10);
+                const valComissao = v.comissaoValor ? parseFloat(v.comissaoValor) : (valCorrida * partnerDescPct);
 
                 const isPaid = v.comissaoStatus === 'Pago';
                 const statusPgto = isPaid ? 
