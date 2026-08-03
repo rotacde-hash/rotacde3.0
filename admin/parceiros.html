@@ -472,18 +472,29 @@
                     const { data, error } = await supabaseClient.from('parceiros').select('*');
                     if (error) {
                         console.error("Erro ao buscar parceiros do Supabase:", error);
-                    } else if (data) {
-                        partners = data.map(p => ({
+                    } else if (data && data.length > 0) {
+                        const loaded = data.map(p => ({
                             id: p.id,
                             nome: p.nome,
                             slug: p.slug,
                             whatsapp: p.whatsapp || '',
                             email: p.email || '',
-                            desconto: p.desconto !== undefined ? p.desconto : 10,
+                            desconto: (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5,
+                            senha: p.senha || '',
                             obs: p.obs || '',
                             cliques: p.cliques || 0,
-                            criadoEm: p.criadoEm || p.created_at
+                            criadoEm: p.criadoEm || p.created_at || new Date().toISOString()
                         }));
+                        
+                        // Preserva parceiros criados localmente caso o Supabase não tenha sincronizado
+                        const localStored = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+                        localStored.forEach(lp => {
+                            if (!loaded.some(sp => sp.slug === lp.slug || sp.id === lp.id)) {
+                                loaded.push(lp);
+                            }
+                        });
+
+                        partners = loaded;
                         localStorage.setItem('rota_parceiros', JSON.stringify(partners));
                     }
                 } catch (e) {
@@ -503,6 +514,7 @@
                                 nome: 'Hotel Copacabana Foz',
                                 slug: 'hotel-copacabana',
                                 whatsapp: '5545999999999',
+                                desconto: 5,
                                 obs: 'Exemplo de parceiro pré-cadastrado',
                                 cliques: 12,
                                 criadoEm: new Date().toISOString()
@@ -576,11 +588,12 @@
                 const leadCount = partnerLeads.length;
                 const clickCount = p.cliques || 0;
                 const shareUrl = `${baseUrl}?ref=${p.slug}`;
+                const pDesconto = (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        <div class="partner-name">${p.nome}</div>
+                        <div class="partner-name">${p.nome} <span style="font-size:11px; font-weight:700; color:var(--primary-gold); margin-left:4px;">(${pDesconto}%)</span></div>
                         ${p.obs ? `<div class="partner-sub">📝 ${p.obs}</div>` : ''}
                     </td>
                     <td>
@@ -598,7 +611,7 @@
                             ${p.whatsapp ? `
                                 <a href="https://wa.me/${p.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent('Olá ' + p.nome + '! Aqui está seu link exclusivo de indicação do Rota CDE Transfer:\n' + shareUrl)}" target="_blank" class="btn-wa-share" title="Enviar link para o WhatsApp do parceiro">💬 WhatsApp</a>
                             ` : ''}
-                            <button class="btn-copy" style="background:rgba(255,255,255,0.05); color:#fff; border-color:rgba(255,255,255,0.1);" onclick="viewPartnerHistory('${p.slug}')" title="Ver histórico de clientes indicados">📊 Histórico (${leadCount})</button>
+                            <button class="btn-copy" style="background:rgba(255,255,255,0.05); color:#fff; border-color:rgba(255,255,255,0.1);" onclick="viewPartnerHistory('${p.slug}')" title="Ver histórico de clientes indicados">📊 Gestão (${leadCount})</button>
                             <button class="btn-copy" style="background:rgba(54, 162, 235, 0.15); color:#36a2eb; border-color:rgba(54, 162, 235, 0.3);" onclick="editPartner('${p.id}')" title="Editar parceiro">✏️</button>
                             <button class="btn-copy" style="background:rgba(231, 76, 60, 0.15); color:#e74c3c; border-color:rgba(231, 76, 60, 0.3);" onclick="deletePartner('${p.id}')" title="Excluir parceiro">🗑️</button>
                         </div>
@@ -651,7 +664,7 @@
             document.getElementById('partner-nome').value = '';
             document.getElementById('partner-slug').value = '';
             document.getElementById('partner-whatsapp').value = '';
-            document.getElementById('partner-desconto').value = '10';
+            document.getElementById('partner-desconto').value = '5';
             document.getElementById('partner-senha').value = '';
             document.getElementById('partner-obs').value = '';
             document.getElementById('modalPartnerTitle').innerText = '➕ Novo Parceiro';
@@ -666,11 +679,13 @@
             const partner = partners.find(p => p.id === id);
             if (!partner) return;
 
+            const descVal = (partner.desconto !== undefined && partner.desconto !== null && !isNaN(parseFloat(partner.desconto))) ? parseFloat(partner.desconto) : 5;
+
             document.getElementById('partner-id').value = partner.id;
             document.getElementById('partner-nome').value = partner.nome;
             document.getElementById('partner-slug').value = partner.slug;
             document.getElementById('partner-whatsapp').value = partner.whatsapp || '';
-            document.getElementById('partner-desconto').value = partner.desconto !== undefined ? partner.desconto : 10;
+            document.getElementById('partner-desconto').value = descVal;
             document.getElementById('partner-senha').value = partner.senha || '';
             document.getElementById('partner-obs').value = partner.obs || '';
             document.getElementById('modalPartnerTitle').innerText = '✏️ Editar Parceiro';
@@ -713,7 +728,8 @@
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
             const whatsapp = document.getElementById('partner-whatsapp').value.trim();
-            const desconto = parseFloat(document.getElementById('partner-desconto').value) || 10;
+            const rawDesc = parseFloat(document.getElementById('partner-desconto').value);
+            const desconto = !isNaN(rawDesc) ? rawDesc : 5;
             const senha = document.getElementById('partner-senha').value.trim();
             const obs = document.getElementById('partner-obs').value.trim();
 
@@ -759,20 +775,30 @@
             // Salva no Supabase se disponível
             if (typeof supabaseClient !== 'undefined' && supabaseClient && targetPartner) {
                 try {
-                    const { error } = await supabaseClient.from('parceiros').upsert({
+                    const supabaseData = {
                         id: targetPartner.id,
                         nome: targetPartner.nome,
                         slug: targetPartner.slug,
-                        whatsapp: targetPartner.whatsapp,
+                        whatsapp: targetPartner.whatsapp || '',
                         desconto: targetPartner.desconto,
-                        senha: targetPartner.senha,
-                        obs: targetPartner.obs,
-                        cliques: targetPartner.cliques,
-                        criadoEm: targetPartner.criadoEm
-                    }, { onConflict: 'id' });
+                        senha: targetPartner.senha || '',
+                        obs: targetPartner.obs || '',
+                        cliques: targetPartner.cliques || 0
+                    };
+
+                    const { error } = await supabaseClient.from('parceiros').upsert(supabaseData);
                     
                     if (error) {
                         console.error("Erro ao salvar parceiro no Supabase:", error);
+                        // Fallback: se id causar erro de casting no Postgres, faz inserção/atualização por slug
+                        if (error.code === '22P02' || error.message.includes('invalid input syntax')) {
+                            delete supabaseData.id;
+                            const { error: err2 } = await supabaseClient.from('parceiros').upsert(supabaseData, { onConflict: 'slug' });
+                            if (err2) console.error("Erro no fallback upsert no Supabase:", err2);
+                            else console.log("✅ Parceiro salvo via fallback slug no Supabase!");
+                        }
+                    } else {
+                        console.log("✅ Parceiro salvo com sucesso no Supabase!");
                     }
                 } catch (err) {
                     console.error("Erro de conexão ao salvar parceiro no Supabase:", err);
@@ -780,6 +806,8 @@
             }
 
             savePartnersToStorage();
+            updateDashboardStats();
+            renderPartnersTable();
             
             if (id) {
                 showToast('Parceiro atualizado com sucesso!');
@@ -788,8 +816,6 @@
             }
 
             closePartnerModal();
-            updateDashboardStats();
-            renderPartnersTable();
         }
 
         async function toggleCommissionPayment(tripId, newStatus, partnerSlug) {

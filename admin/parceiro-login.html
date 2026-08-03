@@ -307,7 +307,7 @@
                     partnerSlug: partner.slug,
                     partnerNome: partner.nome,
                     whatsapp: partner.whatsapp || '',
-                    desconto: partner.desconto || 10,
+                    desconto: (partner.desconto !== undefined && partner.desconto !== null && !isNaN(parseFloat(partner.desconto))) ? parseFloat(partner.desconto) : 5,
                     loginAt: Date.now(),
                     expireAt: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
                 };
