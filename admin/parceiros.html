@@ -476,73 +476,16 @@
         }
 
         async function loadPartnersData() {
-            // Tenta carregar os parceiros do Supabase
-            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.from('parceiros').select('*');
-                    if (error) {
-                        console.error("Erro ao buscar parceiros do Supabase:", error);
-                    } else if (data && data.length > 0) {
-                        const loaded = data.map(p => ({
-                            id: p.id,
-                            nome: p.nome,
-                            slug: p.slug,
-                            whatsapp: p.whatsapp || '',
-                            email: p.email || '',
-                            desconto: (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5,
-                            senha: p.senha || '',
-                            obs: p.obs || '',
-                            cliques: p.cliques || 0,
-                            criadoEm: p.criadoEm || p.created_at || new Date().toISOString()
-                        }));
-                        
-                        // Preserva parceiros criados localmente caso o Supabase não tenha sincronizado
-                        const localStored = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
-                        localStored.forEach(lp => {
-                            if (!loaded.some(sp => sp.slug === lp.slug || sp.id === lp.id)) {
-                                loaded.push(lp);
-                            }
-                        });
-
-                        partners = loaded;
-                        localStorage.setItem('rota_parceiros', JSON.stringify(partners));
-                    }
-                } catch (e) {
-                    console.warn("Falha de conexão com Supabase para parceiros, usando LocalStorage:", e);
-                }
+            if (typeof dbGetPartners === 'function') {
+                partners = await dbGetPartners();
+            } else {
+                partners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
             }
 
             try {
-                if (partners.length === 0) {
-                    const storedPartners = localStorage.getItem('rota_parceiros');
-                    if (storedPartners) {
-                        partners = JSON.parse(storedPartners);
-                    } else {
-                        partners = [
-                            {
-                                id: 'p_ex_1',
-                                nome: 'Hotel Copacabana Foz',
-                                slug: 'hotel-copacabana',
-                                whatsapp: '5545999999999',
-                                desconto: 5,
-                                obs: 'Exemplo de parceiro pré-cadastrado',
-                                cliques: 12,
-                                criadoEm: new Date().toISOString()
-                            }
-                        ];
-                        localStorage.setItem('rota_parceiros', JSON.stringify(partners));
-                    }
-                }
-
                 const storedLeads = localStorage.getItem('rota_parceiros_leads');
-                if (storedLeads) {
-                    leads = JSON.parse(storedLeads);
-                } else {
-                    leads = [];
-                }
+                leads = storedLeads ? JSON.parse(storedLeads) : [];
             } catch (e) {
-                console.error("Erro ao carregar parceiros locais:", e);
-                if (partners.length === 0) partners = [];
                 leads = [];
             }
 
@@ -707,22 +650,13 @@
             if (!partner) return;
 
             if (confirm(`Tem certeza que deseja excluir o parceiro "${partner.nome}"?\n\nOs links ativos desse parceiro deixarão de contabilizar indicações.`)) {
-                // Remove do Supabase se disponível
-                if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-                    try {
-                        const { error } = await supabaseClient.from('parceiros').delete().eq('id', id);
-                        if (error) {
-                            console.error("Erro ao excluir parceiro no Supabase:", error);
-                        }
-                    } catch (err) {
-                        console.error("Erro de conexão ao excluir parceiro no Supabase:", err);
-                    }
+                if (typeof dbDeletePartner === 'function') {
+                    await dbDeletePartner(id);
+                } else {
+                    partners = partners.filter(p => p.id !== id);
+                    savePartnersToStorage();
                 }
-
-                partners = partners.filter(p => p.id !== id);
-                savePartnersToStorage();
-                updateDashboardStats();
-                renderPartnersTable();
+                await loadPartnersData();
                 showToast('Parceiro removido.');
             }
         }
@@ -734,6 +668,7 @@
             const nome = document.getElementById('partner-nome').value.trim();
             let slug = document.getElementById('partner-slug').value.trim().toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
             const ddiEl = document.getElementById('partner-ddi');
@@ -756,77 +691,31 @@
                 return;
             }
 
-            let targetPartner = null;
+            let targetPartner = {
+                id: id || ('p_' + Date.now()),
+                nome: nome,
+                slug: slug,
+                whatsapp: whatsapp,
+                desconto: desconto,
+                senha: senha,
+                obs: obs,
+                cliques: id ? (partners.find(p => p.id === id)?.cliques || 0) : 0,
+                criadoEm: id ? (partners.find(p => p.id === id)?.criadoEm || new Date().toISOString()) : new Date().toISOString()
+            };
 
-            if (id) {
-                const partner = partners.find(p => p.id === id);
-                if (partner) {
-                    partner.nome = nome;
-                    partner.slug = slug;
-                    partner.whatsapp = whatsapp;
-                    partner.desconto = desconto;
-                    partner.senha = senha;
-                    partner.obs = obs;
-                    targetPartner = partner;
-                }
+            // Salva via helper dbSavePartner (mesmo padrão de salvarViagem da página nova-viagem)
+            if (typeof dbSavePartner === 'function') {
+                await dbSavePartner(targetPartner);
             } else {
-                targetPartner = {
-                    id: 'p_' + Date.now(),
-                    nome: nome,
-                    slug: slug,
-                    whatsapp: whatsapp,
-                    desconto: desconto,
-                    senha: senha,
-                    obs: obs,
-                    cliques: 0,
-                    criadoEm: new Date().toISOString()
-                };
-                partners.push(targetPartner);
+                const idx = partners.findIndex(p => p.id === targetPartner.id || p.slug === targetPartner.slug);
+                if (idx !== -1) partners[idx] = targetPartner;
+                else partners.push(targetPartner);
+                localStorage.setItem('rota_parceiros', JSON.stringify(partners));
             }
 
-            // Salva no Supabase se disponível
-            if (typeof supabaseClient !== 'undefined' && supabaseClient && targetPartner) {
-                try {
-                    const supabaseData = {
-                        id: targetPartner.id,
-                        nome: targetPartner.nome,
-                        slug: targetPartner.slug,
-                        whatsapp: targetPartner.whatsapp || '',
-                        desconto: targetPartner.desconto,
-                        senha: targetPartner.senha || '',
-                        obs: targetPartner.obs || '',
-                        cliques: targetPartner.cliques || 0
-                    };
-
-                    const { error } = await supabaseClient.from('parceiros').upsert(supabaseData);
-                    
-                    if (error) {
-                        console.error("Erro ao salvar parceiro no Supabase:", error);
-                        // Fallback: se id causar erro de casting no Postgres, faz inserção/atualização por slug
-                        if (error.code === '22P02' || error.message.includes('invalid input syntax')) {
-                            delete supabaseData.id;
-                            const { error: err2 } = await supabaseClient.from('parceiros').upsert(supabaseData, { onConflict: 'slug' });
-                            if (err2) console.error("Erro no fallback upsert no Supabase:", err2);
-                            else console.log("✅ Parceiro salvo via fallback slug no Supabase!");
-                        }
-                    } else {
-                        console.log("✅ Parceiro salvo com sucesso no Supabase!");
-                    }
-                } catch (err) {
-                    console.error("Erro de conexão ao salvar parceiro no Supabase:", err);
-                }
-            }
-
-            savePartnersToStorage();
-            updateDashboardStats();
-            renderPartnersTable();
+            await loadPartnersData();
             
-            if (id) {
-                showToast('Parceiro atualizado com sucesso!');
-            } else {
-                showToast('✅ Novo parceiro cadastrado com sucesso!');
-            }
-
+            showToast(id ? 'Parceiro atualizado com sucesso!' : '✅ Novo parceiro cadastrado com sucesso!');
             closePartnerModal();
         }
 
