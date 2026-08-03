@@ -1250,26 +1250,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const partnerRegisterForm = document.getElementById('partnerRegisterForm');
     if (partnerRegisterForm) {
-        partnerRegisterForm.addEventListener('submit', (e) => {
+        partnerRegisterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const nome = document.getElementById('pNome').value.trim();
             const empresa = document.getElementById('pEmpresa').value.trim();
-            const whatsapp = document.getElementById('pWhatsapp').value.trim();
+            const ddiEl = document.getElementById('pDDI');
+            const ddi = ddiEl ? ddiEl.value : '55';
+            const rawWa = document.getElementById('pWhatsapp').value.trim();
+            const whatsapp = ddi ? (ddi + rawWa.replace(/\D/g, '')) : rawWa;
             const email = document.getElementById('pEmail').value.trim();
             const tipo = document.getElementById('pTipo').value;
 
-            // Envia mensagem direta ao WhatsApp sem inserir no banco de dados automaticamente
-            const waMessage = `Olá Rota CDE Transfer! Gostaria de me cadastrar no *Programa de Parceiros*:
+            // Gera slug único automaticamente
+            let slug = (empresa || nome).toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+            if (!slug) slug = 'p-' + Date.now();
+
+            const newPartner = {
+                id: 'p_' + Date.now(),
+                nome: `${nome} (${empresa})`,
+                slug: slug,
+                whatsapp: whatsapp,
+                email: email,
+                desconto: 5,
+                obs: `Cadastrado via site (${tipo})`,
+                cliques: 0,
+                criadoEm: new Date().toISOString()
+            };
+
+            // 1. Salva localmente
+            try {
+                let list = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+                if (!list.some(p => p.slug === slug)) {
+                    list.push(newPartner);
+                    localStorage.setItem('rota_parceiros', JSON.stringify(list));
+                }
+            } catch(err) {}
+
+            // 2. Salva no Supabase
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+                try {
+                    await supabaseClient.from('parceiros').upsert({
+                        id: newPartner.id,
+                        nome: newPartner.nome,
+                        slug: newPartner.slug,
+                        whatsapp: newPartner.whatsapp,
+                        email: newPartner.email,
+                        desconto: 5,
+                        obs: newPartner.obs,
+                        cliques: 0
+                    });
+                } catch(err) {
+                    console.warn("Erro ao salvar parceiro do site no Supabase:", err);
+                }
+            }
+
+            const shareUrl = `${window.location.origin}/?ref=${slug}`;
+            const waMessage = `Olá Rota CDE Transfer! Acabei de me cadastrar no *Programa de Parceiros*:
 *Nome:* ${nome}
 *Empresa/Atuação:* ${empresa}
-*WhatsApp:* ${whatsapp}
+*WhatsApp:* +${whatsapp}
 *E-mail:* ${email}
-*Categoria:* ${tipo}`;
+*Categoria:* ${tipo}
+*Link Gerado:* ${shareUrl}`;
 
             const waUrl = `https://wa.me/${currentPhone}?text=${encodeURIComponent(waMessage)}`;
 
-            alert(`Obrigado pela solicitação, ${nome}! Você será redirecionado ao WhatsApp para enviar seus dados à nossa equipe. O cadastro será ativado manualmente no painel admin.`);
+            alert(`✅ Cadastro de parceiro realizado com sucesso, ${nome}!\n\nSeu link exclusivo é: ${shareUrl}\n\nClique em OK para enviar os dados para nossa equipe via WhatsApp.`);
             window.open(waUrl, '_blank');
             partnerRegisterForm.reset();
         });
