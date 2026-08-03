@@ -278,29 +278,7 @@ async function dbGetPartners() {
             const { data, error } = await supabaseClient.from('parceiros').select('*');
             if (error) {
                 console.error("Erro ao buscar parceiros do Supabase:", error);
-            } else if (data) {
-                // Auto-migração: Se o Supabase estiver vazio, mas o localStorage tiver parceiros, migra para o Supabase
-                if (data.length === 0 && localPartners.length > 0) {
-                    console.log("Migrando parceiros locais para o Supabase...");
-                    for (const p of localPartners) {
-                        const payload = {
-                            id: p.id || ('p_' + Date.now()),
-                            nome: p.nome,
-                            slug: p.slug,
-                            whatsapp: p.whatsapp || '',
-                            email: p.email || '',
-                            desconto: (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5,
-                            senha: p.senha || '',
-                            obs: p.obs || '',
-                            cliques: p.cliques || 0
-                        };
-                        try {
-                            await supabaseClient.from('parceiros').upsert(payload);
-                        } catch(err) {}
-                    }
-                    return localPartners;
-                }
-
+            } else if (data && data.length > 0) {
                 // Mescla dados do Supabase com dados locais
                 const mergedMap = new Map();
                 localPartners.forEach(lp => {
@@ -345,7 +323,17 @@ async function dbSavePartner(partner) {
     }
     partner.desconto = (partner.desconto !== undefined && partner.desconto !== null && !isNaN(parseFloat(partner.desconto))) ? parseFloat(partner.desconto) : 5;
 
-    // 1. Tenta salvar no Supabase (como na função dbSaveViagem)
+    // 1. SEMPRE SALVA PRIMEIRO EM LOCALSTORAGE (Garante que nunca trave nem suma)
+    let partners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+    const idx = partners.findIndex(p => (p.slug && p.slug === partner.slug) || (p.id && p.id === partner.id));
+    if (idx !== -1) {
+        partners[idx] = partner;
+    } else {
+        partners.push(partner);
+    }
+    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+
+    // 2. Tenta salvar no Supabase sem deixar erros travarem a aplicação
     if (typeof supabaseClient !== 'undefined' && supabaseClient) {
         try {
             const supabaseData = {
@@ -362,9 +350,13 @@ async function dbSavePartner(partner) {
 
             const { error } = await supabaseClient.from('parceiros').upsert(supabaseData);
             if (error) {
-                console.warn("Aviso ao salvar parceiro no Supabase (tentando fallback):", error);
-                delete supabaseData.id;
-                await supabaseClient.from('parceiros').upsert(supabaseData, { onConflict: 'slug' });
+                console.warn("Aviso ao salvar parceiro no Supabase, tentando sem ID:", error);
+                try {
+                    delete supabaseData.id;
+                    await supabaseClient.from('parceiros').upsert(supabaseData);
+                } catch (errFallback) {
+                    console.warn("Fallback do Supabase ignorado:", errFallback);
+                }
             } else {
                 console.log("✅ Parceiro salvo no Supabase com sucesso:", partner.slug);
             }
@@ -372,16 +364,6 @@ async function dbSavePartner(partner) {
             console.error("Erro de conexão ao salvar parceiro no Supabase:", e);
         }
     }
-
-    // 2. Sempre salva em LocalStorage (idêntico à página nova-viagem)
-    let partners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
-    const idx = partners.findIndex(p => (p.slug && p.slug === partner.slug) || (p.id && p.id === partner.id));
-    if (idx !== -1) {
-        partners[idx] = partner;
-    } else {
-        partners.push(partner);
-    }
-    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
 
     return partner;
 }
