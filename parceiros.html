@@ -783,7 +783,17 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                         <div>
                             <label for="pWhatsapp" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.4rem; color: #fff;">WhatsApp / Celular *</label>
-                            <input type="tel" id="pWhatsapp" name="whatsapp" class="form-control-dark" placeholder="Ex: (45) 99999-8888" required>
+                            <div style="display: flex; gap: 6px;">
+                                <select id="pDDI" class="form-control-dark" style="width: 105px; font-size: 13px; padding: 8px 4px;">
+                                    <option value="55" selected>🇧🇷 +55</option>
+                                    <option value="595">🇵🇾 +595</option>
+                                    <option value="54">🇦🇷 +54</option>
+                                    <option value="598">🇺🇾 +598</option>
+                                    <option value="1">🇺🇸 +1</option>
+                                    <option value="">Outro</option>
+                                </select>
+                                <input type="tel" id="pWhatsapp" name="whatsapp" class="form-control-dark" style="flex: 1;" placeholder="DDD + Número (Ex: 45 99999-8888)" required>
+                            </div>
                         </div>
                         <div>
                             <label for="pEmail" style="font-size: 0.875rem; font-weight: 600; display: block; margin-bottom: 0.4rem; color: #fff;">E-mail principal *</label>

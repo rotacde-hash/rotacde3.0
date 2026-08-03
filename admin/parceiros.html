@@ -388,13 +388,23 @@
                         
                         <div>
                             <label for="partner-whatsapp" style="display:block; margin-bottom:6px; font-weight:600;">WhatsApp do Parceiro (Opcional)</label>
-                            <input type="text" id="partner-whatsapp" class="form-control" placeholder="Ex: 5545999999999">
+                            <div style="display:flex; gap:6px;">
+                                <select id="partner-ddi" class="form-control" style="width:105px; font-size:12px; padding:4px;">
+                                    <option value="55" selected>🇧🇷 +55</option>
+                                    <option value="595">🇵🇾 +595</option>
+                                    <option value="54">🇦🇷 +54</option>
+                                    <option value="598">🇺🇾 +598</option>
+                                    <option value="1">🇺🇸 +1</option>
+                                    <option value="">Outro</option>
+                                </select>
+                                <input type="text" id="partner-whatsapp" class="form-control" style="flex:1;" placeholder="Ex: 45 999999999">
+                            </div>
                         </div>
 
                         <div>
-                            <label for="partner-desconto" style="display:block; margin-bottom:6px; font-weight:600;">Desconto do Link (% OFF)</label>
-                            <input type="number" id="partner-desconto" class="form-control" value="10" min="0" max="100" placeholder="Ex: 10" required>
-                            <span style="font-size:11px; color: var(--text-muted);">Desconto concedido aos clientes deste link</span>
+                            <label for="partner-desconto" style="display:block; margin-bottom:6px; font-weight:600;">Comissão / Desconto (%) *</label>
+                            <input type="number" id="partner-desconto" class="form-control" value="5" min="0" max="100" placeholder="Ex: 5" required>
+                            <span style="font-size:11px; color: var(--text-muted);">Comissão paga ao parceiro / desconto aos clientes</span>
                         </div>
 
                         <div>
@@ -724,10 +734,12 @@
             const nome = document.getElementById('partner-nome').value.trim();
             let slug = document.getElementById('partner-slug').value.trim().toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9]/g, '-')
                 .replace(/-+/g, '-')
                 .replace(/^-|-$/g, '');
-            const whatsapp = document.getElementById('partner-whatsapp').value.trim();
+            const ddiEl = document.getElementById('partner-ddi');
+            const ddi = ddiEl ? ddiEl.value : '55';
+            const rawWa = document.getElementById('partner-whatsapp').value.trim();
+            const whatsapp = (rawWa && !rawWa.startsWith('+')) ? (ddi + rawWa.replace(/\D/g, '')) : rawWa;
             const rawDesc = parseFloat(document.getElementById('partner-desconto').value);
             const desconto = !isNaN(rawDesc) ? rawDesc : 5;
             const senha = document.getElementById('partner-senha').value.trim();
