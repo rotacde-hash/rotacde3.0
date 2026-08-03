@@ -1,0 +1,4 @@
+.git
+*.sql
+*.ps1
+pagerule_payload.json
