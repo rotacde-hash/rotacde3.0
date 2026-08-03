@@ -264,6 +264,145 @@ async function dbDeleteViagem(id) {
     }
 }
 
+// --- Operações CRUD no Banco de Dados (Parceiros) ---
+
+// Obter Parceiros
+async function dbGetPartners() {
+    let localPartners = [];
+    try {
+        localPartners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+    } catch(e) {}
+
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient.from('parceiros').select('*');
+            if (error) {
+                console.error("Erro ao buscar parceiros do Supabase:", error);
+            } else if (data) {
+                // Auto-migração: Se o Supabase estiver vazio, mas o localStorage tiver parceiros, migra para o Supabase
+                if (data.length === 0 && localPartners.length > 0) {
+                    console.log("Migrando parceiros locais para o Supabase...");
+                    for (const p of localPartners) {
+                        const payload = {
+                            id: p.id || ('p_' + Date.now()),
+                            nome: p.nome,
+                            slug: p.slug,
+                            whatsapp: p.whatsapp || '',
+                            email: p.email || '',
+                            desconto: (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5,
+                            senha: p.senha || '',
+                            obs: p.obs || '',
+                            cliques: p.cliques || 0
+                        };
+                        try {
+                            await supabaseClient.from('parceiros').upsert(payload);
+                        } catch(err) {}
+                    }
+                    return localPartners;
+                }
+
+                // Mescla dados do Supabase com dados locais
+                const mergedMap = new Map();
+                localPartners.forEach(lp => {
+                    if (lp.slug) mergedMap.set(lp.slug, lp);
+                });
+
+                data.forEach(p => {
+                    const pObj = {
+                        id: p.id,
+                        nome: p.nome,
+                        slug: p.slug,
+                        whatsapp: p.whatsapp || '',
+                        email: p.email || '',
+                        desconto: (p.desconto !== undefined && p.desconto !== null && !isNaN(parseFloat(p.desconto))) ? parseFloat(p.desconto) : 5,
+                        senha: p.senha || '',
+                        obs: p.obs || '',
+                        cliques: p.cliques || 0,
+                        criadoEm: p.criadoEm || p.created_at || new Date().toISOString()
+                    };
+                    mergedMap.set(p.slug, pObj);
+                });
+
+                const partners = Array.from(mergedMap.values());
+                localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+                return partners;
+            }
+        } catch (e) {
+            console.warn("Falha de conexão com Supabase para parceiros, usando LocalStorage:", e);
+        }
+    }
+
+    return localPartners;
+}
+
+// Salvar Parceiro (Novo ou Edição)
+async function dbSavePartner(partner) {
+    if (!partner.id) {
+        partner.id = 'p_' + Date.now();
+    }
+    if (!partner.criadoEm) {
+        partner.criadoEm = new Date().toISOString();
+    }
+    partner.desconto = (partner.desconto !== undefined && partner.desconto !== null && !isNaN(parseFloat(partner.desconto))) ? parseFloat(partner.desconto) : 5;
+
+    // 1. Tenta salvar no Supabase (como na função dbSaveViagem)
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            const supabaseData = {
+                id: partner.id,
+                nome: partner.nome,
+                slug: partner.slug,
+                whatsapp: partner.whatsapp || '',
+                email: partner.email || '',
+                desconto: partner.desconto,
+                senha: partner.senha || '',
+                obs: partner.obs || '',
+                cliques: partner.cliques || 0
+            };
+
+            const { error } = await supabaseClient.from('parceiros').upsert(supabaseData);
+            if (error) {
+                console.warn("Aviso ao salvar parceiro no Supabase (tentando fallback):", error);
+                delete supabaseData.id;
+                await supabaseClient.from('parceiros').upsert(supabaseData, { onConflict: 'slug' });
+            } else {
+                console.log("✅ Parceiro salvo no Supabase com sucesso:", partner.slug);
+            }
+        } catch (e) {
+            console.error("Erro de conexão ao salvar parceiro no Supabase:", e);
+        }
+    }
+
+    // 2. Sempre salva em LocalStorage (idêntico à página nova-viagem)
+    let partners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+    const idx = partners.findIndex(p => (p.slug && p.slug === partner.slug) || (p.id && p.id === partner.id));
+    if (idx !== -1) {
+        partners[idx] = partner;
+    } else {
+        partners.push(partner);
+    }
+    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+
+    return partner;
+}
+
+// Excluir Parceiro
+async function dbDeletePartner(idOrSlug) {
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        try {
+            await supabaseClient.from('parceiros').delete().eq('id', idOrSlug);
+            await supabaseClient.from('parceiros').delete().eq('slug', idOrSlug);
+        } catch (e) {
+            console.warn("Erro ao excluir parceiro no Supabase:", e);
+        }
+    }
+
+    let partners = JSON.parse(localStorage.getItem('rota_parceiros') || '[]');
+    partners = partners.filter(p => p.id !== idOrSlug && p.slug !== idOrSlug);
+    localStorage.setItem('rota_parceiros', JSON.stringify(partners));
+    return true;
+}
+
 // --- CRM (Clientes) ---
 async function dbGetClientes() {
     const viagens = await dbGetViagens();
