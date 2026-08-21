@@ -1446,3 +1446,119 @@ section {
     }
 }
 
+/* --- Top Announcement Bar (WRC 2026) --- */
+.top-announcement-bar {
+    background: linear-gradient(90deg, #070e1a 0%, #101d30 50%, #070e1a 100%);
+    border-bottom: 1px solid rgba(197, 155, 39, 0.45);
+    color: #e2e8f0;
+    font-size: 13.5px;
+    padding: 8px 0;
+    position: relative;
+    z-index: 101;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.announcement-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.announcement-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+    text-align: center;
+}
+
+.announcement-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-gold);
+    animation: subtlePulse 2.5s infinite ease-in-out;
+}
+
+.announcement-icon {
+    width: 18px;
+    height: 18px;
+    filter: drop-shadow(0 0 4px rgba(197, 155, 39, 0.5));
+}
+
+.announcement-text strong {
+    color: var(--primary-gold);
+    font-weight: 700;
+}
+
+.announcement-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(197, 155, 39, 0.15);
+    color: #ffd875;
+    border: 1px solid rgba(197, 155, 39, 0.4);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.announcement-btn:hover {
+    background: var(--primary-gold);
+    color: #070e1a;
+    border-color: var(--primary-gold);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(197, 155, 39, 0.4);
+}
+
+.announcement-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.announcement-close:hover {
+    color: #ffffff;
+}
+
+@keyframes subtlePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.08);
+        opacity: 0.85;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-announcement-bar {
+        font-size: 12px;
+        padding: 7px 0;
+    }
+    .announcement-content {
+        gap: 6px;
+    }
+    .announcement-btn {
+        padding: 2px 10px;
+        font-size: 11px;
+    }
+}
+
+

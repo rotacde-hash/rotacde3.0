@@ -195,7 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. Todos os direitos reservados.",
             footer_dev: "Site feito por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
-            val_sob_consulta: "Sob Consulta"
+            val_sob_consulta: "Sob Consulta",
+            announcement_title: "Atendimento Especial — WRC Paraguay 2026:",
+            announcement_desc: "Reservas abertas para transfers privativos durante o Campeonato Mundial de Rally.",
+            announcement_btn: "Saiba mais →"
         },
         es: {
             nav_servicos: "Servicios",
@@ -320,7 +323,10 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. Todos los derechos reservados.",
             footer_dev: "Sitio hecho por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
-            val_sob_consulta: "Bajo Consulta"
+            val_sob_consulta: "Bajo Consulta",
+            announcement_title: "Atención Especial — WRC Paraguay 2026:",
+            announcement_desc: "Reservas abiertas para traslados privados durante el Campeonato Mundial de Rally.",
+            announcement_btn: "Saber más →"
         },
         en: {
             nav_servicos: "Services",
@@ -445,7 +451,10 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. All rights reserved.",
             footer_dev: "Site made by <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Book",
-            val_sob_consulta: "On Request"
+            val_sob_consulta: "On Request",
+            announcement_title: "Special Service — WRC Paraguay 2026:",
+            announcement_desc: "Bookings open for private transfers during the World Rally Championship.",
+            announcement_btn: "Learn more →"
         }
     };
 
@@ -486,6 +495,19 @@ document.addEventListener('DOMContentLoaded', () => {
         langSelector.addEventListener('change', (e) => {
             translatePage(e.target.value);
         });
+    }
+
+    // --- Top Announcement Bar Handler ---
+    const announcementClose = document.getElementById('announcementClose');
+    const topAnnouncementBar = document.getElementById('topAnnouncementBar');
+    if (announcementClose && topAnnouncementBar) {
+        announcementClose.addEventListener('click', () => {
+            topAnnouncementBar.style.display = 'none';
+            sessionStorage.setItem('rota_announcement_closed', '1');
+        });
+        if (sessionStorage.getItem('rota_announcement_closed') === '1') {
+            topAnnouncementBar.style.display = 'none';
+        }
     }
 
     // --- Scroll & Header Style ---
