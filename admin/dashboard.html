@@ -1,63 +1,65 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Agenda de Viagens - Rota CDE Transfer</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="assets/admin.css">
     <!-- Google Consent Mode Default -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      
-      // Default Consent Mode v2 setup (denied by default)
-      if (localStorage.getItem('cookie_consent') === null) {
-        gtag('consent', 'default', {
-          'ad_storage': 'denied',
-          'ad_user_data': 'denied',
-          'ad_personalization': 'denied',
-          'analytics_storage': 'denied'
-        });
-      } else {
-        try {
-          const consent = JSON.parse(localStorage.getItem('cookie_consent'));
-          gtag('consent', 'default', {
-            'ad_storage': consent.ad_storage || 'denied',
-            'ad_user_data': consent.ad_user_data || 'denied',
-            'ad_personalization': consent.ad_personalization || 'denied',
-            'analytics_storage': consent.analytics_storage || 'denied'
-          });
-        } catch (e) {
-          gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied',
-            'analytics_storage': 'denied'
-          });
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+
+        // Default Consent Mode v2 setup (denied by default)
+        if (localStorage.getItem('cookie_consent') === null) {
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied'
+            });
+        } else {
+            try {
+                const consent = JSON.parse(localStorage.getItem('cookie_consent'));
+                gtag('consent', 'default', {
+                    'ad_storage': consent.ad_storage || 'denied',
+                    'ad_user_data': consent.ad_user_data || 'denied',
+                    'ad_personalization': consent.ad_personalization || 'denied',
+                    'analytics_storage': consent.analytics_storage || 'denied'
+                });
+            } catch (e) {
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+            }
         }
-      }
     </script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MJPZYG2G9Z"></script>
     <script>
-      gtag('js', new Date());
-      gtag('config', 'G-MJPZYG2G9Z');
+        gtag('js', new Date());
+        gtag('config', 'G-MJPZYG2G9Z');
     </script>
     <!-- Cookie Consent Banner -->
     <script src="../assets/cookie-consent.js" defer></script>
 </head>
+
 <body>
 
     <div class="admin-layout">
-        
+
         <!-- Sidebar -->
         <aside class="admin-sidebar" id="sidebar">
             <div class="sidebar-brand">
@@ -81,7 +83,7 @@
                 <button class="logout-btn" onclick="logout()">Sair</button>
             </div>
         </aside>
-        
+
         <!-- Area de Conteudo Principal -->
         <div class="admin-main">
             <!-- Mobile Header -->
@@ -93,18 +95,19 @@
                 </div>
                 <button class="logout-btn" onclick="logout()">Sair</button>
             </header>
-            
+
             <!-- Page Header -->
             <div class="page-header">
                 <div>
                     <h1 class="page-title">📅 Agenda / Viagens</h1>
-                    <p style="color: var(--text-muted); font-size: 14px;">Controle e gestão das corridas de transfers agendadas.</p>
+                    <p style="color: var(--text-muted); font-size: 14px;">Controle e gestão das corridas de transfers
+                        agendadas.</p>
                 </div>
                 <div class="page-actions">
                     <a href="nova-viagem.html" class="btn btn-primary">➕ Nova Viagem</a>
                 </div>
             </div>
-            
+
             <!-- Dashboard Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
@@ -124,14 +127,14 @@
                     <span class="stat-value" id="stat-clientes">-</span>
                 </div>
             </div>
-            
+
             <!-- Filtros -->
             <div class="filter-card">
                 <div class="filter-group">
                     <label for="filter-search">Cliente / WhatsApp</label>
                     <input type="text" id="filter-search" class="form-control" placeholder="Buscar por nome ou tel...">
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="filter-period">Período</label>
                     <select id="filter-period" class="form-control">
@@ -143,17 +146,17 @@
                         <option value="personalizado">Personalizado</option>
                     </select>
                 </div>
-                
+
                 <div class="filter-group" id="custom-date-group" style="display: none;">
                     <label for="filter-start-date">De</label>
                     <input type="date" id="filter-start-date" class="form-control">
                 </div>
-                
+
                 <div class="filter-group" id="custom-date-group-end" style="display: none;">
                     <label for="filter-end-date">Até</label>
                     <input type="date" id="filter-end-date" class="form-control">
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="filter-status">Status</label>
                     <select id="filter-status" class="form-control">
@@ -165,7 +168,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <!-- Listagem de Viagens -->
             <div class="viagens-list" id="viagens-list-container">
                 <!-- Injetado dinamicamente -->
@@ -173,7 +176,7 @@
                     Carregando viagens...
                 </div>
             </div>
-            
+
         </div>
     </div>
 
@@ -185,44 +188,44 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
+
     <!-- Google API & GIS -->
     <script src="assets/google.js"></script>
-    
+
     <!-- Config e Lógica -->
     <script src="assets/firebase-config.js"></script>
     <script src="assets/admin.js"></script>
-    
+
     <script>
         let viagensGlobal = [];
-        
+
         document.addEventListener('DOMContentLoaded', () => {
             // Hamburger Menu Mobile
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle) {
                 menuToggle.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
                 });
             }
-            
+
             // Listeners de Filtros
             document.getElementById('filter-search').addEventListener('input', renderViagensList);
             document.getElementById('filter-status').addEventListener('change', renderViagensList);
             document.getElementById('filter-period').addEventListener('change', handlePeriodChange);
             document.getElementById('filter-start-date').addEventListener('change', renderViagensList);
             document.getElementById('filter-end-date').addEventListener('change', renderViagensList);
-            
+
             // Carregar dados iniciais
             loadDashboardData();
         });
-        
+
         function handlePeriodChange() {
             const period = document.getElementById('filter-period').value;
             const startGroup = document.getElementById('custom-date-group');
             const endGroup = document.getElementById('custom-date-group-end');
-            
+
             if (period === 'personalizado') {
                 startGroup.style.display = 'flex';
                 endGroup.style.display = 'flex';
@@ -232,7 +235,7 @@
             }
             renderViagensList();
         }
-        
+
         async function loadDashboardData() {
             try {
                 // 1. Estatísticas do Topo
@@ -241,7 +244,7 @@
                 document.getElementById('stat-semana').innerText = stats.viagensSemana;
                 document.getElementById('stat-receita').innerText = `R$ ${stats.receitaMes.toFixed(2)}`;
                 document.getElementById('stat-clientes').innerText = stats.clientesAtendidosMes;
-                
+
                 // 2. Carregar Lista de Viagens
                 viagensGlobal = await dbGetViagens();
                 renderViagensList();
@@ -249,37 +252,37 @@
                 console.error("Erro ao carregar dados do dashboard:", e);
             }
         }
-        
+
         function renderViagensList() {
             const search = document.getElementById('filter-search').value.toLowerCase();
             const status = document.getElementById('filter-status').value;
             const period = document.getElementById('filter-period').value;
             const startDate = document.getElementById('filter-start-date').value;
             const endDate = document.getElementById('filter-end-date').value;
-            
+
             const container = document.getElementById('viagens-list-container');
             container.innerHTML = '';
-            
+
             const hoje = new Date().toISOString().split('T')[0];
             const amanhaDate = new Date();
             amanhaDate.setDate(amanhaDate.getDate() + 1);
             const amanha = amanhaDate.toISOString().split('T')[0];
-            
+
             // Obter limites da semana
             const dataAtual = new Date();
             const diaSemana = dataAtual.getDay();
             const dif = dataAtual.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
             const inicioSemana = new Date(dataAtual.setDate(dif)).toISOString().split('T')[0];
-            
+
             // Filtrar viagens
             const filtradas = viagensGlobal.filter(v => {
                 // Busca texto
                 const matchesSearch = v.nomeCliente.toLowerCase().includes(search) || v.telefone.includes(search);
                 if (!matchesSearch) return false;
-                
+
                 // Status
                 if (status !== 'todos' && v.status !== status) return false;
-                
+
                 // Período
                 if (period === 'hoje' && v.data !== hoje) return false;
                 if (period === 'amanha' && v.data !== amanha) return false;
@@ -292,24 +295,24 @@
                     if (startDate && v.data < startDate) return false;
                     if (endDate && v.data > endDate) return false;
                 }
-                
+
                 return true;
             });
-            
+
             if (filtradas.length === 0) {
                 container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Nenhuma viagem agendada com estes filtros.</div>`;
                 return;
             }
-            
+
             filtradas.forEach(v => {
                 const card = document.createElement('div');
                 card.className = 'viagem-card';
-                
+
                 let badgeClass = 'badge-waiting';
                 if (v.status === 'Confirmado') badgeClass = 'badge-confirmed';
                 else if (v.status === 'Concluído') badgeClass = 'badge-completed';
                 else if (v.status === 'Cancelado') badgeClass = 'badge-cancelled';
-                
+
                 card.innerHTML = `
                     <div class="viagem-details">
                         <div class="viagem-header">
@@ -341,20 +344,20 @@
                         <button class="action-icon-btn" style="color: var(--color-cancelled);" onclick="cancelarViagem('${v.id}')" title="Cancelar Viagem">❌</button>
                     </div>
                 `;
-                
+
                 container.appendChild(card);
             });
         }
-        
+
         // --- Ações Rápidas ---
-        
+
         function whatsappLembrete(id) {
             const viagem = viagensGlobal.find(v => v.id === id);
             if (viagem) {
                 enviarLembreteWhatsApp(viagem);
             }
         }
-        
+
         async function concluirViagem(id) {
             if (confirm("Confirmar conclusão deste transfer?")) {
                 const viagem = viagensGlobal.find(v => v.id === id);
@@ -365,7 +368,7 @@
                 }
             }
         }
-        
+
         async function cancelarViagem(id) {
             if (confirm("Deseja realmente CANCELAR este transfer?")) {
                 const viagem = viagensGlobal.find(v => v.id === id);
@@ -376,11 +379,11 @@
                 }
             }
         }
-        
+
         function editarViagem(id) {
             window.location.href = `nova-viagem.html?id=${id}`;
         }
     </script>
 </body>
-</html>
 
+</html>
