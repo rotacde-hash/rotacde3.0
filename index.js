@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: "assuncao",   name: "Foz do Iguaçu ⇄ Assunção (Asunción)",          desc: "Transfer longa distância (aprox. 6h de viagem)", price: 0 },
         { id: "santa_rita", name: "Foz do Iguaçu ⇄ Santa Rita",                   desc: "Transfer longa distância",                   price: 0 },
         { id: "encarnacao", name: "Foz do Iguaçu ⇄ Encarnação (Encarnación)",    desc: "Transfer longa distância",                   price: 0 },
+        { id: "wrc_encarnacao_4p", name: "WRC Paraguay 2026 (Aeroporto Foz) ⇄ Encarnación", desc: "Transfer longa distância (até 4 pessoas)", price: 240, currency: "USD" },
+        { id: "wrc_encarnacao_7p", name: "WRC Paraguay 2026 (Aeroporto Foz) ⇄ Encarnación", desc: "Transfer longa distância (5 a 7 pessoas)", price: 270, currency: "USD" },
         { id: "personalizado", name: "Transfer Personalizado / Outras Rotas",      desc: "Rotas especiais e destinos sob consulta",    price: 0 }
     ];
 
@@ -27,8 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const storedPrices = localStorage.getItem('rota_cde_prices');
         if (storedPrices) {
             prices = JSON.parse(storedPrices);
-            // Sync in case we added new price items in code
-            if (prices.length !== DEFAULT_PRICES.length) {
+            // Sync in case we added new price items in code or IDs changed
+            const storedIds = prices.map(p => p.id).join(',');
+            const defaultIds = DEFAULT_PRICES.map(p => p.id).join(',');
+            if (storedIds !== defaultIds) {
                 prices = DEFAULT_PRICES;
                 localStorage.setItem('rota_cde_prices', JSON.stringify(prices));
             }
@@ -94,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Assunção (Asunción)",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnação (Encarnación)",
+            opt_wrc_encarnacao: "WRC Paraguay 2026 (Aeroporto Foz)",
             opt_outro: "Outro local (Personalizado)",
             label_destino: "Destino",
             opt_select_destino: "Selecione o destino",
@@ -218,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Asunción",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnación",
+            opt_wrc_encarnacao: "WRC Paraguay 2026 (Aeropuerto Foz)",
             opt_outro: "Otro lugar (Personalizado)",
             label_destino: "Destino",
             opt_select_destino: "Seleccione el destino",
@@ -342,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Asunción",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnación",
+            opt_wrc_encarnacao: "WRC Paraguay 2026 (Foz Airport)",
             opt_outro: "Other location (Custom)",
             label_destino: "Destination",
             opt_select_destino: "Select destination",
@@ -508,9 +515,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Format Currency Helper ---
-    function formatCurrency(value) {
+    function formatCurrency(value, currency = 'BRL') {
         if (value === 0) {
             return TRANSLATIONS[currentLang]['val_sob_consulta'] || "Sob Consulta";
+        }
+        if (currency === 'USD' || currency === 'U$') {
+            return `U$ ${value.toFixed(2).replace('.', ',')}`;
         }
         const locale = currentLang === 'en' ? 'en-US' : (currentLang === 'es' ? 'es-ES' : 'pt-BR');
         return new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL' }).format(value);
@@ -858,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
         prices.forEach(item => {
             const tr = document.createElement('tr');
             
-            const priceDisplay = formatCurrency(item.price);
+            const priceDisplay = formatCurrency(item.price, item.currency);
             
             // Build custom wa link for this specific item
             let itemWaTextVal = `Olá! Gostaria de reservar o transfer: ${item.name} (${priceDisplay}).`;
@@ -947,6 +957,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 routeKey = "santa_rita";
             } else if (origem === "Encarnação" || destino === "Encarnação") {
                 routeKey = "encarnacao";
+            } else if (
+                origem === "Rally WRC Encarnación" || destino === "Rally WRC Encarnación" ||
+                origem === "WRC Paraguay 2026 (Aeroporto Foz)" || destino === "WRC Paraguay 2026 (Aeroporto Foz)"
+            ) {
+                const passCount = parseInt(passageiros) || 1;
+                routeKey = passCount > 4 ? "wrc_encarnacao_7p" : "wrc_encarnacao_4p";
             } else if (isCdeSide) {
                 if (isFozSide) {
                     routeKey = "foz_cde";
@@ -969,25 +985,41 @@ document.addEventListener('DOMContentLoaded', () => {
             let discountValue = 0;
 
             if (basePrice > 0) {
-                if (parseInt(passageiros) > 4) {
-                    originalCalculatedPrice = Math.round(basePrice * 1.6);
-                } else {
+                if (priceItem && priceItem.currency === 'USD') {
                     originalCalculatedPrice = basePrice;
-                }
-
-                // Aplica desconto do cupom se ativo
-                if (activeAppliedCoupon) {
-                    if (activeAppliedCoupon.tipo === 'porcentagem') {
-                        discountValue = Math.round(originalCalculatedPrice * (activeAppliedCoupon.valor / 100));
-                    } else if (activeAppliedCoupon.tipo === 'fixo') {
-                        discountValue = Math.min(originalCalculatedPrice, activeAppliedCoupon.valor);
+                    if (activeAppliedCoupon) {
+                        if (activeAppliedCoupon.tipo === 'porcentagem') {
+                            discountValue = Math.round(originalCalculatedPrice * (activeAppliedCoupon.valor / 100));
+                        } else if (activeAppliedCoupon.tipo === 'fixo') {
+                            discountValue = Math.min(originalCalculatedPrice, activeAppliedCoupon.valor);
+                        }
                     }
+                    finalPrice = Math.max(0, originalCalculatedPrice - discountValue);
+                    let capacityLabel = (parseInt(passageiros) > 4) ? "(5 a 7 pessoas)" : "(até 4 pessoas)";
+                    if (currentLang === 'es') capacityLabel = (parseInt(passageiros) > 4) ? "(5 a 7 personas)" : "(hasta 4 personas)";
+                    if (currentLang === 'en') capacityLabel = (parseInt(passageiros) > 4) ? "(5 to 7 people)" : "(up to 4 people)";
+                    estimateText = `U$ ${finalPrice},00 ${capacityLabel}`;
+                } else {
+                    if (parseInt(passageiros) > 4) {
+                        originalCalculatedPrice = Math.round(basePrice * 1.6);
+                    } else {
+                        originalCalculatedPrice = basePrice;
+                    }
+
+                    // Aplica desconto do cupom se ativo
+                    if (activeAppliedCoupon) {
+                        if (activeAppliedCoupon.tipo === 'porcentagem') {
+                            discountValue = Math.round(originalCalculatedPrice * (activeAppliedCoupon.valor / 100));
+                        } else if (activeAppliedCoupon.tipo === 'fixo') {
+                            discountValue = Math.min(originalCalculatedPrice, activeAppliedCoupon.valor);
+                        }
+                    }
+
+                    finalPrice = Math.max(0, originalCalculatedPrice - discountValue);
+
+                    let vanSuffix = parseInt(passageiros) > 4 ? (currentLang === 'es' ? " (Vehículo Grande/Van)" : (currentLang === 'en' ? " (Large Vehicle/Van)" : " (Veículo Grande/Van)")) : "";
+                    estimateText = `R$ ${finalPrice},00${vanSuffix}`;
                 }
-
-                finalPrice = Math.max(0, originalCalculatedPrice - discountValue);
-
-                let vanSuffix = parseInt(passageiros) > 4 ? (currentLang === 'es' ? " (Vehículo Grande/Van)" : (currentLang === 'en' ? " (Large Vehicle/Van)" : " (Veículo Grande/Van)")) : "";
-                estimateText = `R$ ${finalPrice},00${vanSuffix}`;
             } else {
                 estimateText = TRANSLATIONS[currentLang]['val_sob_consulta'] || "Sob Consulta";
             }
@@ -1004,14 +1036,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show Results
             const resultPriceOrigEl = document.getElementById('resultPriceOriginal');
             const resultDiscountBadge = document.getElementById('resultDiscountBadge');
+            const currencyPrefix = (priceItem && priceItem.currency === 'USD') ? 'U$' : 'R$';
 
             if (discountValue > 0 && originalCalculatedPrice > 0) {
                 if (resultPriceOrigEl) {
-                    resultPriceOrigEl.textContent = `R$ ${originalCalculatedPrice},00`;
+                    resultPriceOrigEl.textContent = `${currencyPrefix} ${originalCalculatedPrice},00`;
                     resultPriceOrigEl.style.display = 'inline';
                 }
                 if (resultDiscountBadge) {
-                    resultDiscountBadge.textContent = `🎉 Cupom ${activeAppliedCoupon.codigo}: Economia de R$ ${discountValue},00 (${activeAppliedCoupon.descricao})`;
+                    resultDiscountBadge.textContent = `🎉 Cupom ${activeAppliedCoupon.codigo}: Economia de ${currencyPrefix} ${discountValue},00 (${activeAppliedCoupon.descricao})`;
                     resultDiscountBadge.style.display = 'block';
                 }
             } else {
@@ -1038,8 +1071,8 @@ document.addEventListener('DOMContentLoaded', () => {
 *Pasajeros:* ${passageiros}
 *Maletas:* ${malas}`;
                 if (discountValue > 0) {
-                    message += `\n*Precio Original:* R$ ${originalCalculatedPrice},00`;
-                    message += `\n*Cupón Aplicado:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                    message += `\n*Precio Original:* ${currencyPrefix} ${originalCalculatedPrice},00`;
+                    message += `\n*Cupón Aplicado:* ${activeAppliedCoupon.codigo} (-${currencyPrefix} ${discountValue},00)`;
                 }
                 message += `\n*Valor Estimado Final:* ${estimateText}`;
             } else if (currentLang === 'en') {
@@ -1050,8 +1083,8 @@ document.addEventListener('DOMContentLoaded', () => {
 *Passengers:* ${passageiros}
 *Baggage:* ${malas}`;
                 if (discountValue > 0) {
-                    message += `\n*Original Price:* R$ ${originalCalculatedPrice},00`;
-                    message += `\n*Coupon Applied:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                    message += `\n*Original Price:* ${currencyPrefix} ${originalCalculatedPrice},00`;
+                    message += `\n*Coupon Applied:* ${activeAppliedCoupon.codigo} (-${currencyPrefix} ${discountValue},00)`;
                 }
                 message += `\n*Final Estimated Value:* ${estimateText}`;
             } else {
@@ -1062,8 +1095,8 @@ document.addEventListener('DOMContentLoaded', () => {
 *Passageiros:* ${passageiros}
 *Malas:* ${malas}`;
                 if (discountValue > 0) {
-                    message += `\n*Valor Tabela:* R$ ${originalCalculatedPrice},00`;
-                    message += `\n*Cupom Aplicado:* ${activeAppliedCoupon.codigo} (-R$ ${discountValue},00)`;
+                    message += `\n*Valor Tabela:* ${currencyPrefix} ${originalCalculatedPrice},00`;
+                    message += `\n*Cupom Aplicado:* ${activeAppliedCoupon.codigo} (-${currencyPrefix} ${discountValue},00)`;
                 }
                 message += `\n*Valor Final com Desconto:* ${estimateText}`;
             }
@@ -1170,9 +1203,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Do not show customizable text or allow edit for customized item if it's dynamic
             const container = document.createElement('div');
             container.className = "form-group admin-price-row";
+            const currencyLabel = item.currency === 'USD' ? ' (U$)' : ' (R$)';
             
             container.innerHTML = `
-                <label for="price_${item.id}">${item.name}</label>
+                <label for="price_${item.id}">${item.name} - <small>${item.desc}</small>${currencyLabel}</label>
                 <input type="number" id="price_${item.id}" name="${item.id}" value="${item.price}" min="0" class="form-control" required>
             `;
             adminInputsContainer.appendChild(container);
