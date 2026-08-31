@@ -178,16 +178,55 @@ function addStoreToRoute(store) {
         });
         saveRouteToLocalStorage();
         triggerRouteBadgePulse();
-        showToast(`"<strong>${store.name}</strong>" adicionada ao seu roteiro! 🎉`);
+        showToast(`"<strong>${store.name}</strong>" adicionada ao roteiro! <button class="toast-action-btn" onclick="openRouteDrawer()">Ver Roteiro ➔</button>`);
+        
+        // Abre automaticamente o painel do roteiro para o usuário ver o item adicionado
+        openRouteDrawer();
     }
 }
 
 function triggerRouteBadgePulse() {
-    const badge = document.getElementById('floating-route-badge');
-    if (badge) {
-        badge.classList.remove('pulse');
-        void badge.offsetWidth;
-        badge.classList.add('pulse');
+    const bar = document.getElementById('floatingRouteBar');
+    if (bar) {
+        bar.classList.remove('pulse');
+        void bar.offsetWidth;
+        bar.classList.add('pulse');
+    }
+    const headerBtn = document.getElementById('headerRouteBtn');
+    if (headerBtn) {
+        headerBtn.style.transform = 'scale(1.15)';
+        setTimeout(() => { headerBtn.style.transform = 'scale(1)'; }, 300);
+    }
+}
+
+function openRouteDrawer() {
+    const drawer = document.getElementById('routeDrawer');
+    const overlay = document.getElementById('routeDrawerOverlay');
+    if (drawer) drawer.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    updateRouteUI();
+}
+
+function closeRouteDrawer() {
+    const drawer = document.getElementById('routeDrawer');
+    const overlay = document.getElementById('routeDrawerOverlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = 'auto';
+}
+
+function scrollToMapFromDrawer() {
+    closeRouteDrawer();
+    const mapSection = document.querySelector('.map-section');
+    if (mapSection) {
+        mapSection.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+            if (leafletMap) {
+                leafletMap.invalidateSize();
+                updateMapMarkers(allStores);
+            }
+        }, 450);
     }
 }
 
@@ -516,15 +555,30 @@ function updateMapMarkers(storesToDisplay) {
             // Filtra coordenadas válidas focadas estritamente na região comercial de Ciudad del Este
             if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
                 if (lat < -25.48 && lat > -25.55 && lng < -54.58 && lng > -54.65) {
-                    const marker = L.marker([lat, lng]).addTo(leafletMap);
-                    const inRoute = isStoreInRoute(store.id || store.slug);
+                    const inRouteIndex = selectedRouteStores.findIndex(s => s.id === store.id || s.slug === store.slug);
+                    const inRoute = inRouteIndex !== -1;
+
+                    let marker;
+                    if (inRoute) {
+                        // Marcador Especial Dourado Numerado para Lojas no Roteiro
+                        const routeIcon = L.divIcon({
+                            className: 'custom-route-pin',
+                            html: `<div style="background: linear-gradient(135deg, #e6b83b, #c59b27); color: #050B14; font-weight: 800; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; box-shadow: 0 4px 16px rgba(197,155,39,0.85); font-size: 13px; font-family: Outfit, sans-serif;">${inRouteIndex + 1}</div>`,
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        });
+                        marker = L.marker([lat, lng], { icon: routeIcon, zIndexOffset: 1000 }).addTo(leafletMap);
+                    } else {
+                        marker = L.marker([lat, lng]).addTo(leafletMap);
+                    }
 
                     const popupHtml = `
-                        <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 150px;">
+                        <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 160px;">
+                            ${inRoute ? `<div style="color: var(--primary-gold, #c59b27); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">⭐ ${inRouteIndex + 1}ª Parada do Roteiro</div>` : ''}
                             <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
                             <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">📍 ${store.neighborhood || 'Centro, Ciudad del Este'}</p>
                             <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
-                                ${inRoute ? '✓ No Roteiro' : '+ Adicionar ao Roteiro'}
+                                ${inRoute ? '✕ Remover do Roteiro' : '+ Adicionar ao Roteiro'}
                             </button>
                         </div>
                     `;
@@ -545,27 +599,39 @@ function updateMapMarkers(storesToDisplay) {
     }
 }
 
-// --- UI DO ROTEIRO ---
+// --- UI DO ROTEIRO (SINCRONIZAÇÃO COMPLETA: SEÇÃO, DRAWER, HEADER E MAPA) ---
 function updateRouteUI() {
+    const count = selectedRouteStores.length;
+
+    // 1. Contadores nos cabeçalhos e badges
     const routeBadge = document.getElementById('route-badge-count');
+    const headerBadge = document.getElementById('header-route-count');
     const floatingBadge = document.getElementById('floating-route-badge-count');
+    const drawerCount = document.getElementById('drawer-store-count');
+    const floatingSummary = document.getElementById('floating-route-summary');
+
+    if (routeBadge) routeBadge.innerText = count;
+    if (headerBadge) headerBadge.innerText = count;
+    if (floatingBadge) floatingBadge.innerText = count;
+    if (drawerCount) {
+        drawerCount.innerText = count === 1 ? '1 loja selecionada' : `${count} lojas selecionadas`;
+    }
+    if (floatingSummary) {
+        floatingSummary.innerText = count === 0 ? 'Nenhuma loja' : (count === 1 ? '1 loja selecionada' : `${count} lojas selecionadas`);
+    }
+
+    // 2. Seção Na Página (#meu-roteiro)
     const container = document.getElementById('route-items-container');
     const emptyView = document.getElementById('route-empty-view');
     const filledView = document.getElementById('route-filled-view');
 
-    const count = selectedRouteStores.length;
-
-    if (routeBadge) routeBadge.innerText = count;
-    if (floatingBadge) floatingBadge.innerText = count;
-
     if (count === 0) {
         if (emptyView) emptyView.style.display = 'block';
         if (filledView) filledView.style.display = 'none';
-        return;
+    } else {
+        if (emptyView) emptyView.style.display = 'none';
+        if (filledView) filledView.style.display = 'block';
     }
-
-    if (emptyView) emptyView.style.display = 'none';
-    if (filledView) filledView.style.display = 'block';
 
     if (container) {
         let html = '';
@@ -586,6 +652,44 @@ function updateRouteUI() {
             `;
         });
         container.innerHTML = html;
+    }
+
+    // 3. Painel Lateral / Drawer (#routeDrawer)
+    const drawerList = document.getElementById('drawer-items-list');
+    const drawerEmpty = document.getElementById('drawer-empty-state');
+    const drawerFooter = document.getElementById('drawer-footer');
+
+    if (drawerList && drawerEmpty && drawerFooter) {
+        if (count === 0) {
+            drawerEmpty.style.display = 'block';
+            drawerList.style.display = 'none';
+            drawerFooter.style.display = 'none';
+        } else {
+            drawerEmpty.style.display = 'none';
+            drawerList.style.display = 'flex';
+            drawerFooter.style.display = 'block';
+
+            let drawerHtml = '';
+            selectedRouteStores.forEach((store, index) => {
+                drawerHtml += `
+                    <div class="drawer-item-card">
+                        <span style="background: var(--primary-gold); color: #050B14; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;">
+                            ${index + 1}
+                        </span>
+                        <div style="flex: 1; min-width: 0;">
+                            <strong style="display: block; color: #fff; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${store.name}</strong>
+                            <small style="color: var(--text-light-muted); font-size: 0.76rem;">📍 ${store.neighborhood || 'Centro'}</small>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="btn-icon" onclick="moveRouteStore(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Mover para cima" style="width: 24px; height: 24px; font-size: 0.7rem;">▲</button>
+                            <button class="btn-icon" onclick="moveRouteStore(${index}, 1)" ${index === count - 1 ? 'disabled' : ''} title="Mover para baixo" style="width: 24px; height: 24px; font-size: 0.7rem;">▼</button>
+                            <button class="btn-icon btn-icon-danger" onclick="removeStoreFromRoute('${store.slug}')" title="Remover" style="width: 24px; height: 24px; font-size: 0.75rem;">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+            drawerList.innerHTML = drawerHtml;
+        }
     }
 }
 
