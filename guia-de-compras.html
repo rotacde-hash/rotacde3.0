@@ -535,108 +535,177 @@
             color: #fff;
         }
 
-        /* --- Floating Route Badge (Compacto) --- */
-        .mobile-route-badge {
-            position: fixed;
-            bottom: 18px;
-            right: 18px;
-            background: var(--primary-gold);
-            color: var(--primary-dark);
-            padding: 8px 16px;
-            border-radius: 9999px;
-            font-weight: 800;
-            font-size: 0.82rem;
-            box-shadow: 0 6px 20px rgba(197, 155, 39, 0.4);
-            z-index: 990;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        @keyframes badgePulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 rgba(197, 155, 39, 0.4); }
-            50% { transform: scale(1.12); box-shadow: 0 0 20px rgba(197, 155, 39, 0.8); }
-            100% { transform: scale(1); box-shadow: 0 6px 20px rgba(197, 155, 39, 0.4); }
-        }
-
-        .mobile-route-badge.pulse {
-            animation: badgePulse 0.6s ease-in-out;
-        }
-
-        /* --- Modal Detalhes --- */
-        .modal-overlay {
+        /* --- Drawer Lateral do Roteiro (Slide-over) --- */
+        .route-drawer-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(5, 11, 20, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: none;
+            background: rgba(3, 7, 13, 0.78);
+            backdrop-filter: blur(4px);
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .route-drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .route-drawer {
+            position: fixed;
+            top: 0; right: 0; bottom: 0;
+            width: 100%;
+            max-width: 440px;
+            background: #091322;
+            border-left: 1px solid rgba(197, 155, 39, 0.4);
+            box-shadow: -12px 0 45px rgba(0, 0, 0, 0.75);
+            z-index: 1101;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .route-drawer.open {
+            transform: translateX(0);
+        }
+
+        .route-drawer-header {
+            padding: 18px 20px;
+            background: rgba(14, 26, 47, 0.98);
+            border-bottom: 1px solid rgba(197, 155, 39, 0.25);
+            display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            justify-content: space-between;
         }
 
-        .modal-card {
-            background: var(--primary-navy);
-            border: 1px solid var(--primary-gold);
-            border-radius: var(--border-radius-lg);
-            max-width: 650px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-        }
-
-        .modal-header-image {
-            height: 200px;
-            width: 100%;
-            position: relative;
-        }
-
-        .modal-header-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .modal-close-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            background: rgba(0,0,0,0.6);
-            border: none;
+        .drawer-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             color: #fff;
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .drawer-close-btn:hover {
+            background: rgba(197, 155, 39, 0.25);
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        .route-drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 18px;
+        }
+
+        .route-drawer-footer {
+            padding: 16px 18px;
+            background: rgba(14, 26, 47, 0.98);
+            border-top: 1px solid rgba(197, 155, 39, 0.25);
+        }
+
+        .drawer-item-card {
+            background: rgba(14, 26, 47, 0.85);
+            border: 1px solid rgba(197, 155, 39, 0.25);
+            border-radius: var(--border-radius-md);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .drawer-item-card:hover {
+            border-color: var(--primary-gold);
+            background: rgba(197, 155, 39, 0.08);
+        }
+
+        /* --- Floating Route Bar Refinada --- */
+        .floating-route-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #101d30 0%, #08101c 100%);
+            border: 1.5px solid var(--primary-gold);
+            color: #fff;
+            border-radius: 9999px;
+            padding: 8px 18px 8px 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(197, 155, 39, 0.35);
+            z-index: 990;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .floating-route-bar:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.85), 0 0 28px rgba(197, 155, 39, 0.55);
+        }
+
+        .floating-route-bar.pulse {
+            animation: badgePulse 0.7s ease-in-out;
+        }
+
+        .floating-route-count-badge {
+            background: var(--primary-gold);
+            color: #050B14;
+            font-weight: 800;
+            font-size: 0.85rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .modal-body-content {
-            padding: 20px;
+        .btn-route-header {
+            background: rgba(197, 155, 39, 0.15);
+            border: 1px solid rgba(197, 155, 39, 0.4);
+            color: #ffd875;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
         }
 
-        .modal-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            background: #08111e;
-            padding: 14px;
-            border-radius: 8px;
-            margin: 14px 0;
-            border: 1px solid rgba(255,255,255,0.05);
+        .btn-route-header:hover {
+            background: var(--primary-gold);
+            color: #050B14;
+            transform: translateY(-1px);
         }
 
-        .modal-info-item {
-            font-size: 0.85rem;
-            color: #d1d5db;
+        .toast-action-btn {
+            background: var(--primary-gold);
+            color: #050B14;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .toast-action-btn:hover {
+            transform: scale(1.05);
         }
 
         /* --- Toast Notification --- */
@@ -645,16 +714,17 @@
             bottom: 24px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: var(--primary-navy);
+            background: #091322;
             color: #fff;
             border: 1px solid var(--primary-gold);
-            padding: 10px 20px;
+            padding: 12px 22px;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
-            z-index: 1100;
+            font-size: 0.88rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.7), 0 0 16px rgba(197,155,39,0.25);
+            z-index: 1150;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
+            display: flex;
+            align-items: center;
         }
 
         .guiacompras-toast.show {
@@ -683,6 +753,9 @@
                 <a href="index.html#faq" class="nav-item">Dúvidas</a>
             </nav>
             <div class="header-actions">
+                <button class="btn-route-header" onclick="openRouteDrawer()" id="headerRouteBtn" title="Ver meu roteiro de compras">
+                    📋 Roteiro (<span id="header-route-count">0</span>)
+                </button>
                 <a href="index.html#cotacao" class="btn btn-nav">Reservar Transfer</a>
                 <button class="mobile-menu-toggle" id="menuToggle" aria-label="Abrir Menu">
                     <span class="bar"></span>
@@ -708,7 +781,7 @@
             Encontre as principais lojas de Ciudad del Este, descubra onde comprar produtos 100% originais e monte seu roteiro de compras.
         </p>
         <div class="hero-actions">
-            <a href="#meu-roteiro" class="btn btn-primary btn-hero-main">📋 MONTAR MEU ROTEIRO</a>
+            <button onclick="openRouteDrawer()" class="btn btn-primary btn-hero-main" style="cursor: pointer;">📋 MONTAR MEU ROTEIRO</button>
             <a href="#explorar-lojas" class="btn btn-secondary btn-hero-sub">🛍️ VER LOJAS</a>
             <a href="https://dafveurgzqysybznmzqg.supabase.co/storage/v1/object/public/shopping-guide/guia-de-compras.pdf" target="_blank" download="Guia-de-Compras-Paraguai-RotaCDE.pdf" class="hero-link-tertiary">
                 📥 Baixar Guia Gratuito (PDF)
@@ -864,10 +937,67 @@
         </div>
     </section>
 
-    <!-- Floating Badge Fixa no Canto Inferior Direito (Compacto) -->
-    <a href="#meu-roteiro" class="mobile-route-badge" id="floating-route-badge">
-        📋 MEU ROTEIRO (<span id="floating-route-badge-count">0</span>)
-    </a>
+    <!-- Floating Bar Interativa do Roteiro -->
+    <div class="floating-route-bar" id="floatingRouteBar" onclick="openRouteDrawer()" title="Clique para abrir seu roteiro de compras">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="floating-route-count-badge" id="floating-route-badge-count">0</div>
+            <div style="text-align: left;">
+                <strong style="display: block; font-size: 0.85rem; color: #fff; line-height: 1.1;">Meu Roteiro</strong>
+                <small style="color: var(--primary-gold); font-size: 0.74rem;" id="floating-route-summary">0 lojas selecionadas</small>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: 700; color: #ffd875; border-left: 1px solid rgba(255,255,255,0.18); padding-left: 10px;">
+            <span>Abrir</span>
+            <span>➔</span>
+        </div>
+    </div>
+
+    <!-- Drawer Lateral do Meu Roteiro (Slide-over) -->
+    <div class="route-drawer-overlay" id="routeDrawerOverlay" onclick="closeRouteDrawer()"></div>
+    <aside class="route-drawer" id="routeDrawer" aria-label="Meu Roteiro de Compras">
+        <div class="route-drawer-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.4rem;">📋</span>
+                <div>
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; color: #fff; margin: 0; line-height: 1.2;">Meu Roteiro de Compras</h3>
+                    <span style="color: var(--primary-gold); font-size: 0.78rem; font-weight: 600;" id="drawer-store-count">0 lojas selecionadas</span>
+                </div>
+            </div>
+            <button class="drawer-close-btn" onclick="closeRouteDrawer()" aria-label="Fechar Roteiro">&times;</button>
+        </div>
+
+        <div class="route-drawer-body">
+            <!-- Vazio -->
+            <div id="drawer-empty-state" style="text-align: center; padding: 40px 16px; color: var(--text-light-muted);">
+                <span style="font-size: 3rem; display: block; margin-bottom: 12px; opacity: 0.6;">🛍️</span>
+                <h4 style="color: #fff; font-size: 1.05rem; margin-bottom: 6px;">Seu roteiro ainda está vazio</h4>
+                <p style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 20px;">Adicione lojas clicando em "+ Adicionar ao roteiro" nos cards das lojas abaixo.</p>
+                <button class="btn btn-primary btn-sm" onclick="closeRouteDrawer()">Explorar Lojas</button>
+            </div>
+
+            <!-- Lista de Lojas Selecionadas -->
+            <div id="drawer-items-list" style="display: none; flex-direction: column; gap: 10px;">
+                <!-- Injetado via JS -->
+            </div>
+        </div>
+
+        <div class="route-drawer-footer" id="drawer-footer" style="display: none;">
+            <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800; font-size: 0.92rem;" onclick="reserveTransferWithRoute()">
+                🚗 Reservar Transfer com este Roteiro
+            </button>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button class="btn btn-outline-gold" style="flex: 1; padding: 8px 10px; font-size: 0.8rem;" onclick="scrollToMapFromDrawer()">
+                    🗺️ Ver no Mapa
+                </button>
+                <button class="btn btn-outline-gold" style="flex: 1; padding: 8px 10px; font-size: 0.8rem;" onclick="shareMyRoute()">
+                    📲 Compartilhar
+                </button>
+                <button class="btn btn-outline-gold" style="padding: 8px 12px; font-size: 0.8rem;" onclick="clearRoute()" title="Limpar todo o roteiro">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    </aside>
 
     <!-- Modal de Detalhes da Loja -->
     <div class="modal-overlay" id="store-detail-modal">
