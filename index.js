@@ -16,8 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: "assuncao",   name: "Foz do Iguaçu ⇄ Assunção (Asunción)",          desc: "Transfer longa distância (aprox. 6h de viagem)", price: 0 },
         { id: "santa_rita", name: "Foz do Iguaçu ⇄ Santa Rita",                   desc: "Transfer longa distância",                   price: 0 },
         { id: "encarnacao", name: "Foz do Iguaçu ⇄ Encarnação (Encarnación)",    desc: "Transfer longa distância",                   price: 0 },
-        { id: "wrc_encarnacao_4p", name: "WRC Paraguay 2026 (Aeroporto Foz) ⇄ Encarnación", desc: "Transfer longa distância (até 4 pessoas)", price: 240, currency: "USD" },
-        { id: "wrc_encarnacao_7p", name: "WRC Paraguay 2026 (Aeroporto Foz) ⇄ Encarnación", desc: "Transfer longa distância (5 a 7 pessoas)", price: 270, currency: "USD" },
         { id: "personalizado", name: "Transfer Personalizado / Outras Rotas",      desc: "Rotas especiais e destinos sob consulta",    price: 0 }
     ];
 
@@ -98,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Assunção (Asunción)",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnação (Encarnación)",
-            opt_wrc_encarnacao: "WRC Paraguay 2026 (Aeroporto Foz)",
             opt_outro: "Outro local (Personalizado)",
             label_destino: "Destino",
             opt_select_destino: "Selecione o destino",
@@ -126,8 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
             srv5_desc: "Alugou uma casa ou apartamento por temporada? Oferecemos um serviço especializado de transfer para buscar você e seus acompanhantes com todas as bagagens, deixando vocês na porta do seu Airbnb com tranquilidade.",
             srv6_title: "Transporte Executivo",
             srv6_desc: "Veículo confortável com ar condicionado e motorista discreto para viagens de negócios, eventos corporativos ou turismo executivo.",
-            srv_wrc_title: "WRC 2026 Paraguay",
-            srv_wrc_desc: "Transfer privativo e seguro entre Foz do Iguaçu e Ciudad del Este para o Campeonato Mundial de Rally 2026. Atendimento para grupos e passageiros individuais.",
             btn_learn_more: "Saiba mais →",
             how_tagline: "Passo a Passo",
             how_title: "Como Funciona Nosso Serviço?",
@@ -198,10 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. Todos os direitos reservados.",
             footer_dev: "Site feito por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
-            val_sob_consulta: "Sob Consulta",
-            announcement_title: "Atendimento Especial — WRC Paraguay 2026:",
-            announcement_desc: "Reservas abertas para transfers privativos durante o Campeonato Mundial de Rally.",
-            announcement_btn: "Saiba mais →"
+            val_sob_consulta: "Sob Consulta"
         },
         es: {
             nav_servicos: "Servicios",
@@ -229,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Asunción",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnación",
-            opt_wrc_encarnacao: "WRC Paraguay 2026 (Aeropuerto Foz)",
             opt_outro: "Otro lugar (Personalizado)",
             label_destino: "Destino",
             opt_select_destino: "Seleccione el destino",
@@ -257,8 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             srv5_desc: "¿Alquiló una casa o apartamento por temporada? Ofrecemos un servicio especializado de transfer para buscarlo a usted y a sus acompañantes con todo el equipaje, dejándolos en la puerta de su Airbnb con total tranquilidad.",
             srv6_title: "Transporte Ejecutivo",
             srv6_desc: "Vehículo confortable con aire acondicionado y chofer discreto para viajes de negocios, eventos corporativos o turismo ejecutivo.",
-            srv_wrc_title: "WRC 2026 Paraguay",
-            srv_wrc_desc: "Traslado privado y seguro entre Foz de Iguazú y Ciudad del Este para el Campeonato Mundial de Rally 2026. Atención para grupos y pasajeros individuales.",
             btn_learn_more: "Saber más →",
             how_tagline: "Paso a Paso",
             how_title: "¿Cómo Funciona Nuestro Servicio?",
@@ -329,10 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. Todos los derechos reservados.",
             footer_dev: "Sitio hecho por <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Reservar",
-            val_sob_consulta: "Bajo Consulta",
-            announcement_title: "Atención Especial — WRC Paraguay 2026:",
-            announcement_desc: "Reservas abiertas para traslados privados durante el Campeonato Mundial de Rally.",
-            announcement_btn: "Saber más →"
+            val_sob_consulta: "Bajo Consulta"
         },
         en: {
             nav_servicos: "Services",
@@ -360,7 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
             opt_assuncao: "Asunción",
             opt_santa_rita: "Santa Rita",
             opt_encarnacao: "Encarnación",
-            opt_wrc_encarnacao: "WRC Paraguay 2026 (Foz Airport)",
             opt_outro: "Other location (Custom)",
             label_destino: "Destination",
             opt_select_destino: "Select destination",
@@ -388,8 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
             srv5_desc: "Rented a house or apartment for the season? We offer a specialized transfer service to pick you and your companions up with all the luggage, dropping you at your Airbnb door with ease.",
             srv6_title: "Executive Transport",
             srv6_desc: "Comfortable vehicle with air conditioning and discrete driver for business trips, corporate events, or VIP tourism.",
-            srv_wrc_title: "WRC 2026 Paraguay",
-            srv_wrc_desc: "Private and secure transfer between Foz do Iguaçu and Ciudad del Este for the 2026 World Rally Championship. Service for groups and individual travelers.",
             btn_learn_more: "Learn more →",
             how_tagline: "Step by Step",
             how_title: "How Does Our Service Work?",
@@ -460,10 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             footer_rights: "© 2026 Rota CDE Transfer. All rights reserved.",
             footer_dev: "Site made by <a href=\"https://gdsdesign.site/\" target=\"_blank\">GDS Design</a>",
             btn_reserve: "Book",
-            val_sob_consulta: "On Request",
-            announcement_title: "Special Service — WRC Paraguay 2026:",
-            announcement_desc: "Bookings open for private transfers during the World Rally Championship.",
-            announcement_btn: "Learn more →"
+            val_sob_consulta: "On Request"
         }
     };
 
@@ -988,12 +968,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 routeKey = "santa_rita";
             } else if (origem === "Encarnação" || destino === "Encarnação") {
                 routeKey = "encarnacao";
-            } else if (
-                origem === "Rally WRC Encarnación" || destino === "Rally WRC Encarnación" ||
-                origem === "WRC Paraguay 2026 (Aeroporto Foz)" || destino === "WRC Paraguay 2026 (Aeroporto Foz)"
-            ) {
-                const passCount = parseInt(passageiros) || 1;
-                routeKey = passCount > 4 ? "wrc_encarnacao_7p" : "wrc_encarnacao_4p";
             } else if (isCdeSide) {
                 if (isFozSide) {
                     routeKey = "foz_cde";
