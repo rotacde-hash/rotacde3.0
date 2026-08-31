@@ -460,21 +460,40 @@ function closeStoreModal() {
     }
 }
 
-// --- MAPA LEAFLET ---
+// --- MAPA LEAFLET FOCADO EM CIUDAD DEL ESTE ---
+const CDE_CENTER = [-25.5135, -54.6125]; // Centro comercial de Ciudad del Este
+const CDE_DEFAULT_ZOOM = 16;
+
 function initLeafletMap() {
     const mapElement = document.getElementById('mapa-compras');
     if (!mapElement || typeof L === 'undefined') return;
 
     if (!leafletMap) {
         leafletMap = L.map('mapa-compras', {
-            center: [-25.5155, -54.6120],
-            zoom: 15,
-            zoomControl: true
+            center: CDE_CENTER,
+            zoom: CDE_DEFAULT_ZOOM,
+            zoomControl: true,
+            minZoom: 13,
+            maxZoom: 18,
+            maxBounds: [
+                [-25.545, -54.650],
+                [-25.485, -54.580]
+            ],
+            maxBoundsViscosity: 0.9
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap contributors',
+            noWrap: true
         }).addTo(leafletMap);
+
+        // Garante renderização perfeita sem cortes de tiles
+        setTimeout(() => {
+            if (leafletMap) {
+                leafletMap.invalidateSize();
+                leafletMap.setView(CDE_CENTER, CDE_DEFAULT_ZOOM);
+            }
+        }, 300);
     }
 
     updateMapMarkers(allStores);
@@ -487,35 +506,42 @@ function updateMapMarkers(storesToDisplay) {
     mapMarkers = [];
 
     const bounds = L.latLngBounds();
+    let validMarkersCount = 0;
 
     storesToDisplay.forEach(store => {
         if (store.latitude && store.longitude) {
             const lat = parseFloat(store.latitude);
             const lng = parseFloat(store.longitude);
             
-            if (!isNaN(lat) && !isNaN(lng)) {
-                const marker = L.marker([lat, lng]).addTo(leafletMap);
-                const inRoute = isStoreInRoute(store.id || store.slug);
+            // Filtra coordenadas válidas focadas estritamente na região comercial de Ciudad del Este
+            if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
+                if (lat < -25.48 && lat > -25.55 && lng < -54.58 && lng > -54.65) {
+                    const marker = L.marker([lat, lng]).addTo(leafletMap);
+                    const inRoute = isStoreInRoute(store.id || store.slug);
 
-                const popupHtml = `
-                    <div style="font-family: 'Inter', sans-serif; padding: 4px;">
-                        <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
-                        <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">${store.neighborhood || 'Centro'}</p>
-                        <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
-                            ${inRoute ? '✓ No Roteiro' : '+ Adicionar'}
-                        </button>
-                    </div>
-                `;
+                    const popupHtml = `
+                        <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 150px;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
+                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">📍 ${store.neighborhood || 'Centro, Ciudad del Este'}</p>
+                            <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
+                                ${inRoute ? '✓ No Roteiro' : '+ Adicionar ao Roteiro'}
+                            </button>
+                        </div>
+                    `;
 
-                marker.bindPopup(popupHtml);
-                mapMarkers.push(marker);
-                bounds.extend([lat, lng]);
+                    marker.bindPopup(popupHtml);
+                    mapMarkers.push(marker);
+                    bounds.extend([lat, lng]);
+                    validMarkersCount++;
+                }
             }
         }
     });
 
-    if (mapMarkers.length > 0 && leafletMap) {
-        leafletMap.fitBounds(bounds, { padding: [30, 30] });
+    if (validMarkersCount > 1 && leafletMap) {
+        leafletMap.fitBounds(bounds, { padding: [35, 35], maxZoom: 16, minZoom: 14 });
+    } else if (leafletMap) {
+        leafletMap.setView(CDE_CENTER, CDE_DEFAULT_ZOOM);
     }
 }
 
