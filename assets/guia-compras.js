@@ -884,6 +884,585 @@ function updateRouteUI() {
             drawerList.innerHTML = drawerHtml;
         }
     }
+
+    // 4. Estado dos Botões de Download do Planejamento em PDF
+    const pdfBtnSection = document.getElementById('btn-download-pdf-plan-section');
+    const pdfBtnDrawer = document.getElementById('btn-download-pdf-plan-drawer');
+
+    if (pdfBtnSection) {
+        pdfBtnSection.disabled = (count === 0);
+        if (count === 0) pdfBtnSection.classList.add('is-disabled');
+        else pdfBtnSection.classList.remove('is-disabled');
+    }
+    if (pdfBtnDrawer) {
+        pdfBtnDrawer.disabled = (count === 0);
+        if (count === 0) pdfBtnDrawer.classList.add('is-disabled');
+        else pdfBtnDrawer.classList.remove('is-disabled');
+    }
+}
+
+// --- LAZY LOAD DA BIBLIOTECA jsPDF ---
+let jsPdfPromise = null;
+function loadJsPdfLibrary() {
+    if (window.jspdf && window.jspdf.jsPDF) {
+        return Promise.resolve(window.jspdf.jsPDF);
+    }
+    if (jsPdfPromise) return jsPdfPromise;
+
+    jsPdfPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+            if (window.jspdf && window.jspdf.jsPDF) {
+                resolve(window.jspdf.jsPDF);
+            } else {
+                reject(new Error("Biblioteca jsPDF não inicializada."));
+            }
+        };
+        script.onerror = () => {
+            jsPdfPromise = null;
+            reject(new Error("Falha de conexão ao carregar jsPDF. Verifique sua internet."));
+        };
+        document.head.appendChild(script);
+    });
+    return jsPdfPromise;
+}
+
+// Converte a logo oficial para base64 via Canvas para inserção sem distorção
+function getLogoBase64() {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+            try {
+                const canvas = document.createElement('canvas');
+                const w = img.naturalWidth || img.width;
+                const h = img.naturalHeight || img.height;
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const dataURL = canvas.toDataURL('image/png');
+                resolve({ dataURL, width: w, height: h, ratio: w / h });
+            } catch (err) {
+                console.warn("Aviso ao converter logo para base64:", err);
+                resolve(null);
+            }
+        };
+        img.onerror = function() {
+            console.warn("Logo não encontrada para o PDF.");
+            resolve(null);
+        };
+        img.src = 'assets/logo.png';
+    });
+}
+
+// Sanitizador rigoroso para jsPDF: remove emojis e caracteres não suportados, preservando acentos em português
+function sanitizePdfText(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/\p{Extended_Pictographic}/gu, '')
+        .replace(/[\uFE00-\uFE0F]/g, '')
+        .replace(/\s+,/g, ',')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// --- GERADOR OFICIAL: MEU PLANEJAMENTO EM PDF ---
+async function generateShoppingPlanPdf(triggerButton) {
+    if (!selectedRouteStores || selectedRouteStores.length === 0) {
+        showToast("Adicione pelo menos uma loja ao seu roteiro para gerar o PDF.");
+        return;
+    }
+
+    // Previne duplo clique e atualiza estado visual do botão
+    const buttons = [
+        document.getElementById('btn-download-pdf-plan-section'),
+        document.getElementById('btn-download-pdf-plan-drawer'),
+        triggerButton
+    ].filter(Boolean);
+
+    const originalContents = buttons.map(b => b.innerHTML);
+    buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.add('is-disabled');
+        const titleEl = b.querySelector('.btn-pdf-title');
+        if (titleEl) titleEl.innerText = "GERANDO SEU PDF...";
+    });
+
+    try {
+        // Registra evento no Google Analytics se disponível
+        if (typeof gtag === 'function') {
+            try {
+                gtag('event', 'download_pdf_planejamento', {
+                    event_category: 'engagement',
+                    event_label: 'Meu Planejamento em PDF',
+                    value: selectedRouteStores.length
+                });
+            } catch (e) {}
+        }
+
+        // Lazy load do jsPDF e carregamento da logo em paralelo
+        const [jsPDFClass, logoInfo] = await Promise.all([
+            loadJsPdfLibrary(),
+            getLogoBase64()
+        ]);
+
+        const doc = new jsPDFClass({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+
+        // Dimensões da página A4
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const marginL = 14;
+        const marginR = 14;
+        const contentWidth = pageWidth - marginL - marginR; // 182mm
+        const bottomLimit = pageHeight - 20; // 277mm limite antes do rodapé
+
+        // Paleta de Cores Oficial Rota CDE
+        const COLOR_NAVY = [14, 26, 47];       // #0e1a2f
+        const COLOR_GOLD = [197, 155, 39];      // #c59b27
+        const COLOR_TEXT = [33, 37, 41];
+        const COLOR_MUTED = [100, 116, 139];
+        const COLOR_CARD_BG = [248, 250, 252];
+        const COLOR_BORDER = [226, 232, 240];
+
+        let currentY = 16;
+
+        // Cabeçalho da Primeira Página
+        function drawFirstPageHeader() {
+            doc.setFillColor(...COLOR_NAVY);
+            doc.rect(0, 0, pageWidth, 4, 'F'); // Barra superior azul marinho
+
+            const headerTop = 11;
+            let titleStartX = marginL;
+
+            if (logoInfo && logoInfo.dataURL) {
+                const logoH = 15;
+                const logoW = logoH * (logoInfo.ratio || 1.06);
+                doc.addImage(logoInfo.dataURL, 'PNG', marginL, headerTop, logoW, logoH);
+                titleStartX = marginL + logoW + 5;
+            } else {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(13);
+                doc.setTextColor(...COLOR_GOLD);
+                doc.text("ROTA CDE TRANSFER", marginL, headerTop + 6);
+                titleStartX = marginL;
+            }
+
+            // Título Principal
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14.5);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text("MEU PLANO DE COMPRAS NO PARAGUAI", titleStartX, headerTop + (logoInfo ? 6 : 13));
+
+            // Subtítulo
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text("Seu planejamento personalizado para Ciudad del Este", titleStartX, headerTop + (logoInfo ? 11 : 18));
+
+            // Data de emissão brasileira à direita
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text(`Data: ${hoje}`, pageWidth - marginR, headerTop + 6, { align: 'right' });
+
+            // Linha divisória dourada
+            const dividerY = headerTop + (logoInfo ? 18 : 22);
+            doc.setDrawColor(...COLOR_GOLD);
+            doc.setLineWidth(0.6);
+            doc.line(marginL, dividerY, pageWidth - marginR, dividerY);
+
+            currentY = dividerY + 7;
+        }
+
+        // Cabeçalho Compacto das Páginas Seguintes
+        function drawCompactHeader() {
+            doc.setFillColor(...COLOR_NAVY);
+            doc.rect(0, 0, pageWidth, 3, 'F');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text("ROTA CDE TRANSFER  |  Meu Plano de Compras no Paraguai", marginL, 10);
+
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text(`Data: ${hoje}`, pageWidth - marginR, 10, { align: 'right' });
+
+            doc.setDrawColor(...COLOR_BORDER);
+            doc.setLineWidth(0.3);
+            doc.line(marginL, 13, pageWidth - marginR, 13);
+
+            currentY = 19;
+        }
+
+        // Título de Seção
+        function drawSectionTitle(title, subtitle) {
+            if (currentY + 14 > bottomLimit) {
+                doc.addPage();
+                drawCompactHeader();
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10.5);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text(sanitizePdfText(title), marginL, currentY);
+
+            if (subtitle) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.setTextColor(...COLOR_MUTED);
+                doc.text(sanitizePdfText(subtitle), marginL, currentY + 4);
+                currentY += 8;
+            } else {
+                currentY += 6;
+            }
+        }
+
+        // Inicia primeira página
+        drawFirstPageHeader();
+
+        // SEÇÃO 1: MINHAS LOJAS SELECIONADAS
+        drawSectionTitle("1. MINHAS LOJAS SELECIONADAS", "Ordem de visita planejada para o seu roteiro de compras");
+
+        // Enriquece os dados de cada loja com allStores
+        const enrichedStores = selectedRouteStores.map((item, idx) => {
+            const full = (typeof allStores !== 'undefined' && Array.isArray(allStores))
+                ? allStores.find(s => s.slug === item.slug || s.id === item.id)
+                : null;
+
+            let catNames = '';
+            if (full && full.categories && full.categories.length > 0) {
+                catNames = full.categories.map(c => c.name).filter(Boolean).join(', ');
+            } else if (full && full.category_slugs && full.category_slugs.length > 0) {
+                catNames = full.category_slugs.map(slug => {
+                    const found = (typeof allCategories !== 'undefined') ? allCategories.find(c => c.slug === slug) : null;
+                    return found ? found.name : slug;
+                }).filter(Boolean).join(', ');
+            }
+
+            return {
+                index: idx + 1,
+                name: sanitizePdfText(item.name || full?.name || 'Loja'),
+                categories: sanitizePdfText(catNames),
+                address: sanitizePdfText(full?.address || item.address || ''),
+                neighborhood: sanitizePdfText(full?.neighborhood || item.neighborhood || 'Centro'),
+                description: sanitizePdfText(full?.short_description || full?.description || '')
+            };
+        });
+
+        // Desenha os cards das lojas (garantindo que NENHUM card seja dividido entre páginas)
+        enrichedStores.forEach((store) => {
+            const cardInnerWidth = contentWidth - 16;
+            const storeName = store.name;
+            const categoryText = store.categories ? `Categoria: ${store.categories}` : '';
+            
+            let fullAddress = store.address;
+            if (fullAddress && store.neighborhood && !fullAddress.toLowerCase().includes(store.neighborhood.toLowerCase())) {
+                fullAddress += ` - ${store.neighborhood}`;
+            }
+            if (fullAddress && !fullAddress.toLowerCase().includes('ciudad del este')) {
+                fullAddress += ', Ciudad del Este';
+            }
+            const addressLines = fullAddress ? doc.splitTextToSize(`Localização: ${fullAddress}`, cardInnerWidth) : [];
+            const descLines = store.description ? doc.splitTextToSize(store.description, cardInnerWidth) : [];
+
+            // Altura total dinâmica do card
+            let cardHeight = 8;
+            if (categoryText) cardHeight += 4;
+            if (addressLines.length > 0) cardHeight += (addressLines.length * 3.8);
+            if (descLines.length > 0) cardHeight += (Math.min(descLines.length, 3) * 3.6) + 1;
+            cardHeight += 9;
+            cardHeight = Math.max(cardHeight, 26);
+
+            // Se o card não couber inteiro na página atual, move para a próxima página
+            if (currentY + cardHeight > bottomLimit) {
+                doc.addPage();
+                drawCompactHeader();
+            }
+
+            const cardY = currentY;
+
+            // Fundo do card
+            doc.setFillColor(...COLOR_CARD_BG);
+            doc.setDrawColor(...COLOR_BORDER);
+            doc.setLineWidth(0.3);
+            doc.roundedRect(marginL, cardY, contentWidth, cardHeight, 2, 2, 'FD');
+
+            // Barra vertical dourada de destaque à esquerda
+            doc.setFillColor(...COLOR_GOLD);
+            doc.roundedRect(marginL, cardY, 2.5, cardHeight, 1, 1, 'F');
+
+            // Número de ordem da loja
+            doc.setFillColor(...COLOR_GOLD);
+            doc.circle(marginL + 7, cardY + 6.5, 3.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text(String(store.index), marginL + 7, cardY + 7.7, { align: 'center' });
+
+            // Nome da loja
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text(storeName, marginL + 13, cardY + 7.5);
+
+            let innerY = cardY + 11.5;
+
+            // Categoria
+            if (categoryText) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(7.5);
+                doc.setTextColor(...COLOR_GOLD);
+                doc.text(categoryText, marginL + 13, innerY);
+                innerY += 4;
+            }
+
+            // Endereço
+            if (addressLines.length > 0) {
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.8);
+                doc.setTextColor(...COLOR_TEXT);
+                doc.text(addressLines, marginL + 13, innerY);
+                innerY += (addressLines.length * 3.8);
+            }
+
+            // Descrição
+            if (descLines.length > 0) {
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(7.5);
+                doc.setTextColor(...COLOR_MUTED);
+                const cappedDesc = descLines.slice(0, 3);
+                doc.text(cappedDesc, marginL + 13, innerY);
+                innerY += (cappedDesc.length * 3.6) + 1;
+            }
+
+            // Checklist da Loja (caixas de seleção desenhadas)
+            const checkY = cardY + cardHeight - 5.5;
+            const items = [
+                "Visitei a loja",
+                "Encontrei o produto",
+                "Pesquisei o preço",
+                "Realizei a compra"
+            ];
+            
+            const checkSpacing = (contentWidth - 14) / items.length;
+            doc.setDrawColor(140, 150, 165);
+            doc.setLineWidth(0.3);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(70, 80, 95);
+
+            items.forEach((itemText, i) => {
+                const itemX = marginL + 13 + (i * checkSpacing);
+                doc.rect(itemX, checkY - 2.8, 3, 3);
+                doc.text(itemText, itemX + 4.2, checkY - 0.4);
+            });
+
+            currentY = cardY + cardHeight + 4;
+        });
+
+        currentY += 2;
+
+        // SEÇÃO 2: MINHA LISTA DE COMPRAS (Linhas em branco para anotações manuais)
+        const listaSectionHeight = 40;
+        if (currentY + listaSectionHeight > bottomLimit) {
+            doc.addPage();
+            drawCompactHeader();
+        }
+
+        drawSectionTitle("2. MINHA LISTA DE COMPRAS", "Espaço para preenchimento manual dos produtos planejados e valores");
+
+        const tableStartY = currentY;
+        const colWidths = [80, 48, 36, 18]; // Total = 182mm
+        const colHeaders = ["Item / Produto Desejado", "Loja Pretendida", "Preço Estimado", "Comprado"];
+
+        // Cabeçalho da tabela
+        doc.setFillColor(238, 242, 248);
+        doc.rect(marginL, tableStartY, contentWidth, 5.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...COLOR_NAVY);
+
+        let hX = marginL + 2;
+        colHeaders.forEach((hText, i) => {
+            doc.text(hText, hX, tableStartY + 3.8);
+            hX += colWidths[i];
+        });
+
+        // 5 Linhas em branco com caixas de marcação
+        let rowY = tableStartY + 5.5;
+        for (let r = 0; r < 5; r++) {
+            doc.setDrawColor(...COLOR_BORDER);
+            doc.setLineWidth(0.25);
+            doc.line(marginL, rowY + 5.5, marginL + contentWidth, rowY + 5.5);
+
+            const chkX = marginL + colWidths[0] + colWidths[1] + colWidths[2] + 6;
+            doc.setDrawColor(150, 160, 175);
+            doc.rect(chkX, rowY + 1.4, 3, 3);
+
+            rowY += 5.5;
+        }
+
+        currentY = rowY + 6;
+
+        // SEÇÃO 3: CHECKLIST GERAL DA VIAGEM
+        const checklistHeight = 30;
+        if (currentY + checklistHeight > bottomLimit) {
+            doc.addPage();
+            drawCompactHeader();
+        }
+
+        drawSectionTitle("3. CHECKLIST GERAL DA VIAGEM", "Itens essenciais para garantir um dia tranquilo em Ciudad del Este");
+
+        const generalChecks = [
+            "Documento de Identidade: RG original em bom estado (menos de 10 anos) ou Passaporte válido.",
+            "Moeda / Pagamento: Dinheiro em espécie (Dólar ou Real) e/ou cartão com função internacional habilitada.",
+            "Horário de Saída: Combinado previamente para chegar cedo aos principais shoppings de CDE.",
+            "Horário de Retorno: Planejado para evitar o fluxo mais intenso na Ponte da Amizade.",
+            "Transporte Seguro: Transfer privativo agendado com a Rota CDE Transfer."
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.8);
+        doc.setTextColor(...COLOR_TEXT);
+
+        generalChecks.forEach((checkText) => {
+            doc.setDrawColor(140, 150, 165);
+            doc.setLineWidth(0.3);
+            doc.rect(marginL, currentY - 2.8, 3.2, 3.2);
+
+            const lines = doc.splitTextToSize(checkText, contentWidth - 6);
+            doc.text(lines, marginL + 5.5, currentY - 0.4);
+            currentY += (lines.length * 4) + 1;
+        });
+
+        currentY += 4;
+
+        // SEÇÃO 4: DICAS DE COMPRA SEGURA EM CIUDAD DEL ESTE
+        const safetyHeight = 35;
+        if (currentY + safetyHeight > bottomLimit) {
+            doc.addPage();
+            drawCompactHeader();
+        }
+
+        drawSectionTitle("4. DICAS PARA COMPRA SEGURA EM CIUDAD DEL ESTE", "");
+
+        const safetyBoxY = currentY - 2;
+        const safetyBoxH = 31;
+
+        // Box com fundo suave e borda dourada
+        doc.setFillColor(255, 252, 242);
+        doc.setDrawColor(...COLOR_GOLD);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(marginL, safetyBoxY, contentWidth, safetyBoxH, 2, 2, 'FD');
+
+        const tips = [
+            "1. Pesquise Preços: Consulte lojas oficiais antes de comprar. Desconfie sempre de ofertas muito abaixo do padrão.",
+            "2. Teste Tudo: Abra as embalagens e teste os produtos eletrônicos no setor de testes da própria loja.",
+            "3. Exija Nota Fiscal: Solicite sempre a factura legal com descrição clara do item e número de série legível.",
+            "4. Cuidado nas Ruas: Evite abordagens de guias informais e panfleteiros. Dirija-se sempre às lojas do seu roteiro."
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(50, 55, 65);
+
+        let tipY = safetyBoxY + 5.5;
+        tips.forEach(t => {
+            doc.text(t, marginL + 4, tipY);
+            tipY += 5;
+        });
+
+        // Aviso legal
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(6.8);
+        doc.setTextColor(...COLOR_MUTED);
+        doc.text("Informações sujeitas a alterações sem aviso prévio. Este documento é um planejamento pessoal de viagem.", marginL + 4, tipY + 1);
+
+        // RODAPÉ EM TODAS AS PÁGINAS (Com numeração completa)
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+            doc.setPage(p);
+
+            const footerY = pageHeight - 14;
+
+            // Linha divisória fina
+            doc.setDrawColor(...COLOR_BORDER);
+            doc.setLineWidth(0.3);
+            doc.line(marginL, footerY - 2.5, pageWidth - marginR, footerY - 2.5);
+
+            // Linha 1: Marca, site e WhatsApp
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLOR_NAVY);
+            doc.text("ROTA CDE TRANSFER", marginL, footerY + 1);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text("— Seu parceiro na viagem ao Paraguai  |  Site: https://www.rotacde.site  |  WhatsApp: +595 973 953874", marginL + 31, footerY + 1);
+
+            // Numeração de páginas à direita
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text(`Página ${p} de ${totalPages}`, pageWidth - marginR, footerY + 1, { align: 'right' });
+
+            // Linha 2: Chamada comercial do transfer e frase de encerramento
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(7);
+            doc.setTextColor(...COLOR_GOLD);
+            doc.text("Reserve seu transfer privativo para suas compras em Ciudad del Este.", marginL, footerY + 5.2);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(...COLOR_MUTED);
+            doc.text("Planeje suas compras. Aproveite sua viagem.", marginL + 78, footerY + 5.2);
+        }
+
+        // SALVA / DISPARA DOWNLOAD
+        const fileName = 'meu-planejamento-de-compras-rota-cde.pdf';
+
+        // Disparo otimizado (compatível com Safari / Mobile / Chrome)
+        try {
+            doc.save(fileName);
+        } catch (saveErr) {
+            console.warn("doc.save() falhou, tentando blob URL:", saveErr);
+            const blob = doc.output('blob');
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+            }, 1000);
+        }
+
+        showToast("Seu planejamento está pronto! Agora você pode levar sua lista de compras para Ciudad del Este.");
+    } catch (err) {
+        console.error("Erro ao gerar PDF do roteiro:", err);
+        alert("Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.");
+    } finally {
+        // Restaura botões
+        buttons.forEach((b, idx) => {
+            b.disabled = false;
+            b.classList.remove('is-disabled');
+            b.innerHTML = originalContents[idx];
+        });
+    }
 }
 
 // --- COMPARTILHAR ---
