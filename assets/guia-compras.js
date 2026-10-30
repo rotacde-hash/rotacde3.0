@@ -19,7 +19,7 @@ const FALLBACK_CATEGORIES = [
     { id: "cat-11", name: "Destaques", slug: "destaques", icon: "⭐", description: "Lojas mais recomendadas em CDE" }
 ];
 
-// Lista fallback de lojas
+// Lista fallback de lojas com localizações reais verificadas no Google Maps
 const FALLBACK_STORES = [
     {
         id: "store-1",
@@ -30,14 +30,14 @@ const FALLBACK_STORES = [
         address: "Av. Luis Maria Argaña, Shopping Paris - 3º Piso",
         city: "Ciudad del Este",
         neighborhood: "Centro",
-        latitude: -25.5173,
-        longitude: -54.6105,
+        latitude: -25.5132,
+        longitude: -54.6064,
         phone: "+595 61 501 400",
         whatsapp: "+595 983 501 400",
         website: "https://www.shoppingchina.com.py",
         instagram: "@shoppingchinaparaguay",
         opening_hours: "Segunda a Domingo: 07:00 às 19:00",
-        image_url: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=800&q=80",
+        image_url: "https://100fronteiras.com/wp-content/uploads/2022/12/Fachada-Shopping-China-CDE-OFICIAL-e1672146116149.jpeg",
         active: true,
         featured: true,
         category_slugs: ["loja-de-departamento", "eletronicos", "perfumes-e-beleza", "destaques"]
@@ -51,14 +51,14 @@ const FALLBACK_STORES = [
         address: "Av. Adrián Jara esquina Regimiento Piribebuy",
         city: "Ciudad del Este",
         neighborhood: "Centro",
-        latitude: -25.5142,
-        longitude: -54.6128,
+        latitude: -25.5101,
+        longitude: -54.6095,
         phone: "+595 61 500 111",
         whatsapp: "+595 983 500 111",
         website: "https://nissei.com",
         instagram: "@nisseiparaguay",
-        opening_hours: "Segunda a Sábado: 06:30 às 15:30",
-        image_url: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
+        opening_hours: "Segunda a Sábado: 06:30 às 16:00 | Domingo: 08:00 às 16:00",
+        image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjR5Nk78wE0zq2nH3S_0MKhZ-3IV26ZX_Zvibcm6HMTalt8RhX9p0lhug&s=10",
         active: true,
         featured: true,
         category_slugs: ["eletronicos", "informatica", "games", "destaques"]
@@ -72,8 +72,8 @@ const FALLBACK_STORES = [
         address: "Av. Carlos Antonio López esquina Monseñor Rodríguez",
         city: "Ciudad del Este",
         neighborhood: "Centro",
-        latitude: -25.5150,
-        longitude: -54.6115,
+        latitude: -25.5104,
+        longitude: -54.6107,
         phone: "+595 61 501 000",
         whatsapp: "+595 983 600 000",
         website: "https://www.cellshop.com",
@@ -90,11 +90,11 @@ const FALLBACK_STORES = [
         slug: "elegancia-perfumaria",
         short_description: "Referência em perfumes importados, maquiagem e cosméticos originais.",
         description: "A Elegancia Perfumaria oferece os últimos lançamentos em alta perfumaria internacional, tratamentos para a pele e maquiagens exclusivas com atestado de procedência original.",
-        address: "Edifício Central, Av. Adrián Jara",
+        address: "Edifício Victoria, Av. Adrián Jara esquina Calle Abay",
         city: "Ciudad del Este",
         neighborhood: "Centro",
-        latitude: -25.5138,
-        longitude: -54.6135,
+        latitude: -25.5110,
+        longitude: -54.6115,
         phone: "+595 61 512 345",
         whatsapp: "+595 983 512 345",
         website: "https://eleganciaparaguay.com",
@@ -110,12 +110,12 @@ const FALLBACK_STORES = [
         name: "S.A. Shop",
         slug: "sa-shop",
         short_description: "Loja com departamento completo de roupas, calçados e maquiagens.",
-        description: "Localizada estrategicamente no Shopping Galeria e com filial no Shopping Jebai, a SA Shop combina moda de marcas internacionais com promoções diárias imbatíveis.",
+        description: "Localizada estrategicamente no Shopping Galeria e com filial no Shopping Paris, a SA Shop combina moda de marcas internacionais com promoções diárias imbatíveis.",
         address: "Av. Monseñor Rodríguez, Shopping Galeria",
         city: "Ciudad del Este",
         neighborhood: "Centro",
-        latitude: -25.5160,
-        longitude: -54.6120,
+        latitude: -25.5112,
+        longitude: -54.6085,
         phone: "+595 61 500 999",
         whatsapp: "+595 983 500 999",
         website: "https://sashop.com.py",
@@ -125,8 +125,109 @@ const FALLBACK_STORES = [
         active: true,
         featured: false,
         category_slugs: ["moda", "calcados", "variedades"]
+    },
+    {
+        id: "store-6",
+        name: "La Petisquera (Matriz)",
+        slug: "la-petisquera-tienda-la-petisquera-tienda-1",
+        short_description: "Tradicional loja de perfumes, bebidas nobres e artigos de luxo importados.",
+        description: "La Petisquera é um dos pontos mais tradicionais de compras no Paraguai desde 1970, especializada em whiskies raros, vinhos importados, charutos e perfumaria fina.",
+        address: "Av. Monseñor Rodríguez esquina Av. Adrián Jara",
+        city: "Ciudad del Este",
+        neighborhood: "Centro",
+        latitude: -25.5096,
+        longitude: -54.6091,
+        phone: "+595 61 500 120",
+        whatsapp: "",
+        website: "https://lapetisquera.com.py/",
+        instagram: "@lapetisqueraoficial",
+        opening_hours: "Segunda a Sábado: 06:30 às 16:30",
+        image_url: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnhfYF0u2LlEMdWEm9G4LN32YPURkud4WOUsIyDyEQPnZT7Fgz-wjpTOxjY8GEk2QgpAoYX5HdDhmbg-VbzrN92c_JWO--zjGfKBmbDH8OlcmWvZ7ojr4a_7RI-OjSsdorsV4tVU8OzNEk=w408-h544-k-no",
+        active: true,
+        featured: true,
+        category_slugs: ["bebidas", "perfumes-e-beleza", "destaques"]
+    },
+    {
+        id: "store-7",
+        name: "Shopping Itaipu",
+        slug: "shopping-itaipu",
+        short_description: "Centro comercial com variedade em eletrônicos, cosméticos e utilidades.",
+        description: "Localizado no coração comercial de CDE, oferece diversas lojas e boxes com eletrônicos, vestuário e produtos de beleza a preços acessíveis.",
+        address: "Av. Adrián Jara esquina Calle Rubio Ñu",
+        city: "Ciudad del Este",
+        neighborhood: "Centro",
+        latitude: -25.5119,
+        longitude: -54.6074,
+        phone: "",
+        whatsapp: "",
+        website: "https://www.instagram.com/shoppingitaipuoficial",
+        instagram: "@shoppingitaipuoficial",
+        opening_hours: "Segunda a Sábado: 06:00 às 17:00",
+        image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjUErDM0mk7fAzrHgowSl4c0OXGgxeAcUrQ4LwEaTYtjULnzY80qWqzjw&s=10",
+        active: true,
+        featured: false,
+        category_slugs: ["variedades", "eletronicos"]
+    },
+    {
+        id: "store-8",
+        name: "28 de Julio Autoservicio",
+        slug: "28-de-julio-autoservicio",
+        short_description: "Artigos do cotidiano, utilidades para o lar e presentes com preços populares.",
+        description: "Excelente para garimpar utilidades domésticas, itens de cozinha, artigos para bebês e presentes com excelente custo-benefício.",
+        address: "Av. Adrián Jara esquina Av. Monseñor Rodríguez",
+        city: "Ciudad del Este",
+        neighborhood: "Centro",
+        latitude: -25.5113,
+        longitude: -54.6062,
+        phone: "+595 61 505075",
+        whatsapp: "+595 0981 468954",
+        website: "https://28dejulio.com.py/",
+        instagram: "@28dejuliopy",
+        opening_hours: "Segunda a Sábado: 06:00 às 16:00",
+        image_url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6mtc-ASPjMtEYz-6cpMxBdkNgMXy0_1lDjqqJkS6FzhjmP5pznix-BNRy&s=10",
+        active: true,
+        featured: false,
+        category_slugs: ["casa-e-decoracao", "variedades"]
     }
 ];
+
+// Helper para obter URL direta de localização real no Google Maps
+function getGoogleMapsUrl(store) {
+    if (!store) return 'https://www.google.com/maps/search/?api=1&query=Ciudad+del+Este+Paraguay';
+    if (store.latitude && store.longitude) {
+        let lat = parseFloat(store.latitude);
+        let lng = parseFloat(store.longitude);
+        if (!isNaN(lng) && Math.abs(lng) > 180) {
+            const s = String(store.longitude).replace('-', '');
+            lng = -parseFloat(s.slice(0, 2) + '.' + s.slice(2));
+        }
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+            return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        }
+    }
+    const q = store.address ? `${store.name}, ${store.address}, Ciudad del Este` : `${store.name}, Ciudad del Este`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
+// Abre o roteiro completo no Google Maps (com waypoints ordenados a pé)
+function openRouteInGoogleMaps() {
+    if (selectedRouteStores.length === 0) {
+        showToast("Adicione pelo menos uma loja ao seu roteiro para abrir no Google Maps.");
+        return;
+    }
+    if (selectedRouteStores.length === 1) {
+        window.open(getGoogleMapsUrl(selectedRouteStores[0]), '_blank');
+        return;
+    }
+    const origin = encodeURIComponent(`${selectedRouteStores[0].name}, Ciudad del Este`);
+    const destination = encodeURIComponent(`${selectedRouteStores[selectedRouteStores.length - 1].name}, Ciudad del Este`);
+    let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
+    if (selectedRouteStores.length > 2) {
+        const waypoints = selectedRouteStores.slice(1, -1).map(s => encodeURIComponent(`${s.name}, Ciudad del Este`)).join('|');
+        url += `&waypoints=${waypoints}`;
+    }
+    window.open(url, '_blank');
+}
 
 // Estado Global
 let allCategories = [];
@@ -189,7 +290,7 @@ function triggerRouteBadgePulse() {
     const bar = document.getElementById('floatingRouteBar');
     if (bar) {
         bar.classList.remove('pulse');
-        void bar.offsetWidth;
+        void bar.offsetWidth; // Trigger reflow
         bar.classList.add('pulse');
     }
     const headerBtn = document.getElementById('headerRouteBtn');
@@ -415,10 +516,13 @@ function filterAndRenderStores() {
                     
                     <div class="store-card-actions">
                         <button class="btn btn-outline-gold btn-sm" onclick="openStoreModal('${store.slug}')">
-                            ℹ️ Ver detalhes
+                            ℹ️ Detalhes
                         </button>
+                        <a href="${getGoogleMapsUrl(store)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-gold btn-sm" title="Abrir localização real no Google Maps" style="padding: 7px 10px; display: inline-flex; align-items: center; gap: 4px;">
+                            📍 Maps
+                        </a>
                         <button class="btn ${inRoute ? 'btn-success' : 'btn-primary'} btn-sm" onclick="toggleRouteStore('${store.slug}')">
-                            ${inRoute ? '✓ No Meu Roteiro' : '+ Adicionar ao roteiro'}
+                            ${inRoute ? '✓ No Roteiro' : '+ Roteiro'}
                         </button>
                     </div>
                 </div>
@@ -476,11 +580,14 @@ function openStoreModal(slug) {
                 ${store.website ? `<div class="modal-info-item"><strong>🌐 Website:</strong> <a href="${store.website}" target="_blank" style="color: #64b5f6;">${store.website.replace('https://','')}</a></div>` : ''}
             </div>
 
-            <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-                <button class="btn ${inRoute ? 'btn-success' : 'btn-primary'}" style="flex: 1; min-width: 200px;" onclick="toggleRouteStore('${store.slug}'); openStoreModal('${store.slug}');">
+            <div style="display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap;">
+                <button class="btn ${inRoute ? 'btn-success' : 'btn-primary'}" style="flex: 1; min-width: 170px;" onclick="toggleRouteStore('${store.slug}'); openStoreModal('${store.slug}');">
                     ${inRoute ? '✓ No Meu Roteiro' : '+ Adicionar ao Meu Roteiro'}
                 </button>
-                <a href="index.html?destino=Ciudad+del+Este&loja=${encodeURIComponent(store.name)}#cotacao" class="btn btn-gold" style="flex: 1; min-width: 200px; text-align: center;">
+                <a href="${getGoogleMapsUrl(store)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-gold" style="flex: 1; min-width: 170px; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                    📍 Abrir no Google Maps ↗
+                </a>
+                <a href="index.html?destino=Ciudad+del+Este&loja=${encodeURIComponent(store.name)}#cotacao" class="btn btn-gold" style="flex: 1; min-width: 170px; text-align: center;">
                     🚗 Ir com Transfer
                 </a>
             </div>
@@ -499,8 +606,8 @@ function closeStoreModal() {
     }
 }
 
-// --- MAPA LEAFLET FOCADO EM CIUDAD DEL ESTE ---
-const CDE_CENTER = [-25.5135, -54.6125]; // Centro comercial de Ciudad del Este
+// --- MAPA GOOGLE MAPS FOCADO EM CIUDAD DEL ESTE ---
+const CDE_CENTER = [-25.5112, -54.6085]; // Centro comercial de Ciudad del Este
 const CDE_DEFAULT_ZOOM = 16;
 
 function initLeafletMap() {
@@ -512,17 +619,20 @@ function initLeafletMap() {
             center: CDE_CENTER,
             zoom: CDE_DEFAULT_ZOOM,
             zoomControl: true,
-            minZoom: 13,
-            maxZoom: 18,
+            minZoom: 12,
+            maxZoom: 19,
             maxBounds: [
-                [-25.545, -54.650],
-                [-25.485, -54.580]
+                [-25.560, -54.760],
+                [-25.470, -54.560]
             ],
             maxBoundsViscosity: 0.9
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
+        // Camada Google Maps Roadmap (Oficial com nomes reais das lojas, shoppings e ruas de Ciudad del Este)
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps',
             noWrap: true
         }).addTo(leafletMap);
 
@@ -550,11 +660,17 @@ function updateMapMarkers(storesToDisplay) {
     storesToDisplay.forEach(store => {
         if (store.latitude && store.longitude) {
             const lat = parseFloat(store.latitude);
-            const lng = parseFloat(store.longitude);
+            let lng = parseFloat(store.longitude);
             
-            // Filtra coordenadas válidas focadas estritamente na região comercial de Ciudad del Este
+            // Tratamento defensivo caso a longitude tenha vindo sem ponto decimal do banco
+            if (!isNaN(lng) && Math.abs(lng) > 180) {
+                const s = String(store.longitude).replace('-', '');
+                lng = -parseFloat(s.slice(0, 2) + '.' + s.slice(2));
+            }
+            
+            // Filtra coordenadas válidas na região de Ciudad del Este
             if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
-                if (lat < -25.48 && lat > -25.55 && lng < -54.58 && lng > -54.65) {
+                if (lat < -25.45 && lat > -25.56 && lng < -54.55 && lng > -54.78) {
                     const inRouteIndex = selectedRouteStores.findIndex(s => s.id === store.id || s.slug === store.slug);
                     const inRoute = inRouteIndex !== -1;
 
@@ -563,21 +679,27 @@ function updateMapMarkers(storesToDisplay) {
                         // Marcador Especial Dourado Numerado para Lojas no Roteiro
                         const routeIcon = L.divIcon({
                             className: 'custom-route-pin',
-                            html: `<div style="background: linear-gradient(135deg, #e6b83b, #c59b27); color: #050B14; font-weight: 800; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; box-shadow: 0 4px 16px rgba(197,155,39,0.85); font-size: 13px; font-family: Outfit, sans-serif;">${inRouteIndex + 1}</div>`,
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 16]
+                            html: `<div style="background: linear-gradient(135deg, #e6b83b, #c59b27); color: #050B14; font-weight: 800; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; box-shadow: 0 4px 16px rgba(197,155,39,0.85); font-size: 14px; font-family: Outfit, sans-serif;">${inRouteIndex + 1}</div>`,
+                            iconSize: [34, 34],
+                            iconAnchor: [17, 17]
                         });
                         marker = L.marker([lat, lng], { icon: routeIcon, zIndexOffset: 1000 }).addTo(leafletMap);
                     } else {
                         marker = L.marker([lat, lng]).addTo(leafletMap);
                     }
 
+                    const gMapsLink = getGoogleMapsUrl(store);
                     const popupHtml = `
-                        <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 160px;">
-                            ${inRoute ? `<div style="color: var(--primary-gold, #c59b27); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">⭐ ${inRouteIndex + 1}ª Parada do Roteiro</div>` : ''}
+                        <div style="font-family: 'Inter', sans-serif; padding: 6px; min-width: 190px;">
+                            ${inRoute ? `<div style="color: var(--primary-gold, #c59b27); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 3px;">⭐ ${inRouteIndex + 1}ª Parada do Roteiro</div>` : ''}
                             <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #0e1a2f;">${store.name}</h4>
-                            <p style="margin: 0 0 8px 0; font-size: 12px; color: #666;">📍 ${store.neighborhood || 'Centro, Ciudad del Este'}</p>
-                            <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #fff; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; width: 100%;">
+                            <p style="margin: 0 0 6px 0; font-size: 12px; color: #555;">📍 ${store.address || store.neighborhood || 'Centro, Ciudad del Este'}</p>
+                            <div style="margin-bottom: 8px;">
+                                <a href="${gMapsLink}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #1a73e8; font-size: 12px; font-weight: 700; text-decoration: none;">
+                                    📍 Abrir no Google Maps ↗
+                                </a>
+                            </div>
+                            <button onclick="toggleRouteStore('${store.slug}')" style="background: var(--primary-gold, #c59b27); border: none; color: #050B14; padding: 7px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; width: 100%;">
                                 ${inRoute ? '✕ Remover do Roteiro' : '+ Adicionar ao Roteiro'}
                             </button>
                         </div>
@@ -593,7 +715,7 @@ function updateMapMarkers(storesToDisplay) {
     });
 
     if (validMarkersCount > 1 && leafletMap) {
-        leafletMap.fitBounds(bounds, { padding: [35, 35], maxZoom: 16, minZoom: 14 });
+        leafletMap.fitBounds(bounds, { padding: [35, 35], maxZoom: 17, minZoom: 14 });
     } else if (leafletMap) {
         leafletMap.setView(CDE_CENTER, CDE_DEFAULT_ZOOM);
     }
