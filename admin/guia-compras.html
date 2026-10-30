@@ -298,6 +298,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label style="color: #fff; font-weight: 600; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span>🏷️ Categorias da Loja (Selecione uma ou mais) *</span>
+                        <small style="color: var(--primary-gold); font-size: 11px; font-weight: 500;">Exibida no filtro e na página pública</small>
+                    </label>
+                    <div id="store-categories-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 12px; border-radius: var(--border-radius-sm); max-height: 190px; overflow-y: auto;">
+                        <!-- Injetado dinamicamente via JS -->
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Descrição Completa</label>
                     <textarea id="store-desc" class="form-control" rows="3"></textarea>
                 </div>
@@ -479,6 +489,7 @@
         async function loadAdminData() {
             let storesLoadedFromSupabase = false;
             let categoriesLoadedFromSupabase = false;
+            let relationsFromSupabase = [];
 
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
@@ -501,6 +512,14 @@
                         adminCategories = catData;
                         categoriesLoadedFromSupabase = true;
                     }
+
+                    const { data: relData, error: rErr } = await supabaseClient
+                        .from('shopping_store_categories')
+                        .select('*');
+                    
+                    if (!rErr && relData) {
+                        relationsFromSupabase = relData;
+                    }
                 } catch (err) {
                     console.warn("Aviso ao carregar dados do Supabase:", err);
                 }
@@ -513,6 +532,37 @@
             if (!categoriesLoadedFromSupabase) {
                 adminCategories = (typeof FALLBACK_CATEGORIES !== 'undefined') ? [...FALLBACK_CATEGORIES] : [];
             }
+
+            // Mapeia as categorias associadas a cada loja
+            const catMapById = {};
+            adminCategories.forEach(c => { catMapById[c.id] = c; });
+
+            adminStores.forEach(s => {
+                let slugs = [];
+                let ids = [];
+                let cats = [];
+
+                if (relationsFromSupabase.length > 0 && s.id) {
+                    const matchedRels = relationsFromSupabase.filter(r => r.store_id === s.id);
+                    ids = matchedRels.map(r => r.category_id);
+                    slugs = ids.map(id => catMapById[id]?.slug).filter(Boolean);
+                    cats = ids.map(id => catMapById[id]).filter(Boolean);
+                }
+
+                // Fallback se não tiver relações no banco
+                if (slugs.length === 0) {
+                    const fb = (typeof FALLBACK_STORES !== 'undefined') ? FALLBACK_STORES.find(f => f.slug === s.slug) : null;
+                    if (fb && fb.category_slugs) {
+                        slugs = [...fb.category_slugs];
+                        cats = adminCategories.filter(c => slugs.includes(c.slug));
+                        ids = cats.map(c => c.id);
+                    }
+                }
+
+                s.category_ids = ids;
+                s.category_slugs = slugs;
+                s.categories = cats;
+            });
 
             // Atualiza contadores nas abas e no dashboard
             const storeCountEl = document.getElementById('stores-count-badge');
@@ -604,9 +654,20 @@
 
             let html = '';
             filtered.forEach(s => {
-                const categoryBadges = (s.category_slugs || []).map(cat => {
-                    return `<span style="background: rgba(197, 155, 39, 0.12); color: var(--primary-gold); border: 1px solid rgba(197, 155, 39, 0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-block; margin: 2px 2px 2px 0;">${cat}</span>`;
-                }).join('') || '<span style="color: var(--text-muted); font-size: 12px;">Geral</span>';
+                let categoryBadges = '';
+                if (s.categories && s.categories.length > 0) {
+                    categoryBadges = s.categories.map(cat => {
+                        return `<span style="background: rgba(197, 155, 39, 0.15); color: #f5cf68; border: 1px solid rgba(197, 155, 39, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin: 2px 4px 2px 0;">${cat.icon || '🛍️'} ${cat.name}</span>`;
+                    }).join('');
+                } else if (s.category_slugs && s.category_slugs.length > 0) {
+                    categoryBadges = s.category_slugs.map(slug => {
+                        const foundCat = adminCategories.find(c => c.slug === slug);
+                        const label = foundCat ? `${foundCat.icon || '🛍️'} ${foundCat.name}` : slug;
+                        return `<span style="background: rgba(197, 155, 39, 0.15); color: #f5cf68; border: 1px solid rgba(197, 155, 39, 0.35); padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin: 2px 4px 2px 0;">${label}</span>`;
+                    }).join('');
+                } else {
+                    categoryBadges = '<span style="color: var(--text-muted); font-size: 12px; font-style: italic;">Sem Categoria</span>';
+                }
 
                 const statusPill = s.active 
                     ? '<span style="background: rgba(76, 175, 80, 0.15); color: #4caf50; border: 1px solid #4caf50; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">Ativa</span>'
@@ -619,7 +680,7 @@
                             <br><small style="color: var(--text-muted); font-size: 12px;">${s.address || s.slug || ''}</small>
                         </td>
                         <td style="color: var(--text-muted);">${s.neighborhood || 'Centro'}</td>
-                        <td>${categoryBadges}</td>
+                        <td><div style="display: flex; flex-wrap: wrap; gap: 2px; max-width: 340px;">${categoryBadges}</div></td>
                         <td>${s.featured ? '<span style="color: #e5c158; font-weight: 700;">⭐ Sim</span>' : '<span style="color: var(--text-muted);">Não</span>'}</td>
                         <td>${statusPill}</td>
                         <td>
@@ -633,6 +694,27 @@
             });
 
             tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center; padding: 30px; color: var(--text-muted);">Nenhuma loja encontrada.</td></tr>';
+        }
+
+        function renderStoreCategoryCheckboxes(selectedCategoryIds = [], selectedCategorySlugs = []) {
+            const container = document.getElementById('store-categories-container');
+            if (!container) return;
+
+            if (!adminCategories || adminCategories.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-muted); font-size: 12px;">Nenhuma categoria disponível no momento.</span>';
+                return;
+            }
+
+            container.innerHTML = adminCategories.map(cat => {
+                const isChecked = (selectedCategoryIds && selectedCategoryIds.includes(cat.id)) || 
+                                  (selectedCategorySlugs && selectedCategorySlugs.includes(cat.slug));
+                return `
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: ${isChecked ? '#fff' : '#ccc'}; cursor: pointer; padding: 6px 10px; border-radius: 6px; background: ${isChecked ? 'rgba(197, 155, 39, 0.18)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isChecked ? 'rgba(197, 155, 39, 0.5)' : 'rgba(255,255,255,0.06)'}; transition: all 0.2s ease;">
+                        <input type="checkbox" name="store_category" value="${cat.id}" data-slug="${cat.slug}" ${isChecked ? 'checked' : ''} style="accent-color: var(--primary-gold); width: 16px; height: 16px; cursor: pointer;" onchange="this.parentElement.style.background = this.checked ? 'rgba(197, 155, 39, 0.18)' : 'rgba(255,255,255,0.03)'; this.parentElement.style.borderColor = this.checked ? 'rgba(197, 155, 39, 0.5)' : 'rgba(255,255,255,0.06)'; this.parentElement.style.color = this.checked ? '#fff' : '#ccc';">
+                        <span>${cat.icon || '🛍️'} <strong>${cat.name}</strong></span>
+                    </label>
+                `;
+            }).join('');
         }
 
         function openStoreFormModal() {
@@ -653,6 +735,8 @@
             document.getElementById('store-image-url').value = '';
             document.getElementById('store-featured').checked = false;
             document.getElementById('store-active').checked = true;
+
+            renderStoreCategoryCheckboxes([], []);
 
             document.getElementById('store-modal-title').innerText = "Nova Loja";
             document.getElementById('store-modal').style.display = 'flex';
@@ -689,11 +773,13 @@
             document.getElementById('store-featured').checked = Boolean(s.featured);
             document.getElementById('store-active').checked = Boolean(s.active);
 
+            renderStoreCategoryCheckboxes(s.category_ids || [], s.category_slugs || []);
+
             document.getElementById('store-modal-title').innerText = "Editar Loja";
             document.getElementById('store-modal').style.display = 'flex';
         }
 
-        // SALVAR LOJA (SUPABASE UPSERT)
+        // SALVAR LOJA (SUPABASE UPSERT COM CATEGORIAS)
         document.getElementById('store-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -726,6 +812,11 @@
                     if (rawLngInput) rawLngInput.value = cleanLng;
                 }
             }
+
+            // Categorias selecionadas
+            const checkedBoxes = Array.from(document.querySelectorAll('input[name="store_category"]:checked'));
+            const selectedCatIds = checkedBoxes.map(cb => cb.value).filter(Boolean);
+            const selectedCatSlugs = checkedBoxes.map(cb => cb.getAttribute('data-slug')).filter(Boolean);
 
             const storeData = {
                 name: document.getElementById('store-name').value.trim(),
@@ -763,10 +854,45 @@
                         alert(`Atenção! Não foi possível salvar no Supabase:\n\n${error.message || JSON.stringify(error)}`);
                     } else {
                         // Atualiza id gerado pelo Supabase se disponivel
-                        if (data && data.length > 0) {
-                            storeData.id = data[0].id;
+                        let savedStoreId = (data && data.length > 0) ? data[0].id : (storeData.id || idVal);
+                        
+                        // Se não veio no retorno, pesquisa o ID da loja pelo slug
+                        if (!savedStoreId) {
+                            const { data: storeLookup } = await supabaseClient
+                                .from('shopping_stores')
+                                .select('id')
+                                .eq('slug', storeData.slug)
+                                .maybeSingle();
+                            if (storeLookup && storeLookup.id) {
+                                savedStoreId = storeLookup.id;
+                            }
                         }
-                        alert(`Loja "${storeData.name}" salva com SUCESSO no Supabase! 🎉`);
+
+                        if (savedStoreId) {
+                            storeData.id = savedStoreId;
+
+                            // Sincroniza tabela de relacionamento shopping_store_categories
+                            try {
+                                await supabaseClient
+                                    .from('shopping_store_categories')
+                                    .delete()
+                                    .eq('store_id', savedStoreId);
+
+                                if (selectedCatIds.length > 0) {
+                                    const relsToInsert = selectedCatIds.map(catId => ({
+                                        store_id: savedStoreId,
+                                        category_id: catId
+                                    }));
+                                    await supabaseClient
+                                        .from('shopping_store_categories')
+                                        .insert(relsToInsert);
+                                }
+                            } catch (relErr) {
+                                console.warn("Aviso ao sincronizar categorias da loja no Supabase:", relErr);
+                            }
+                        }
+
+                        alert(`Loja "${storeData.name}" salva com SUCESSO no Supabase com suas categorias! 🎉`);
                     }
                 } catch (err) {
                     console.error("Erro inesperado ao salvar no Supabase:", err);
@@ -777,6 +903,10 @@
             }
 
             // Atualiza imediatamente a lista em memoria local
+            storeData.category_ids = selectedCatIds;
+            storeData.category_slugs = selectedCatSlugs;
+            storeData.categories = adminCategories.filter(c => selectedCatIds.includes(c.id));
+
             const existingIdx = adminStores.findIndex(s => s.slug === storeData.slug || (s.id && s.id === storeData.id));
             if (existingIdx >= 0) {
                 adminStores[existingIdx] = { ...adminStores[existingIdx], ...storeData };
@@ -796,8 +926,15 @@
         async function deleteStore(slug) {
             if (!confirm(`Tem certeza que deseja excluir a loja "${slug}"?`)) return;
 
+            const targetStore = adminStores.find(s => s.slug === slug);
+
             if (typeof supabaseClient !== 'undefined' && supabaseClient) {
                 try {
+                    if (targetStore && targetStore.id) {
+                        try {
+                            await supabaseClient.from('shopping_store_categories').delete().eq('store_id', targetStore.id);
+                        } catch(e) {}
+                    }
                     const { error } = await supabaseClient.from('shopping_stores').delete().eq('slug', slug);
                     if (error) {
                         console.error("Erro ao deletar no Supabase:", error);
