@@ -380,18 +380,55 @@ async function fetchShoppingData() {
                 categoriesLoaded = true;
             }
 
-            // Tenta consulta completa primeiro
+            // Tenta consulta de lojas ativas
             let { data: storeData, error: storeError } = await supabaseClient
                 .from('shopping_stores')
                 .select('*')
                 .eq('active', true)
                 .order('name');
 
+            // Busca os relacionamentos de categorias do Supabase
+            let storeRelations = [];
+            try {
+                const { data: relData, error: relError } = await supabaseClient
+                    .from('shopping_store_categories')
+                    .select('*');
+                if (!relError && relData) {
+                    storeRelations = relData;
+                }
+            } catch (rErr) {
+                console.warn("Aviso ao buscar relações de categorias no Supabase:", rErr);
+            }
+
             if (!storeError && storeData && storeData.length > 0) {
+                const catMapById = {};
+                allCategories.forEach(c => { catMapById[c.id] = c; });
+
                 allStores = storeData.map(s => {
+                    let slugs = [];
+                    let cats = [];
+
+                    if (storeRelations.length > 0 && s.id) {
+                        const rels = storeRelations.filter(r => r.store_id === s.id);
+                        slugs = rels.map(r => catMapById[r.category_id]?.slug).filter(Boolean);
+                        cats = rels.map(r => catMapById[r.category_id]).filter(Boolean);
+                    }
+
+                    // Fallback se a loja não tiver relação no banco
+                    if (slugs.length === 0) {
+                        const fb = (typeof FALLBACK_STORES !== 'undefined') ? FALLBACK_STORES.find(f => f.slug === s.slug) : null;
+                        if (fb && fb.category_slugs) {
+                            slugs = [...fb.category_slugs];
+                            cats = allCategories.filter(c => slugs.includes(c.slug));
+                        } else if (s.featured) {
+                            slugs = ['destaques'];
+                        }
+                    }
+
                     return {
                         ...s,
-                        category_slugs: s.category_slugs || (s.featured ? ['destaques'] : ['loja-de-departamento'])
+                        category_slugs: slugs,
+                        categories: cats
                     };
                 });
                 storesLoaded = true;
@@ -402,7 +439,12 @@ async function fetchShoppingData() {
     }
 
     if (!categoriesLoaded) allCategories = FALLBACK_CATEGORIES;
-    if (!storesLoaded) allStores = FALLBACK_STORES;
+    if (!storesLoaded) {
+        allStores = FALLBACK_STORES.map(s => ({
+            ...s,
+            categories: allCategories.filter(c => (s.category_slugs || []).includes(c.slug))
+        }));
+    }
 
     renderCategoryChips();
     filterAndRenderStores();
@@ -503,6 +545,15 @@ function filterAndRenderStores() {
     filteredStores.forEach(store => {
         const inRoute = isStoreInRoute(store.id || store.slug);
 
+        const categoryBadgesHtml = (store.categories && store.categories.length > 0)
+            ? store.categories.slice(0, 2).map(c => `<span class="store-category-badge" title="${c.name}">${c.icon || '🏷️'} ${c.name}</span>`).join('') + (store.categories.length > 2 ? `<span class="store-category-badge-more">+${store.categories.length - 2}</span>` : '')
+            : (store.category_slugs && store.category_slugs.length > 0)
+                ? store.category_slugs.slice(0, 2).map(slug => {
+                    const foundCat = allCategories.find(c => c.slug === slug);
+                    return `<span class="store-category-badge">${foundCat ? (foundCat.icon + ' ' + foundCat.name) : slug}</span>`;
+                }).join('') + (store.category_slugs.length > 2 ? `<span class="store-category-badge-more">+${store.category_slugs.length - 2}</span>` : '')
+                : '';
+
         html += `
             <div class="store-card">
                 <div class="store-card-image">
@@ -510,7 +561,10 @@ function filterAndRenderStores() {
                     ${store.featured ? '<span class="badge-featured">⭐ DESTAQUE</span>' : ''}
                 </div>
                 <div class="store-card-body">
-                    <span class="store-location-badge">📍 ${store.neighborhood || 'Centro'}</span>
+                    <div class="store-badges-row">
+                        <span class="store-location-badge">📍 ${store.neighborhood || 'Centro'}</span>
+                        ${categoryBadgesHtml}
+                    </div>
                     <h3 class="store-card-title">${store.name}</h3>
                     <p class="store-card-desc">${store.short_description || store.description || ''}</p>
                     
@@ -556,6 +610,20 @@ function openStoreModal(slug) {
 
     const inRoute = isStoreInRoute(store.id || store.slug);
 
+    const modalCategoryBadgesHtml = (store.categories && store.categories.length > 0)
+        ? store.categories.map(c => `<span class="store-category-badge" style="font-size: 0.75rem; padding: 3px 10px;">${c.icon || '🏷️'} ${c.name}</span>`).join('')
+        : (store.category_slugs || []).map(slug => {
+            const found = allCategories.find(c => c.slug === slug);
+            return `<span class="store-category-badge" style="font-size: 0.75rem; padding: 3px 10px;">${found ? (found.icon + ' ' + found.name) : slug}</span>`;
+        }).join('');
+
+    const modalCategoryNames = (store.categories && store.categories.length > 0)
+        ? store.categories.map(c => `${c.icon || '🏷️'} ${c.name}`).join(', ')
+        : (store.category_slugs || []).map(slug => {
+            const found = allCategories.find(c => c.slug === slug);
+            return found ? `${found.icon || '🏷️'} ${found.name}` : slug;
+        }).join(', ');
+
     modalContent.innerHTML = `
         <div class="modal-header-image">
             <img src="${store.image_url || 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=800&q=80'}" alt="${store.name}">
@@ -570,9 +638,12 @@ function openStoreModal(slug) {
                 ${store.featured ? '<span class="badge-featured" style="position: static;">⭐ DESTAQUE</span>' : ''}
             </div>
 
+            ${modalCategoryBadgesHtml ? `<div style="display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 6px 0;">${modalCategoryBadgesHtml}</div>` : ''}
+
             <p style="color: rgba(255,255,255,0.85); line-height: 1.6; margin: 16px 0;">${store.description || store.short_description || ''}</p>
 
             <div class="modal-info-grid">
+                ${modalCategoryNames ? `<div class="modal-info-item"><strong>🏷️ Categorias:</strong> <span>${modalCategoryNames}</span></div>` : ''}
                 ${store.opening_hours ? `<div class="modal-info-item"><strong>🕒 Horário:</strong> <span>${store.opening_hours}</span></div>` : ''}
                 ${store.phone ? `<div class="modal-info-item"><strong>📞 Telefone:</strong> <a href="tel:${store.phone}" style="color: var(--primary-gold);">${store.phone}</a></div>` : ''}
                 ${store.whatsapp ? `<div class="modal-info-item"><strong>💬 WhatsApp:</strong> <a href="https://wa.me/${store.whatsapp.replace(/\D/g,'')}?text=Olá! Encontrei sua loja no Guia Rota CDE." target="_blank" style="color: #4caf50;">${store.whatsapp}</a></div>` : ''}
