@@ -823,12 +823,12 @@
         </div>
     </section>
 
-    <!-- Mapa Interativo de Compras Refinado -->
+    <!-- Mapa Interativo de Compras (Google Maps) -->
     <section class="map-section">
         <div style="text-align: center; margin-bottom: 20px;">
-            <span style="color: var(--primary-gold); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">LOCALIZAÇÃO DAS LOJAS</span>
-            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; color: #fff; margin-top: 2px;">🗺️ MAPA DE COMPRAS EM CDE</h2>
-            <p style="color: var(--text-light-muted); font-size: 0.88rem;">Veja a localização exata das lojas no centro de Ciudad del Este</p>
+            <span style="color: var(--primary-gold); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">LOCALIZAÇÃO DAS LOJAS REAIS</span>
+            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.8rem; color: #fff; margin-top: 2px;">🗺️ MAPA DE COMPRAS EM CDE (GOOGLE MAPS)</h2>
+            <p style="color: var(--text-light-muted); font-size: 0.88rem;">Localização exata das melhores lojas no centro de Ciudad del Este com rotas via Google Maps</p>
         </div>
 
         <div class="map-container" id="mapa-compras"></div>
@@ -859,11 +859,14 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
-                    <button class="btn btn-outline-gold" style="flex: 1; min-width: 160px; padding: 10px 14px; font-size: 0.85rem;" onclick="shareMyRoute()">
-                        📲 Compartilhar Roteiro
+                    <button class="btn btn-outline-gold" style="flex: 1; min-width: 150px; padding: 10px 14px; font-size: 0.85rem;" onclick="shareMyRoute()">
+                        📲 Compartilhar
                     </button>
-                    <button class="btn btn-primary" style="flex: 1; min-width: 200px; padding: 10px 14px; font-size: 0.85rem;" onclick="reserveTransferWithRoute()">
-                        🚗 Reservar Meu Transfer
+                    <button class="btn btn-outline-gold" style="flex: 1; min-width: 180px; padding: 10px 14px; font-size: 0.85rem;" onclick="openRouteInGoogleMaps()">
+                        🗺️ Abrir no Google Maps
+                    </button>
+                    <button class="btn btn-primary" style="flex: 1; min-width: 180px; padding: 10px 14px; font-size: 0.85rem;" onclick="reserveTransferWithRoute()">
+                        🚗 Reservar Transfer
                     </button>
                     <button class="btn btn-outline-gold" style="padding: 10px 14px; font-size: 0.85rem;" onclick="clearRoute()" title="Limpar roteiro">
                         🗑️ Limpar
@@ -994,11 +997,14 @@
             <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 800; font-size: 0.92rem;" onclick="reserveTransferWithRoute()">
                 🚗 Reservar Transfer com este Roteiro
             </button>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button class="btn btn-outline-gold" style="flex: 1; padding: 8px 10px; font-size: 0.8rem;" onclick="scrollToMapFromDrawer()">
+            <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline-gold" style="flex: 1; min-width: 100px; padding: 8px 10px; font-size: 0.8rem;" onclick="openRouteInGoogleMaps()">
+                    📍 Google Maps
+                </button>
+                <button class="btn btn-outline-gold" style="flex: 1; min-width: 90px; padding: 8px 10px; font-size: 0.8rem;" onclick="scrollToMapFromDrawer()">
                     🗺️ Ver no Mapa
                 </button>
-                <button class="btn btn-outline-gold" style="flex: 1; padding: 8px 10px; font-size: 0.8rem;" onclick="shareMyRoute()">
+                <button class="btn btn-outline-gold" style="flex: 1; min-width: 90px; padding: 8px 10px; font-size: 0.8rem;" onclick="shareMyRoute()">
                     📲 Compartilhar
                 </button>
                 <button class="btn btn-outline-gold" style="padding: 8px 12px; font-size: 0.8rem;" onclick="clearRoute()" title="Limpar todo o roteiro">
@@ -1056,7 +1062,7 @@
     <script src="admin/assets/supabase-config.js"></script>
 
     <!-- Motor do Guia de Compras -->
-    <script src="assets/guia-compras.js"></script>
+    <script src="assets/guia-compras.js?v=2.1"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
